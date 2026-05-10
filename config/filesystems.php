@@ -60,6 +60,26 @@ return [
             'report' => false,
         ],
 
+        'arsip' => [
+            'driver' => 'local',
+            'root' => storage_path('app/arsip'),
+            'throw' => false,
+        ],
+
+        'sertifikat' => [
+            'driver' => 'local',
+            'root' => storage_path('app/sertifikat'),
+            'throw' => false,
+        ],
+
+        'foto_profil' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/foto-profil'),
+            'url' => env('APP_URL').'/storage/foto-profil',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
     ],
 
     /*

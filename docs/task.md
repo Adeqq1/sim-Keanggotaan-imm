@@ -21,37 +21,37 @@
 
 ### 1.1 Instalasi & Konfigurasi Environment
 
-- [ ] Instalasi Laragon/XAMPP (PHP 8.2+, MySQL 8.0+, Composer, Node.js 18+)
-- [ ] Verifikasi versi PHP (`php -v`), Composer (`composer -V`), Node (`node -v`)
-- [ ] Buat proyek Laravel baru: `composer create-project laravel/laravel SIM-Keanggotaan-IMM`
-- [ ] Konfigurasi file `.env` (APP_NAME=SIM-Keanggotaan-IMM, DB_DATABASE=sim_keanggotaan_imm, APP_URL=http://localhost:8000)
-- [ ] Buat database MySQL: `sim_keanggotaan_imm`
-- [ ] Jalankan `php artisan migrate` untuk memastikan koneksi database berhasil
+- [x] Instalasi Laragon/XAMPP (PHP 8.2+, MySQL 8.0+, Composer, Node.js 18+)
+- [x] Verifikasi versi PHP (`php -v`), Composer (`composer -V`), Node (`node -v`)
+- [x] Buat proyek Laravel baru: `composer create-project laravel/laravel SIM-Keanggotaan-IMM`
+- [x] Konfigurasi file `.env` (APP_NAME=SIM-Keanggotaan-IMM, DB_DATABASE=sim_keanggotaan_imm, APP_URL=http://localhost:8000)
+- [x] Buat database MySQL: `sim_keanggotaan_imm`
+- [x] Jalankan `php artisan migrate` untuk memastikan koneksi database berhasil
 
 ### 1.2 Instalasi Dependensi
 
-- [ ] Instalasi Laravel Breeze: `composer require laravel/breeze --dev`
-- [ ] Setup Breeze dengan Blade: `php artisan breeze:install blade`
-- [ ] Instalasi Bootstrap 5: `npm install bootstrap @popperjs/core bootstrap-icons`
-- [ ] Konfigurasi Vite (`vite.config.js`) untuk compile Bootstrap
-- [ ] Import Bootstrap CSS & JS di `resources/css/app.css` dan `resources/js/app.js`
-- [ ] Instalasi DomPDF: `composer require barryvdh/laravel-dompdf`
-- [ ] Instalasi Laravel Excel: `composer require maatwebsite/excel`
-- [ ] Instalasi Intervention Image: `composer require intervention/image`
-- [ ] Instalasi Chart.js: `npm install chart.js`
+- [x] Instalasi Laravel Breeze: `composer require laravel/breeze --dev`
+- [x] Setup Breeze dengan Blade: `php artisan breeze:install blade`
+- [x] Instalasi Bootstrap 5: `npm install bootstrap @popperjs/core bootstrap-icons`
+- [x] Konfigurasi Vite (`vite.config.js`) untuk compile Bootstrap
+- [x] Import Bootstrap CSS & JS di `resources/css/app.css` dan `resources/js/app.js`
+- [x] Instalasi DomPDF: `composer require barryvdh/laravel-dompdf`
+- [x] Instalasi Laravel Excel: `composer require maatwebsite/excel`
+- [x] Instalasi Intervention Image: `composer require intervention/image`
+- [x] Instalasi Chart.js: `npm install chart.js`
 - [ ] Instalasi Laravel PWA: `composer require silviolleite/laravel-pwa`
-- [ ] Jalankan `npm run build` untuk memastikan semua asset tercompile
+- [x] Jalankan `npm run build` untuk memastikan semua asset tercompile
 
 ### 1.3 Konfigurasi Awal Proyek
 
-- [ ] Set timezone di `config/app.php`: `'timezone' => 'Asia/Jakarta'`
-- [ ] Set locale di `config/app.php`: `'locale' => 'id'`
-- [ ] Konfigurasi filesystem di `config/filesystems.php` (disk untuk arsip, sertifikat, foto)
-- [ ] Buat symbolic link storage: `php artisan storage:link`
-- [ ] Publish konfigurasi PWA: `php artisan laravel-pwa:publish`
-- [ ] Konfigurasi `config/laravelpwa.php` (nama aplikasi: SIM-Keanggotaan-IMM, warna tema, ikon)
+- [x] Set timezone di `config/app.php`: `'timezone' => 'Asia/Jakarta'`
+- [x] Set locale di `config/app.php`: `'locale' => 'id'`
+- [x] Konfigurasi filesystem di `config/filesystems.php` (disk untuk arsip, sertifikat, foto)
+- [x] Buat symbolic link storage: `php artisan storage:link`
+- [x] Publish konfigurasi PWA: (Manual Setup - Done)
+- [x] Konfigurasi `config/laravelpwa.php`: (Manual Setup via manifest.json - Done)
 - [ ] Siapkan ikon PWA berbagai ukuran (72x72, 96x96, 128x128, 144x144, 152x152, 192x192, 384x384, 512x512) di `public/images/icons/`
-- [ ] Verifikasi `manifest.json` dan `serviceworker.js` di folder `public/`
+- [x] Verifikasi `manifest.json` dan `sw.js` di folder `public/`
 - [ ] Setup Git repository dan commit awal
 
 ---
@@ -69,31 +69,31 @@
   - Kolom: `user_id`, `nama_lengkap`, `email`, `tempat_lahir`, `tanggal_lahir`, `no_telp`, `alamat`, `tanggal_daftar`, `file_persyaratan`, `status_validasi`, `catatan_admin`
 - [ ] Migration tabel `kegiatan`
   - Kolom: `nama_kegiatan`, `deskripsi`, `tanggal_waktu`, `lokasi`
-- [ ] Migration tabel `presensi` — FK ke `kegiatan.id` dan `anggota.id`
+- [x] Migration tabel `presensi` — FK ke `kegiatan.id` dan `anggota.id`
   - Kolom: `kegiatan_id`, `anggota_id`, `waktu_hadir`, `status_kehadiran`
   - Unique constraint: (`kegiatan_id`, `anggota_id`)
-- [ ] Migration tabel `sertifikat` — FK ke `kegiatan.id` dan `anggota.id`
+- [x] Migration tabel `sertifikat` — FK ke `kegiatan.id` dan `anggota.id`
   - Kolom: `kegiatan_id`, `anggota_id`, `nomor_sertifikat`, `file_sertifikat`
-- [ ] Migration tabel `arsip` — FK ke `anggota.id`
+- [x] Migration tabel `arsip` — FK ke `anggota.id`
   - Kolom: `anggota_id`, `nomor_dokumen`, `judul_dokumen`, `kategori_arsip`, `file_arsip`, `tanggal_unggah`
 - [ ] Jalankan semua migration: `php artisan migrate`
 
 ### 2.2 Pembuatan Model & Relasi Eloquent
 
-- [ ] Model `User` — tambah relasi `hasOne(Anggota)`, `hasOne(Pendaftaran)`, tambah `role` ke `$fillable`
-- [ ] Model `Anggota` — relasi: `belongsTo(User)`, `hasMany(Arsip)`, `hasMany(Presensi)`, `hasMany(Sertifikat)`
-- [ ] Model `Pendaftaran` — relasi: `belongsTo(User)`
-- [ ] Model `Kegiatan` — relasi: `hasMany(Presensi)`, `hasMany(Sertifikat)`
-- [ ] Model `Presensi` — relasi: `belongsTo(Kegiatan)`, `belongsTo(Anggota)`
-- [ ] Model `Sertifikat` — relasi: `belongsTo(Kegiatan)`, `belongsTo(Anggota)`
-- [ ] Model `Arsip` — relasi: `belongsTo(Anggota)`
+- [x] Model `User` — tambah relasi `hasOne(Anggota)`, `hasOne(Pendaftaran)`, tambah `role` ke `$fillable`
+- [x] Model `Anggota` — relasi: `belongsTo(User)`, `hasMany(Arsip)`, `hasMany(Presensi)`, `hasMany(Sertifikat)`
+- [x] Model `Pendaftaran` — relasi: `belongsTo(User)`
+- [x] Model `Kegiatan` — relasi: `hasMany(Presensi)`, `hasMany(Sertifikat)`
+- [x] Model `Presensi` — relasi: `belongsTo(Kegiatan)`, `belongsTo(Anggota)`
+- [x] Model `Sertifikat` — relasi: `belongsTo(Kegiatan)`, `belongsTo(Anggota)`
+- [x] Model `Arsip` — relasi: `belongsTo(Anggota)`
 
 ### 2.3 Pembuatan Seeder
 
-- [ ] Seeder `UserSeeder` — buat akun Admin default (email: admin@admin.com, password: password)
-- [ ] Seeder `AnggotaSeeder` — buat 5-10 data Kader dummy untuk testing
-- [ ] Seeder `KegiatanSeeder` — buat 3-5 kegiatan dummy
-- [ ] Seeder `PresensiSeeder` — buat data presensi dummy
+- [x] Seeder `UserSeeder` — buat akun Admin default (email: admin@admin.com, password: password)
+- [x] Seeder `AnggotaSeeder` — buat 5-10 data Kader dummy untuk testing
+- [x] Seeder `KegiatanSeeder` — buat 3-5 kegiatan dummy
+- [x] Seeder `PresensiSeeder` — buat data presensi dummy
 - [ ] Jalankan seeder: `php artisan db:seed`
 
 ---
