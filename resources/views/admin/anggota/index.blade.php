@@ -38,8 +38,8 @@
                         <i class="bi bi-three-dots-vertical fs-5"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                        <li><a class="dropdown-item py-2" href="{{ route('admin.anggota.show', $anggota) }}"><i class="bi bi-eye me-2 text-primary"></i> Detail</a></li>
-                        <li><a class="dropdown-item py-2" href="{{ route('admin.anggota.edit', $anggota) }}"><i class="bi bi-pencil me-2 text-info"></i> Edit</a></li>
+                        <li><a class="dropdown-item py-2" href="{{ route('admin.anggota.show', $anggota->id) }}"><i class="bi bi-eye me-2 text-primary"></i> Detail</a></li>
+                        <li><a class="dropdown-item py-2" href="{{ route('admin.anggota.edit', $anggota->id) }}"><i class="bi bi-pencil me-2 text-info"></i> Edit</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <button type="button" class="dropdown-item py-2 text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $anggota->id }}">
@@ -53,7 +53,7 @@
 
         <x-_modal-delete 
             id="deleteModal{{ $anggota->id }}" 
-            :action="route('admin.anggota.destroy', $anggota)" 
+            :action="route('admin.anggota.destroy', $anggota->id)" 
             message="Menghapus anggota ini akan menghapus semua riwayat presensi dan sertifikat terkait."
         />
     @empty

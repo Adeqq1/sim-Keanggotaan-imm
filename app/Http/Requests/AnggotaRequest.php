@@ -22,7 +22,7 @@ class AnggotaRequest extends FormRequest
      */
     public function rules(): array
     {
-        $anggotaId = $this->route('anggota');
+        $anggotaId = $this->route('anggota')?->id;
 
         return [
             'nia' => ['nullable', 'string', 'unique:anggota,nia,'.$anggotaId],

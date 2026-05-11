@@ -20,6 +20,14 @@ class Anggota extends Model
         'status_aktif' => 'boolean',
     ];
 
+    /**
+     * Get the route key name for Laravel.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'id';
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

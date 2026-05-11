@@ -32,7 +32,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/pendaftaran/{id}/validate', [ValidasiPendaftaranController::class, 'validatePendaftaran'])->name('pendaftaran.validate');
 
     // Modul Anggota
-    Route::resource('anggota', AnggotaController::class);
+    Route::resource('anggota', AnggotaController::class)->parameters(['anggota' => 'anggota']);
 
     // Modul Kegiatan
     Route::resource('kegiatan', KegiatanController::class);

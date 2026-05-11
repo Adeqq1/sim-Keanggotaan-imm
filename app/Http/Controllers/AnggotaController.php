@@ -34,8 +34,17 @@ class AnggotaController extends Controller
         return redirect()->route('admin.anggota.index')->with('success', 'Anggota berhasil ditambahkan.');
     }
 
+    public function show(Anggota $anggota)
+    {
+        $anggota->load('user');
+
+        return view('admin.anggota.show', compact('anggota'));
+    }
+
     public function edit(Anggota $anggota)
     {
+        $anggota->load('user');
+
         return view('admin.anggota.edit', compact('anggota'));
     }
 
