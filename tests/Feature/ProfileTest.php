@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Anggota;
 use App\Models\User;
 
 test('profile page is displayed', function () {
@@ -13,13 +14,19 @@ test('profile page is displayed', function () {
 });
 
 test('profile information can be updated', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->kader()->create();
+    Anggota::factory()->create(['user_id' => $user->id]);
 
     $response = $this
         ->actingAs($user)
         ->patch('/profile', [
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'nama_lengkap' => 'Test User Lengkap',
+            'tempat_lahir' => 'Jakarta',
+            'tanggal_lahir' => '2000-01-01',
+            'alamat' => 'Jl. Test No. 1',
+            'no_telp' => '081234567890',
         ]);
 
     $response
@@ -34,13 +41,19 @@ test('profile information can be updated', function () {
 });
 
 test('email verification status is unchanged when the email address is unchanged', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->kader()->create();
+    Anggota::factory()->create(['user_id' => $user->id]);
 
     $response = $this
         ->actingAs($user)
         ->patch('/profile', [
             'name' => 'Test User',
             'email' => $user->email,
+            'nama_lengkap' => 'Test User Lengkap',
+            'tempat_lahir' => 'Jakarta',
+            'tanggal_lahir' => '2000-01-01',
+            'alamat' => 'Jl. Test No. 1',
+            'no_telp' => '081234567890',
         ]);
 
     $response

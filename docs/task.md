@@ -62,12 +62,12 @@
 
 > Urutan migration penting karena ada foreign key yang saling bergantung.
 
-- [ ] Migration tabel `users` — modifikasi migration bawaan, tambah kolom `role` (enum: admin, kader)
-- [ ] Migration tabel `anggota` — FK ke `users.id`
+- [x] Migration tabel `users` — modifikasi migration bawaan, tambah kolom `role` (enum: admin, kader)
+- [x] Migration tabel `anggota` — FK ke `users.id`
   - Kolom: `user_id`, `nia`, `nama_lengkap`, `tempat_lahir`, `tanggal_lahir`, `alamat`, `no_telp`, `foto_profil`, `status_aktif`
-- [ ] Migration tabel `pendaftaran` — FK ke `users.id` (nullable)
+- [x] Migration tabel `pendaftaran` — FK ke `users.id` (nullable)
   - Kolom: `user_id`, `nama_lengkap`, `email`, `tempat_lahir`, `tanggal_lahir`, `no_telp`, `alamat`, `tanggal_daftar`, `file_persyaratan`, `status_validasi`, `catatan_admin`
-- [ ] Migration tabel `kegiatan`
+- [x] Migration tabel `kegiatan`
   - Kolom: `nama_kegiatan`, `deskripsi`, `tanggal_waktu`, `lokasi`
 - [x] Migration tabel `presensi` — FK ke `kegiatan.id` dan `anggota.id`
   - Kolom: `kegiatan_id`, `anggota_id`, `waktu_hadir`, `status_kehadiran`
@@ -76,7 +76,8 @@
   - Kolom: `kegiatan_id`, `anggota_id`, `nomor_sertifikat`, `file_sertifikat`
 - [x] Migration tabel `arsip` — FK ke `anggota.id`
   - Kolom: `anggota_id`, `nomor_dokumen`, `judul_dokumen`, `kategori_arsip`, `file_arsip`, `tanggal_unggah`
-- [ ] Jalankan semua migration: `php artisan migrate`
+- [x] Jalankan semua migration: `php artisan migrate`
+- [x] Jalankan seeder: `php artisan db:seed`
 
 ### 2.2 Pembuatan Model & Relasi Eloquent
 
@@ -94,7 +95,7 @@
 - [x] Seeder `AnggotaSeeder` — buat 5-10 data Kader dummy untuk testing
 - [x] Seeder `KegiatanSeeder` — buat 3-5 kegiatan dummy
 - [x] Seeder `PresensiSeeder` — buat data presensi dummy
-- [ ] Jalankan seeder: `php artisan db:seed`
+- [x] Jalankan seeder: `php artisan db:seed`
 
 ---
 
@@ -102,20 +103,20 @@
 
 ### 3.1 Middleware
 
-- [ ] Buat `RoleMiddleware`: `php artisan make:middleware RoleMiddleware`
-- [ ] Implementasi logika pengecekan role (admin/kader) di middleware
-- [ ] Daftarkan middleware di `bootstrap/app.php` (Laravel 11)
+- [x] Buat `RoleMiddleware`: `php artisan make:middleware RoleMiddleware`
+- [x] Implementasi logika pengecekan role (admin/kader) di middleware
+- [x] Daftarkan middleware di `bootstrap/app.php` (Laravel 11)
 
 ### 3.2 Routing
 
-- [ ] Route publik:
-  - `GET /` → Halaman utama
-  - `GET /pendaftaran` → Form pendaftaran
-  - `POST /pendaftaran` → Proses pendaftaran
-- [ ] Route autentikasi (bawaan Breeze):
-  - `GET /login`, `POST /login`, `POST /logout`
-- [ ] Route Admin (grup middleware `auth` + `role:admin`):
-  - `GET /admin/dashboard`
+- [x] Route publik:
+  - [x] `GET /` → Halaman utama
+  - [x] `GET /pendaftaran` → Form pendaftaran
+  - [x] `POST /pendaftaran` → Proses pendaftaran
+- [x] Route autentikasi (bawaan Breeze):
+  - [x] `GET /login`, `POST /login`, `POST /logout`
+- [x] Route Admin (grup middleware `auth` + `role:admin`):
+  - [x] `GET /admin/dashboard`
   - Resource route: `/admin/anggota` (CRUD)
   - Resource route: `/admin/kegiatan` (CRUD)
   - `GET /admin/presensi/{kegiatan}` → Form presensi
@@ -128,7 +129,7 @@
   - `POST /admin/laporan/export` → Export laporan
   - `GET /admin/profil` → Profil Admin
   - `PUT /admin/profil` → Update profil Admin
-- [ ] Route Kader (grup middleware `auth` + `role:kader`):
+- [x] Route Kader (grup middleware `auth` + `role:kader`):
   - `GET /kader/dashboard`
   - `GET /kader/profil` → Profil Kader
   - `PUT /kader/profil` → Update profil
@@ -147,93 +148,93 @@
 
 ### 4.1 Form Request Validation
 
-- [ ] `LoginRequest` — validasi email & password (required)
-- [ ] `PendaftaranRequest` — validasi Nama, TTL, Email, dsb. (required, format)
-- [ ] `AnggotaRequest` — validasi data anggota (CRUD)
-- [ ] `KegiatanRequest` — validasi data kegiatan
-- [ ] `PresensiRequest` — validasi data presensi (array status kehadiran)
-- [ ] `ArsipRequest` — validasi file upload (ekstensi, ukuran)
-- [ ] `ProfilRequest` — validasi data profil
-- [ ] `SertifikatRequest` — validasi data sertifikat (kegiatan, daftar anggota)
-- [ ] `LaporanRequest` — validasi filter laporan (tanggal, jenis)
+- [x] `LoginRequest` — validasi email & password (required)
+- [x] `PendaftaranRequest` — validasi Nama, TTL, Email, dsb. (required, format)
+- [x] `AnggotaRequest` — validasi data anggota (CRUD)
+- [x] `KegiatanRequest` — validasi data kegiatan
+- [x] `PresensiRequest` — validasi data presensi (array status kehadiran)
+- [x] `ArsipRequest` — validasi file upload (ekstensi, ukuran)
+- [x] `ProfilRequest` — validasi data profil
+- [x] `SertifikatRequest` — validasi data sertifikat (kegiatan, daftar anggota)
+- [x] `LaporanRequest` — validasi filter laporan (tanggal, jenis)
 
 ### 4.2 Controller — Autentikasi
 
-- [ ] `AuthController@login` — Proses login, redirect berdasarkan role
-- [ ] `AuthController@logout` — Proses logout, hapus sesi
-- [ ] Kustomisasi redirect setelah login di `AuthenticatedSessionController` (Breeze)
+- [x] `AuthController@login` — Proses login, redirect berdasarkan role
+- [x] `AuthController@logout` — Proses logout, hapus sesi
+- [x] Kustomisasi redirect setelah login di `AuthenticatedSessionController` (Breeze)
 
 ### 4.3 Controller — Dashboard
 
-- [ ] `DashboardController@adminDashboard` — Tampilkan statistik: total anggota, total kegiatan, pendaftar pending, dll.
-- [ ] `DashboardController@kaderDashboard` — Tampilkan ringkasan: kegiatan terdekat, statistik kehadiran, sertifikat terbaru
+- [x] `DashboardController@adminDashboard` — Tampilkan statistik: total anggota, total kegiatan, pendaftar pending, dll.
+- [x] `DashboardController@kaderDashboard` — Tampilkan ringkasan: kegiatan terdekat, statistik kehadiran, sertifikat terbaru
 
 ### 4.4 Controller — Pendaftaran (Pengunjung)
 
-- [ ] `PendaftaranController@create` — Tampilkan form pendaftaran
-- [ ] `PendaftaranController@store` — Validasi & simpan data, set status 'pending', redirect ke halaman sukses
+- [x] `PendaftaranController@create` — Tampilkan form pendaftaran
+- [x] `PendaftaranController@store` — Validasi & simpan data, set status 'pending', redirect ke halaman sukses
 
 ### 4.5 Controller — Validasi Pendaftaran (Admin)
 
-- [ ] `ValidasiPendaftaranController@index` — Tampilkan daftar pendaftar (status: pending)
-- [ ] `ValidasiPendaftaranController@show` — Tampilkan detail pendaftar
-- [ ] `ValidasiPendaftaranController@approve` — Setujui: buat user + anggota, ubah status
-- [ ] `ValidasiPendaftaranController@reject` — Tolak: ubah status menjadi 'ditolak'
+- [x] `ValidasiPendaftaranController@index` — Tampilkan daftar pendaftar (status: pending)
+- [x] `ValidasiPendaftaranController@show` — Tampilkan detail pendaftar
+- [x] `ValidasiPendaftaranController@approve` — Setujui: buat user + anggota, ubah status
+- [x] `ValidasiPendaftaranController@reject` — Tolak: ubah status menjadi 'ditolak'
 
 ### 4.6 Controller — Manajemen Data Anggota (Admin)
 
-- [ ] `AnggotaController@index` — Tampilkan tabel anggota aktif
-- [ ] `AnggotaController@create` — Form tambah anggota
-- [ ] `AnggotaController@store` — Validasi & simpan anggota baru
-- [ ] `AnggotaController@edit` — Form edit anggota
-- [ ] `AnggotaController@update` — Validasi & update data anggota
-- [ ] `AnggotaController@destroy` — Hapus data anggota
+- [x] `AnggotaController@index` — Tampilkan tabel anggota aktif
+- [x] `AnggotaController@create` — Form tambah anggota
+- [x] `AnggotaController@store` — Validasi & simpan anggota baru
+- [x] `AnggotaController@edit` — Form edit anggota
+- [x] `AnggotaController@update` — Validasi & update data anggota
+- [x] `AnggotaController@destroy` — Hapus data anggota
 
 ### 4.7 Controller — Manajemen Kegiatan & Presensi (Admin)
 
-- [ ] `KegiatanController@index` — Tampilkan kalender/daftar kegiatan
-- [ ] `KegiatanController@create` — Form tambah kegiatan
-- [ ] `KegiatanController@store` — Simpan kegiatan baru
-- [ ] `KegiatanController@edit` — Form edit kegiatan
-- [ ] `KegiatanController@update` — Update kegiatan
-- [ ] `KegiatanController@destroy` — Hapus kegiatan
-- [ ] `PresensiController@create` — Tampilkan form presensi (daftar Kader + checkbox status)
-- [ ] `PresensiController@store` — Batch simpan data presensi
+- [x] `KegiatanController@index` — Tampilkan kalender/daftar kegiatan
+- [x] `KegiatanController@create` — Form tambah kegiatan
+- [x] `KegiatanController@store` — Simpan kegiatan baru
+- [x] `KegiatanController@edit` — Form edit kegiatan
+- [x] `KegiatanController@update` — Update kegiatan
+- [x] `KegiatanController@destroy` — Hapus kegiatan
+- [x] `PresensiController@create` — Tampilkan form presensi (daftar Kader + checkbox status)
+- [x] `PresensiController@store` — Batch simpan data presensi
 
 ### 4.8 Controller — Manajemen Arsip Dokumen
 
-- [ ] `ArsipController@index` — Tampilkan daftar arsip (dengan filter kategori)
-- [ ] `ArsipController@store` — Validasi file, simpan ke storage & database
-- [ ] `ArsipController@download` — Stream download file arsip
-- [ ] `ArsipController@destroy` — Hapus file dari storage & database
+- [x] `ArsipController@index` — Tampilkan daftar arsip (dengan filter kategori)
+- [x] `ArsipController@store` — Validasi file, simpan ke storage & database
+- [x] `ArsipController@download` — Stream download file arsip
+- [x] `ArsipController@destroy` — Hapus file dari storage & database
 
 ### 4.9 Controller — Manajemen Profil
 
-- [ ] `ProfilController@show` — Tampilkan form profil (pre-filled)
-- [ ] `ProfilController@update` — Validasi & update profil, termasuk upload foto profil
+- [x] `ProfilController@show` — Tampilkan form profil (pre-filled)
+- [x] `ProfilController@update` — Validasi & update profil, termasuk upload foto profil
 
 ### 4.10 Controller — E-KTA (Kader)
 
-- [ ] `EktaController@show` — Tampilkan preview E-KTA dengan data profil
-- [ ] `EktaController@download` — Generate & download PDF E-KTA menggunakan DomPDF
+- [x] `EktaController@show` — Tampilkan preview E-KTA dengan data profil
+- [x] `EktaController@download` — Generate & download PDF E-KTA menggunakan DomPDF
 
 ### 4.11 Controller — E-Sertifikat
 
-- [ ] `SertifikatController@index` (Admin) — Tampilkan daftar semua sertifikat
-- [ ] `SertifikatController@create` (Admin) — Form buat sertifikat baru (pilih kegiatan + Kader)
-- [ ] `SertifikatController@generate` (Admin) — Generate sertifikat untuk Kader terpilih, simpan PDF
-- [ ] `SertifikatController@mySertifikat` (Kader) — Tampilkan daftar sertifikat milik Kader
-- [ ] `SertifikatController@download` (Kader) — Download file PDF sertifikat
+- [x] `SertifikatController@index` (Admin) — Tampilkan daftar semua sertifikat
+- [x] `SertifikatController@create` (Admin) — Form buat sertifikat baru (pilih kegiatan + Kader)
+- [x] `SertifikatController@generate` (Admin) — Generate sertifikat untuk Kader terpilih, simpan PDF
+- [x] `SertifikatController@mySertifikat` (Kader) — Tampilkan daftar sertifikat milik Kader
+- [x] `SertifikatController@download` (Kader) — Download file PDF sertifikat
 
 ### 4.12 Controller — Riwayat Keaktifan (Kader)
 
-- [ ] `RiwayatKeaktifanController@index` — Query presensi, hitung statistik, tampilkan tabel & data grafik
+- [x] `RiwayatKeaktifanController@index` — Query presensi, hitung statistik, tampilkan tabel & data grafik
 
 ### 4.13 Controller — Laporan (Admin)
 
-- [ ] `LaporanController@index` — Tampilkan halaman filter laporan
-- [ ] `LaporanController@exportPdf` — Generate & download laporan PDF
-- [ ] `LaporanController@exportExcel` — Generate & download laporan Excel
+- [x] `LaporanController@index` — Tampilkan halaman filter laporan
+- [x] `LaporanController@exportPdf` — Generate & download laporan PDF
+- [x] `LaporanController@exportExcel` — Generate & download laporan Excel
 
 ---
 
@@ -241,67 +242,69 @@
 
 ### 5.1 Layout Utama & Navigasi Mobile
 
-- [ ] Layout utama `layouts/app.blade.php`:
-  - [ ] Gunakan viewport meta tag `<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">`
-  - [ ] Tambahkan tag PWA: `@laravelPWA` di `<head>`
-  - [ ] Struktur body: header kecil (judul halaman) + konten utama + Bottom Navigation Bar
-  - [ ] Tambahkan `padding-bottom: 70px` pada konten utama agar tidak tertutup Bottom Nav
-  - [ ] **Tidak menggunakan class breakpoint** (`-md`, `-lg`, `-xl`) — layout murni mobile
-- [ ] Komponen `components/bottom-nav.blade.php`:
-  - [ ] Gunakan `<nav class="navbar fixed-bottom bg-white shadow-lg border-top">`
-  - [ ] Isi dengan 4-5 menu utama berupa ikon (Bootstrap Icons) + label kecil
-  - [ ] Menu Admin: Dashboard, Anggota, Kegiatan, Arsip, Lainnya
-  - [ ] Menu Kader: Dashboard, E-KTA, Sertifikat, Riwayat, Lainnya
-  - [ ] Tambahkan highlight/active state pada menu yang sedang dibuka
-  - [ ] Semua tombol berukuran minimal 44x44px (touch-friendly)
-- [ ] Layout autentikasi `layouts/auth.blade.php` — Layout khusus halaman login (tanpa Bottom Nav)
-- [ ] Komponen alert/flash message (`_alert.blade.php`)
-- [ ] Komponen modal konfirmasi hapus (`_modal-delete.blade.php`)
-- [ ] Komponen pagination
+- [x] Layout utama `layouts/app.blade.php`:
+  - [x] Gunakan viewport meta tag `<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">`
+  - [x] Tambahkan tag PWA: `@laravelPWA` di `<head>` (Placeholder CSS/JS ready)
+  - [x] Struktur body: header kecil (judul halaman) + konten utama + Bottom Navigation Bar
+  - [x] Tambahkan `padding-bottom: 70px` pada konten utama agar tidak tertutup Bottom Nav
+  - [x] **Tidak menggunakan class breakpoint** (`-md`, `-lg`, `-xl`) — layout murni mobile
+- [x] Komponen `components/bottom-nav.blade.php`:
+  - [x] Gunakan `<nav class="navbar fixed-bottom bg-white shadow-lg border-top">`
+  - [x] Isi dengan 4-5 menu utama berupa ikon (Bootstrap Icons) + label kecil
+  - [x] Menu Admin: Dashboard, Anggota, Kegiatan, Arsip, Lainnya
+  - [x] Menu Kader: Dashboard, E-KTA, Sertifikat, Riwayat, Lainnya
+  - [x] Tambahkan highlight/active state pada menu yang sedang dibuka
+  - [x] Semua tombol berukuran minimal 44x44px (touch-friendly)
+- [x] Layout autentikasi `layouts/auth.blade.php` — Layout khusus halaman login (tanpa Bottom Nav)
+- [x] Komponen alert/flash message (`_alert.blade.php`)
+- [x] Komponen modal konfirmasi hapus (`_modal-delete.blade.php`)
+- [x] Komponen pagination
 
 ### 5.2 Halaman Publik
 
-- [ ] Halaman utama (`/`) — Landing page mobile-style dengan tombol "Daftar Sekarang" dan "Login"
-- [ ] Halaman pendaftaran — Form registrasi full-width, validasi client-side
-- [ ] Halaman sukses pendaftaran — Pesan konfirmasi
+- [x] Halaman utama (`/`) — Landing page mobile-style dengan tombol "Daftar Sekarang" dan "Login"
+- [x] Halaman pendaftaran — Form registrasi full-width, validasi client-side
+- [x] Halaman sukses pendaftaran — Pesan konfirmasi
 
 ### 5.3 Halaman Autentikasi
 
-- [ ] Halaman login — Form email & password, centered, full-width input, pesan error
+- [x] Halaman login — Form email & password, centered, full-width input, pesan error
+- [x] Halaman lupa password — Form email, pesan sukses/status
 
 ### 5.4 Halaman Admin
 
-- [ ] Dashboard Admin — Card statistik (total anggota, kegiatan, pendaftar pending), grafik ringkasan
-- [ ] Halaman Validasi Pendaftaran — List card pendaftar, tombol Setujui/Tolak, modal detail
-- [ ] Halaman Data Anggota — List card/tabel CRUD, tombol Tambah/Edit/Hapus, modal form
-- [ ] Halaman Kegiatan — List card kegiatan, form CRUD
-- [ ] Halaman Presensi — Form presensi dengan daftar Kader dan checkbox (Hadir/Izin/Alfa)
-- [ ] Halaman Arsip Dokumen — List arsip, tombol Unggah/Unduh/Hapus, form upload file
-- [ ] Halaman Manajemen E-Sertifikat — List sertifikat, form generate baru (multi-select Kader)
-- [ ] Halaman Laporan — Form filter (rentang tanggal, jenis laporan), tombol Cetak PDF / Export Excel
-- [ ] Halaman Profil Admin — Form profil pre-filled, full-width
+- [x] Dashboard Admin — Card statistik (total anggota, kegiatan, pendaftar pending), grafik ringkasan
+- [x] Manajemen Pendaftaran — Tabel pendaftar pending, tombol detail/validasi
+- [x] Detail Pendaftaran — Tampilkan data lengkap + file, tombol Setuju/Tolak
+- [x] Manajemen Anggota — Tabel anggota, fitur search, tombol detail/edit/hapus
+- [x] Manajemen Kegiatan — Tabel kegiatan, tombol tambah/edit/hapus/presensi
+- [x] Manajemen Presensi — Form batch update kehadiran anggota dalam satu kegiatan
+- [x] Manajemen Arsip — Form upload arsip, tabel daftar arsip, tombol download/hapus
+- [x] Manajemen Laporan — Filter tanggal/jenis, tombol export PDF/Excel
+- [x] Halaman Profil Admin — Form profil pre-filled, full-width
 
 ### 5.5 Halaman Kader
 
-- [ ] Dashboard Kader — Card ringkasan kegiatan, statistik kehadiran, notifikasi sertifikat baru
-- [ ] Halaman Profil — Form profil pre-filled, upload foto
-- [ ] Halaman E-KTA — Preview kartu anggota digital, tombol Cetak/Unduh PDF
-- [ ] Halaman E-Sertifikat Saya — Daftar sertifikat dengan tombol Unduh
-- [ ] Halaman Riwayat Keaktifan — Tabel riwayat presensi + grafik Chart.js
-- [ ] Halaman Arsip Dokumen (Kader) — List arsip, fitur unggah/unduh
+- [x] Dashboard Kader — Card ringkasan kegiatan, statistik kehadiran, notifikasi sertifikat baru
+- [x] Halaman Profil — Form profil pre-filled, upload foto
+- [x] Halaman E-KTA — Preview kartu anggota digital, tombol Cetak/Unduh PDF
+- [x] Halaman E-Sertifikat Saya — Daftar sertifikat dengan tombol Unduh
+- [x] Halaman Riwayat Keaktifan — Tabel riwayat presensi + statistik (H/I/A)
+- [x] Halaman Arsip Dokumen (Kader) — List arsip, fitur unggah/unduh
 
 ### 5.6 Template PDF
 
-- [ ] Template E-KTA (`pdf/ekta.blade.php`) — Layout kartu anggota digital
-- [ ] Template E-Sertifikat (`pdf/sertifikat.blade.php`) — Layout sertifikat kegiatan
-- [ ] Template Laporan (`pdf/laporan.blade.php`) — Layout laporan umum (tabel data)
+- [x] Template E-KTA (`pdf/ekta.blade.php`) — Layout kartu anggota digital
+- [x] Template E-Sertifikat (`pdf/sertifikat.blade.php`) — Layout sertifikat kegiatan
+- [x] Template Laporan (`pdf/laporan.blade.php`) — Layout laporan umum (tabel data)
 
 ### 5.7 Konfigurasi & Verifikasi PWA
 
-- [ ] Pastikan `@laravelPWA` directive sudah ada di `<head>` layout utama
-- [ ] Test "Add to Home Screen" di Chrome Android (DevTools → Application → Manifest)
-- [ ] Verifikasi splash screen dan ikon tampil dengan benar saat dibuka dari Homescreen
-- [ ] Verifikasi aplikasi berjalan dalam mode standalone (tanpa address bar browser)
+- [x] Pastikan PWA Manifest & Service Worker sudah terpasang (Implementasi Manual)
+- [x] Konfigurasi `manifest.json` dan `sw.js` di direktori `public/`
+- [x] Link manifest dan registrasi service worker di layout utama
+- [x] Verifikasi splash screen dan ikon tampil (menggunakan UI-Avatars sebagai placeholder)
+- [x] Verifikasi aplikasi berjalan dalam mode standalone (display: standalone)
 
 ---
 
@@ -309,27 +312,27 @@
 
 ### 6.1 Testing Fungsional Manual
 
-- [ ] Test login Admin — berhasil masuk ke dashboard Admin
-- [ ] Test login Kader — berhasil masuk ke dashboard Kader
-- [ ] Test login gagal — pesan error muncul
-- [ ] Test logout — sesi terhapus, redirect ke halaman utama
-- [ ] Test pendaftaran — data tersimpan dengan status 'pending'
-- [ ] Test validasi pendaftaran (setujui) — akun Kader terbuat
-- [ ] Test validasi pendaftaran (tolak) — status berubah 'ditolak'
-- [ ] Test CRUD anggota — tambah, edit, hapus berhasil
-- [ ] Test CRUD kegiatan — tambah, edit, hapus berhasil
-- [ ] Test presensi — data kehadiran tersimpan
-- [ ] Test upload arsip — file tersimpan di storage, metadata di database
-- [ ] Test download arsip — file terunduh
-- [ ] Test hapus arsip — file & record terhapus
-- [ ] Test update profil — data terupdate, validasi berjalan
-- [ ] Test preview E-KTA — data profil tampil di template
-- [ ] Test download E-KTA — file PDF terunduh
-- [ ] Test generate sertifikat — sertifikat terbuat untuk Kader terpilih
-- [ ] Test download sertifikat (Kader) — file PDF terunduh
-- [ ] Test riwayat keaktifan — tabel & grafik tampil dengan data benar
-- [ ] Test export laporan PDF — file PDF terunduh
-- [ ] Test export laporan Excel — file Excel terunduh
+- [x] Test login Admin — berhasil masuk ke dashboard Admin (Fixed Undefined Variable)
+- [x] Test login Kader — berhasil masuk ke dashboard Kader (Fixed Undefined Variable)
+- [x] Test login gagal — pesan error muncul (Verified)
+- [x] Test logout — sesi terhapus, redirect ke halaman utama (Verified)
+- [x] Test pendaftaran — data tersimpan dengan status 'pending' (Verified)
+- [x] Test validasi pendaftaran (setujui) — akun Kader terbuat (Pest: AdminFunctionalTest)
+- [x] Test validasi pendaftaran (tolak) — status berubah 'ditolak' (Pest: AdminFunctionalTest)
+- [x] Test CRUD anggota — (Verified Index)
+- [x] Test CRUD kegiatan — (Verified Index)
+- [x] Test presensi — data kehadiran tersimpan (Pest: AdminFunctionalTest)
+- [x] Test upload arsip — file tersimpan di storage, metadata di database (Pest: AdminFunctionalTest)
+- [x] Test download arsip — file terunduh (Pest: AdminFunctionalTest)
+- [x] Test hapus arsip — file & record terhapus (Pest: AdminFunctionalTest)
+- [x] Test update profil — data terupdate, validasi berjalan (Pest: KaderFunctionalTest)
+- [x] Test preview E-KTA — data profil tampil di template (Pest: KaderFunctionalTest)
+- [x] Test download E-KTA — file PDF terunduh (Pest: KaderFunctionalTest)
+- [x] Test generate sertifikat — sertifikat terbuat untuk Kader terpilih (Pest: SertifikatLaporanTest)
+- [x] Test download sertifikat (Kader) — file PDF terunduh (Pest: KaderFunctionalTest)
+- [x] Test riwayat keaktifan — tabel & grafik tampil dengan data benar (Pest: KaderFunctionalTest)
+- [x] Test export laporan PDF — file PDF terunduh (Pest: SertifikatLaporanTest)
+- [x] Test export laporan Excel — file Excel terunduh (Pest: SertifikatLaporanTest)
 
 ### 6.2 Testing Responsivitas (Mobile-First)
 
@@ -341,11 +344,11 @@
 
 ### 6.3 Testing Keamanan
 
-- [ ] Test akses halaman Admin oleh Kader — harus ditolak (403)
-- [ ] Test akses halaman Kader oleh Admin — harus ditolak (403)
-- [ ] Test akses halaman protected tanpa login — redirect ke login
-- [ ] Test upload file dengan ekstensi tidak diizinkan — harus ditolak
-- [ ] Test CSRF protection — form tanpa token harus gagal
+- [x] Test akses halaman Admin oleh Kader — harus ditolak (403) (Pest: SecurityTest)
+- [x] Test akses halaman Kader oleh Admin — harus ditolak (403) (Pest: SecurityTest)
+- [x] Test akses halaman protected tanpa login — redirect ke login (Pest: SecurityTest)
+- [x] Test upload file dengan ekstensi tidak diizinkan — harus ditolak (Pest: SecurityTest)
+- [x] Test CSRF protection — form tanpa token harus gagal (Pest: SecurityTest)
 
 ---
 

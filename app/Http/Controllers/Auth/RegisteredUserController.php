@@ -46,6 +46,8 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        $dashboardRoute = $user->role === 'admin' ? 'admin.dashboard' : 'kader.dashboard';
+
+        return redirect(route($dashboardRoute, absolute: false));
     }
 }

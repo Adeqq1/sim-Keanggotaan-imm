@@ -1,8 +1,6 @@
 const CACHE_NAME = 'sim-imm-cache-v1';
 const urlsToCache = [
     '/',
-    '/css/app.css',
-    '/js/app.js'
 ];
 
 self.addEventListener('install', event => {
@@ -15,6 +13,11 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', event => {
     event.respondWith(
         caches.match(event.request)
-            .then(response => response || fetch(event.request))
+            .then(response => {
+                if (response) {
+                    return response;
+                }
+                return fetch(event.request);
+            })
     );
 });
