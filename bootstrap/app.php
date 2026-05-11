@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ForceHttpsForTunnel;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,6 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => RoleMiddleware::class,
         ]);
+
+        // Trust all proxies for tunneling services (Ngrok, LocalTunnel, etc)
+        $middleware->trustProxies(at: '*');
+
+        // Force HTTPS for tunneling services
+        $middleware->append(ForceHttpsForTunnel::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
