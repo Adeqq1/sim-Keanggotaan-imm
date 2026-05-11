@@ -16,10 +16,10 @@
             </div>
         </div>
 
-        <div class="p-4 bg-white shadow-sm border-0 mt-4 mb-5" style="border-radius: 15px;">
+        <!-- <div class="p-4 bg-white shadow-sm border-0 mt-4 mb-5" style="border-radius: 15px;">
             <div class="max-w-xl">
                 @include('profile.partials.delete-user-form')
             </div>
-        </div>
+        </div> -->
     </div>
 </x-app-layout>

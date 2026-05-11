@@ -12,7 +12,7 @@ class PresensiController extends Controller
     public function create(Kegiatan $kegiatan)
     {
         $anggotas = Anggota::where('status_aktif', true)->orderBy('nama_lengkap')->get();
-        $presensis = $kegiatan->presensis;
+        $presensis = $kegiatan->presensi;
 
         return view('admin.kegiatan.presensi', compact('kegiatan', 'anggotas', 'presensis'));
     }

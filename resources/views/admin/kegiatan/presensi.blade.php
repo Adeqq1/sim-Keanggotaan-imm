@@ -8,14 +8,13 @@
         <p class="text-muted small mb-0"><i class="bi bi-calendar-event me-1"></i> {{ $kegiatan->tanggal_waktu->format('d F Y, H:i') }}</p>
     </div>
 
-    <form action="{{ route('admin.presensi.update', $kegiatan) }}" method="POST">
+    <form action="{{ route('admin.presensi.store', $kegiatan) }}" method="POST">
         @csrf
-        @method('PUT')
 
         @foreach($anggotas as $anggota)
             @php
                 $presensi = $presensis->where('anggota_id', $anggota->id)->first();
-                $status = $presensi ? $presensi->status_kehadiran : 'alfa';
+                $status = $presensi ? $presensi->status_kehadiran : 'hadir';
             @endphp
             <div class="card mb-2 p-3">
                 <div class="d-flex align-items-center justify-content-between">
