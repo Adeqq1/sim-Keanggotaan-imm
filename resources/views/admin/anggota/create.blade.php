@@ -90,7 +90,7 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-save"></i> Simpan
                     </button>
-                    <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-secondary">
+                    <a href="{{ route('admin.anggota.index') }}" class="btn btn-danger">
                         Batal
                     </a>
                 </div>
