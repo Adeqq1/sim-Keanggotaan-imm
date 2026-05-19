@@ -15,8 +15,8 @@ use App\Http\Controllers\ValidasiPendaftaranController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('public.landing');
+})->name('landing');
 
 Route::get('/pendaftaran', [PendaftaranController::class, 'create'])->name('pendaftaran');
 Route::post('/pendaftaran', [PendaftaranController::class, 'store'])->name('pendaftaran.store');
