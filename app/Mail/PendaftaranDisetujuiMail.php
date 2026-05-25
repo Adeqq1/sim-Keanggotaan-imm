@@ -9,14 +9,31 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 
 class PendaftaranDisetujuiMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
+    /**
+     * Jumlah percobaan ulang jika pengiriman email gagal.
+     */
+    public int $tries = 3;
+
+    /**
+     * Jeda antar retry dalam detik (1 menit, 5 menit, 15 menit).
+     *
+     * @var array<int, int>
+     */
+    public array $backoff = [60, 300, 900];
+
+    /**
+     * @param  string  $passwordSementaraEncrypted  Password di-enkripsi sebelum masuk queue payload.
+     */
     public function __construct(
         public Pendaftaran $pendaftaran,
-        public string $passwordSementara,
+        public string $passwordSementaraEncrypted,
     ) {}
 
     public function envelope(): Envelope
@@ -33,9 +50,23 @@ class PendaftaranDisetujuiMail extends Mailable implements ShouldQueue
             with: [
                 'nama' => $this->pendaftaran->nama_lengkap,
                 'email' => $this->pendaftaran->email,
-                'password' => $this->passwordSementara,
+                'password' => Crypt::decryptString($this->passwordSementaraEncrypted),
                 'loginUrl' => route('login'),
             ],
         );
+    }
+
+    /**
+     * Dipanggil oleh queue worker setelah semua retry habis dan email tetap gagal.
+     */
+    public function failed(\Throwable $e): void
+    {
+        Log::error('Email persetujuan pendaftaran gagal terkirim setelah semua retry', [
+            'pendaftaran_id' => $this->pendaftaran->id,
+            'email' => $this->pendaftaran->email,
+            'exception' => $e::class,
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
     }
 }

@@ -9,10 +9,23 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class PendaftaranDitolakMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
+
+    /**
+     * Jumlah percobaan ulang jika pengiriman email gagal.
+     */
+    public int $tries = 3;
+
+    /**
+     * Jeda antar retry dalam detik (1 menit, 5 menit, 15 menit).
+     *
+     * @var array<int, int>
+     */
+    public array $backoff = [60, 300, 900];
 
     public function __construct(
         public Pendaftaran $pendaftaran,
@@ -35,5 +48,19 @@ class PendaftaranDitolakMail extends Mailable implements ShouldQueue
                 'pendaftaranUrl' => route('pendaftaran'),
             ],
         );
+    }
+
+    /**
+     * Dipanggil oleh queue worker setelah semua retry habis dan email tetap gagal.
+     */
+    public function failed(\Throwable $e): void
+    {
+        Log::error('Email penolakan pendaftaran gagal terkirim setelah semua retry', [
+            'pendaftaran_id' => $this->pendaftaran->id,
+            'email' => $this->pendaftaran->email,
+            'exception' => $e::class,
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
     }
 }

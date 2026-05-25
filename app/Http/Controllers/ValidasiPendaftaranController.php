@@ -8,6 +8,7 @@ use App\Models\Anggota;
 use App\Models\Pendaftaran;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -15,6 +16,14 @@ use Illuminate\Support\Facades\Mail;
 
 class ValidasiPendaftaranController extends Controller
 {
+    /**
+     * Password default sementara untuk kader yang baru disetujui.
+     * Kader wajib mengganti password ini setelah login pertama.
+     *
+     * @todo Ganti dengan Str::password() dan kirim via email — lihat issue terpisah.
+     */
+    private const DEFAULT_KADER_PASSWORD = 'password';
+
     public function index()
     {
         $pendaftarans = Pendaftaran::where('status_validasi', 'pending')->latest()->paginate(10);
@@ -33,14 +42,13 @@ class ValidasiPendaftaranController extends Controller
     {
         $pendaftar = Pendaftaran::findOrFail($id);
         $status = $request->status;
-        $passwordSementara = 'password';
 
         if ($status === 'disetujui') {
-            DB::transaction(function () use ($pendaftar, $passwordSementara) {
+            DB::transaction(function () use ($pendaftar) {
                 $user = User::create([
                     'name' => $pendaftar->nama_lengkap,
                     'email' => $pendaftar->email,
-                    'password' => Hash::make($passwordSementara),
+                    'password' => Hash::make(self::DEFAULT_KADER_PASSWORD),
                     'role' => 'kader',
                 ]);
 
@@ -61,7 +69,7 @@ class ValidasiPendaftaranController extends Controller
                 ]);
             });
 
-            $this->kirimEmailDisetujui($pendaftar->fresh(), $passwordSementara);
+            $this->kirimEmailDisetujui($pendaftar->fresh());
 
             return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftaran disetujui.');
         }
@@ -80,15 +88,22 @@ class ValidasiPendaftaranController extends Controller
         return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftaran ditolak.');
     }
 
-    private function kirimEmailDisetujui(Pendaftaran $pendaftaran, string $passwordSementara): void
+    private function kirimEmailDisetujui(Pendaftaran $pendaftaran): void
     {
         try {
+            // Password di-enkripsi agar tidak tersimpan plain-text di kolom payload tabel jobs.
+            $passwordEncrypted = Crypt::encryptString(self::DEFAULT_KADER_PASSWORD);
+
             Mail::to($pendaftaran->email)
-                ->queue(new PendaftaranDisetujuiMail($pendaftaran, $passwordSementara));
+                ->queue(new PendaftaranDisetujuiMail($pendaftaran, $passwordEncrypted));
         } catch (\Throwable $e) {
-            Log::error('Gagal kirim email persetujuan pendaftaran', [
+            // try/catch di sini hanya menangkap kegagalan dispatch ke queue (misal: DB down).
+            // Kegagalan SMTP yang sebenarnya ditangani oleh method failed() di Mailable.
+            Log::error('Gagal mendispatch email persetujuan pendaftaran ke queue', [
                 'pendaftaran_id' => $pendaftaran->id,
-                'error' => $e->getMessage(),
+                'exception' => $e::class,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
         }
     }
@@ -99,9 +114,13 @@ class ValidasiPendaftaranController extends Controller
             Mail::to($pendaftaran->email)
                 ->queue(new PendaftaranDitolakMail($pendaftaran));
         } catch (\Throwable $e) {
-            Log::error('Gagal kirim email penolakan pendaftaran', [
+            // try/catch di sini hanya menangkap kegagalan dispatch ke queue (misal: DB down).
+            // Kegagalan SMTP yang sebenarnya ditangani oleh method failed() di Mailable.
+            Log::error('Gagal mendispatch email penolakan pendaftaran ke queue', [
                 'pendaftaran_id' => $pendaftaran->id,
-                'error' => $e->getMessage(),
+                'exception' => $e::class,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
         }
     }

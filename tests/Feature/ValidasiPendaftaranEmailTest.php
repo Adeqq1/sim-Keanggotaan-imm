@@ -4,6 +4,7 @@ use App\Mail\PendaftaranDisetujuiMail;
 use App\Mail\PendaftaranDitolakMail;
 use App\Models\Pendaftaran;
 use App\Models\User;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 
 beforeEach(function () {
@@ -25,6 +26,25 @@ it('mengirim email persetujuan saat pendaftaran disetujui', function () {
 
     Mail::assertQueued(PendaftaranDisetujuiMail::class, function (PendaftaranDisetujuiMail $mail) {
         return $mail->hasTo('calon@example.com');
+    });
+});
+
+it('password di queue payload tersimpan dalam bentuk terenkripsi', function () {
+    Mail::fake();
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.pendaftaran.validate', $this->pendaftaran->id), [
+            'status' => 'disetujui',
+        ]);
+
+    Mail::assertQueued(PendaftaranDisetujuiMail::class, function (PendaftaranDisetujuiMail $mail) {
+        // Pastikan payload bukan plain-text
+        expect($mail->passwordSementaraEncrypted)->not->toBe('password');
+
+        // Pastikan bisa di-dekripsi kembali ke nilai yang benar
+        expect(Crypt::decryptString($mail->passwordSementaraEncrypted))->toBe('password');
+
+        return true;
     });
 });
 
