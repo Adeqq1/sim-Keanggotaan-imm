@@ -2,17 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\PendaftaranDisetujuiMail;
-use App\Mail\PendaftaranDitolakMail;
 use App\Models\Anggota;
 use App\Models\Pendaftaran;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class ValidasiPendaftaranController extends Controller
 {
@@ -69,8 +64,6 @@ class ValidasiPendaftaranController extends Controller
                 ]);
             });
 
-            $this->kirimEmailDisetujui($pendaftar->fresh());
-
             return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftaran disetujui.');
         }
 
@@ -83,45 +76,6 @@ class ValidasiPendaftaranController extends Controller
             'catatan_admin' => $request->catatan_admin,
         ]);
 
-        $this->kirimEmailDitolak($pendaftar->fresh());
-
         return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftaran ditolak.');
-    }
-
-    private function kirimEmailDisetujui(Pendaftaran $pendaftaran): void
-    {
-        try {
-            // Password di-enkripsi agar tidak tersimpan plain-text di kolom payload tabel jobs.
-            $passwordEncrypted = Crypt::encryptString(self::DEFAULT_KADER_PASSWORD);
-
-            Mail::to($pendaftaran->email)
-                ->queue(new PendaftaranDisetujuiMail($pendaftaran, $passwordEncrypted));
-        } catch (\Throwable $e) {
-            // try/catch di sini hanya menangkap kegagalan dispatch ke queue (misal: DB down).
-            // Kegagalan SMTP yang sebenarnya ditangani oleh method failed() di Mailable.
-            Log::error('Gagal mendispatch email persetujuan pendaftaran ke queue', [
-                'pendaftaran_id' => $pendaftaran->id,
-                'exception' => $e::class,
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-        }
-    }
-
-    private function kirimEmailDitolak(Pendaftaran $pendaftaran): void
-    {
-        try {
-            Mail::to($pendaftaran->email)
-                ->queue(new PendaftaranDitolakMail($pendaftaran));
-        } catch (\Throwable $e) {
-            // try/catch di sini hanya menangkap kegagalan dispatch ke queue (misal: DB down).
-            // Kegagalan SMTP yang sebenarnya ditangani oleh method failed() di Mailable.
-            Log::error('Gagal mendispatch email penolakan pendaftaran ke queue', [
-                'pendaftaran_id' => $pendaftaran->id,
-                'exception' => $e::class,
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-        }
     }
 }

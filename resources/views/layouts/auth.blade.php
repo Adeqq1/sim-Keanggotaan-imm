@@ -59,10 +59,10 @@
                 margin-bottom: 0.75rem;
                 width: 56px;
             }
-            .auth-card a {
+            .auth-card a:not(.btn) {
                 color: #800000;
             }
-            .auth-card a:hover {
+            .auth-card a:not(.btn):hover {
                 color: #a00000;
             }
             .form-control:focus,

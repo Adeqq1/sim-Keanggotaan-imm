@@ -31,7 +31,7 @@ return [
             'image' => '/images/landing/program-1.jpg',
             'alt' => 'Kajian rutin IMM',
             'icon' => 'bi-journal-text',
-            'icon_bg' => '#eff6ff',
+            'icon_bg' => '#fef7f7',
             'icon_color' => 'text-primary',
             'title' => 'Kajian Rutin',
             'description' => 'Forum diskusi dan kajian keislaman yang diselenggarakan secara rutin untuk memperdalam pemahaman agama dan isu-isu kontemporer.',
@@ -62,7 +62,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'pillars' => [
-        ['icon' => 'bi-book-half',  'color' => 'text-primary', 'bg' => '#eff6ff', 'title' => 'Religiusitas',    'desc' => 'Iman & akhlak mulia'],
+        ['icon' => 'bi-book-half',  'color' => 'text-primary', 'bg' => '#fef7f7', 'title' => 'Religiusitas',    'desc' => 'Iman & akhlak mulia'],
         ['icon' => 'bi-lightbulb',  'color' => 'text-success', 'bg' => '#f0fdf4', 'title' => 'Intelektualitas', 'desc' => 'Ilmu & wawasan luas'],
         ['icon' => 'bi-people',     'color' => 'text-warning', 'bg' => '#fef3c7', 'title' => 'Humanitas',       'desc' => 'Peduli sesama'],
         ['icon' => 'bi-award',      'color' => 'text-danger',  'bg' => '#fdf2f8', 'title' => 'Kaderisasi',      'desc' => 'Pemimpin masa depan'],
