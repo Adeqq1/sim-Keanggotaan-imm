@@ -8,7 +8,7 @@
     </div>
 
     <!-- KTA Card View -->
-    <div class="card p-0 mb-4 shadow-lg overflow-hidden" style="border-radius: 18px; border: none; aspect-ratio: 1.58/1; background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); position: relative;">
+    <div class="card p-0 mb-4 shadow-lg overflow-hidden" style="border-radius: 18px; border: none; aspect-ratio: 1.58/1; background: linear-gradient(135deg, #800000 0%, #a00000 100%); position: relative;">
         <!-- Card Background Pattern -->
         <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
         <div style="position: absolute; bottom: -20px; left: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>

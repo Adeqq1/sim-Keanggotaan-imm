@@ -15,9 +15,9 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <!-- PWA Meta Tags -->
-        <meta name="theme-color" content="#1e3a8a">
+        <meta name="theme-color" content="#800000">
         <link rel="manifest" href="/manifest.json">
-        <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=IMM&background=1e3a8a&color=fff&size=192">
+        <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=IMM&background=800000&color=fff&size=192">
         <script>
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
@@ -33,7 +33,7 @@
                 padding-bottom: 80px; /* Space for Bottom Nav */
             }
             .navbar-header {
-                background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+                background: linear-gradient(135deg, #800000 0%, #a00000 100%);
                 color: white;
             }
             .card {
@@ -42,15 +42,15 @@
                 box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             }
             .btn-primary {
-                background-color: #3b82f6;
-                border-color: #3b82f6;
+                background-color: #800000;
+                border-color: #800000;
                 border-radius: 8px;
                 padding: 10px 20px;
                 font-weight: 600;
             }
             .btn-primary:hover {
-                background-color: #2563eb;
-                border-color: #2563eb;
+                background-color: #600000;
+                border-color: #600000;
             }
         </style>
     </head>

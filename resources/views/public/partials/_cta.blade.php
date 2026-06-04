@@ -10,7 +10,7 @@
                     Jadilah bagian dari gerakan mahasiswa yang membawa perubahan. Daftarkan diri Anda sekarang dan mulai perjalanan bersama ribuan kader IMM di seluruh Indonesia.
                 </p>
                 <div class="d-flex flex-wrap justify-content-center gap-3">
-                    <a href="{{ route('pendaftaran') }}" class="btn btn-light btn-lg fw-bold px-5 py-3" style="border-radius:12px;color:var(--imm-blue);">
+                    <a href="{{ route('pendaftaran') }}" class="btn btn-light btn-lg fw-bold px-5 py-3" style="border-radius:12px;color:var(--imm-primary);">
                         <i class="bi bi-person-plus me-2"></i>Daftar Anggota Sekarang
                     </a>
                     <a href="{{ route('login') }}" class="btn btn-imm-outline btn-lg px-5 py-3">

@@ -8,18 +8,18 @@
             font-family: 'Times-Roman', serif;
             margin: 0;
             padding: 50px;
-            border: 20px solid #1e3a8a;
+            border: 20px solid #800000;
             height: 800px;
         }
         .container {
             text-align: center;
-            border: 2px solid #1e3a8a;
+            border: 2px solid #800000;
             padding: 50px;
             height: 100%;
         }
         .header {
             font-size: 40px;
-            color: #1e3a8a;
+            color: #800000;
             font-weight: bold;
             margin-bottom: 10px;
         }
@@ -44,7 +44,7 @@
         }
         .kegiatan {
             font-weight: bold;
-            color: #1e3a8a;
+            color: #800000;
         }
         .footer {
             margin-top: 100px;

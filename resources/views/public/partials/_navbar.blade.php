@@ -9,7 +9,7 @@
         </a>
 
         <button class="navbar-toggler border-0" type="button" @click="open = !open" aria-label="Toggle navigation" aria-expanded="false" :aria-expanded="open.toString()">
-            <i class="bi" :class="open ? 'bi-x-lg' : 'bi-list'" style="font-size:1.4rem;color:var(--imm-blue);"></i>
+            <i class="bi" :class="open ? 'bi-x-lg' : 'bi-list'" style="font-size:1.4rem;color:var(--imm-primary);"></i>
         </button>
 
         <div class="collapse navbar-collapse" :class="{ 'show': open }" id="navbarNav">
