@@ -75,7 +75,7 @@
         <hr style="border-color:rgba(255,255,255,0.1);">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
             <p class="mb-0 small" style="color:#64748b;">&copy; {{ date('Y') }} Ikatan Mahasiswa Muhammadiyah. All rights reserved.</p>
-            <p class="mb-0 small" style="color:#64748b;">Powered by SIM-IMM &mdash; Sistem Informasi Manajemen Keanggotaan</p>
+            <p class="mb-0 small" style="color:#64748b;">Powered by Adeqq &mdash; Teknologi Informasi 2022</p>
         </div>
     </div>
 </footer>

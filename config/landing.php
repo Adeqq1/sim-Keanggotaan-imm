@@ -90,8 +90,8 @@ return [
     | Kosongkan 'url' => '' untuk menyembunyikan ikon sosmed yang belum ada.
     */
     'contact' => [
-        'address' => 'Jl. Cik Di Tiro No.23, Yogyakarta, Indonesia', // TODO: konfirmasi alamat resmi
-        'email' => 'info@imm.or.id',                                // TODO: konfirmasi email resmi
+        'address' => 'Kompleks Islamic Center, Jl. Rang Kayo Hitam, Cadika, Rimbo Tengah, Kab.Bungo, Prov.Jambi', // TODO: konfirmasi alamat resmi
+        'email' => 'pcimmbungo64@gmail.com',                                // TODO: konfirmasi email resmi
         'website' => 'https://imm.or.id',
     ],
 
