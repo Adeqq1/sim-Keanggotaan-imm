@@ -2,23 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PendaftaranDisetujuiMail;
 use App\Models\Anggota;
 use App\Models\Pendaftaran;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class ValidasiPendaftaranController extends Controller
 {
-    /**
-     * Password default sementara untuk kader yang baru disetujui.
-     * Kader wajib mengganti password ini setelah login pertama.
-     *
-     * @todo Ganti dengan Str::password() dan kirim via email — lihat issue terpisah.
-     */
-    private const DEFAULT_KADER_PASSWORD = 'password';
-
     public function index()
     {
         $pendaftarans = Pendaftaran::where('status_validasi', 'pending')->latest()->paginate(10);
@@ -39,11 +34,14 @@ class ValidasiPendaftaranController extends Controller
         $status = $request->status;
 
         if ($status === 'disetujui') {
-            DB::transaction(function () use ($pendaftar) {
+            $password = Str::password(8);
+            $user = null;
+
+            DB::transaction(function () use ($pendaftar, $password, &$user) {
                 $user = User::create([
                     'name' => $pendaftar->nama_lengkap,
                     'email' => $pendaftar->email,
-                    'password' => Hash::make(self::DEFAULT_KADER_PASSWORD),
+                    'password' => Hash::make($password),
                     'role' => 'kader',
                 ]);
 
@@ -63,6 +61,8 @@ class ValidasiPendaftaranController extends Controller
                     'catatan_admin' => 'Pendaftaran disetujui.',
                 ]);
             });
+
+            Mail::to($user->email)->send(new PendaftaranDisetujuiMail($user, $password));
 
             return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftaran disetujui.');
         }
