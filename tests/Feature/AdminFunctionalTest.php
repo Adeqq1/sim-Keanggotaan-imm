@@ -1,14 +1,18 @@
 <?php
 
+use App\Mail\PendaftaranDisetujuiMail;
 use App\Models\Anggota;
 use App\Models\Arsip;
 use App\Models\Kegiatan;
 use App\Models\Pendaftaran;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 test('admin can approve pendaftaran and create kader account', function () {
+    Mail::fake();
+
     $admin = User::factory()->admin()->create();
     $pendaftaran = Pendaftaran::factory()->create();
 
@@ -32,6 +36,10 @@ test('admin can approve pendaftaran and create kader account', function () {
         'user_id' => $newUser->id,
         'nama_lengkap' => $pendaftaran->nama_lengkap,
     ]);
+
+    Mail::assertQueued(PendaftaranDisetujuiMail::class, function ($mail) use ($newUser) {
+        return $mail->user->id === $newUser->id && strlen($mail->password) === 8;
+    });
 });
 
 test('admin can reject pendaftaran', function () {
