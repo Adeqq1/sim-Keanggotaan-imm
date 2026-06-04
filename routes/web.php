@@ -23,38 +23,44 @@ Route::post('/pendaftaran', [PendaftaranController::class, 'store'])->name('pend
 Route::get('/pendaftaran/sukses', [PendaftaranController::class, 'success'])->name('pendaftaran.success');
 
 // Admin Routes
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'adminDashboard'])->name('dashboard');
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    // Admin Only
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'adminDashboard'])->name('dashboard');
 
-    // Modul Pendaftaran
-    Route::get('/pendaftaran', [ValidasiPendaftaranController::class, 'index'])->name('pendaftaran.index');
-    Route::get('/pendaftaran/{id}', [ValidasiPendaftaranController::class, 'show'])->name('pendaftaran.show');
-    Route::post('/pendaftaran/{id}/validate', [ValidasiPendaftaranController::class, 'validatePendaftaran'])->name('pendaftaran.validate');
+        // Modul Pendaftaran
+        Route::get('/pendaftaran', [ValidasiPendaftaranController::class, 'index'])->name('pendaftaran.index');
+        Route::get('/pendaftaran/{id}', [ValidasiPendaftaranController::class, 'show'])->name('pendaftaran.show');
+        Route::post('/pendaftaran/{id}/validate', [ValidasiPendaftaranController::class, 'validatePendaftaran'])->name('pendaftaran.validate');
 
-    // Modul Anggota
-    Route::resource('anggota', AnggotaController::class)->parameters(['anggota' => 'anggota']);
+        // Modul Anggota
+        Route::resource('anggota', AnggotaController::class)->parameters(['anggota' => 'anggota']);
 
-    // Modul Kegiatan
-    Route::resource('kegiatan', KegiatanController::class);
+        // Modul Arsip
+        Route::resource('arsip', ArsipController::class)->except(['create', 'edit', 'update', 'show']);
+        Route::get('/arsip/{arsip}/download', [ArsipController::class, 'download'])->name('arsip.download');
 
-    // Modul Presensi
-    Route::get('/presensi/{kegiatan}', [PresensiController::class, 'create'])->name('presensi.show');
-    Route::post('/presensi/{kegiatan}', [PresensiController::class, 'store'])->name('presensi.store');
+        // Modul Sertifikat
+        Route::get('/sertifikat', [SertifikatController::class, 'index'])->name('sertifikat.index');
+        Route::get('/sertifikat/create', [SertifikatController::class, 'create'])->name('sertifikat.create');
+        Route::post('/sertifikat/generate', [SertifikatController::class, 'generate'])->name('sertifikat.generate');
+        Route::get('/sertifikat/{sertifikat}/download', [SertifikatController::class, 'download'])->name('sertifikat.download');
 
-    // Modul Arsip
-    Route::resource('arsip', ArsipController::class)->except(['create', 'edit', 'update', 'show']);
-    Route::get('/arsip/{arsip}/download', [ArsipController::class, 'download'])->name('arsip.download');
+        // Modul Laporan
+        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+        Route::post('/laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
+        Route::post('/laporan/export-excel', [LaporanController::class, 'exportExcel'])->name('laporan.exportExcel');
+    });
 
-    // Modul Sertifikat
-    Route::get('/sertifikat', [SertifikatController::class, 'index'])->name('sertifikat.index');
-    Route::get('/sertifikat/create', [SertifikatController::class, 'create'])->name('sertifikat.create');
-    Route::post('/sertifikat/generate', [SertifikatController::class, 'generate'])->name('sertifikat.generate');
-    Route::get('/sertifikat/{sertifikat}/download', [SertifikatController::class, 'download'])->name('sertifikat.download');
+    // Admin & Instruktur Shared
+    Route::middleware('role:admin,instruktur')->group(function () {
+        // Modul Kegiatan
+        Route::resource('kegiatan', KegiatanController::class);
 
-    // Modul Laporan
-    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
-    Route::post('/laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
-    Route::post('/laporan/export-excel', [LaporanController::class, 'exportExcel'])->name('laporan.exportExcel');
+        // Modul Presensi
+        Route::get('/presensi/{kegiatan}', [PresensiController::class, 'create'])->name('presensi.show');
+        Route::post('/presensi/{kegiatan}', [PresensiController::class, 'store'])->name('presensi.store');
+    });
 });
 
 // Kader Routes

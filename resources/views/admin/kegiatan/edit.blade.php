@@ -11,7 +11,7 @@
 
     <div class="card shadow-sm border-0">
         <div class="card-body p-4">
-            <form action="{{ route('admin.kegiatan.update', $kegiatan) }}" method="POST">
+            <form action="{{ route('admin.kegiatan.update', $kegiatan) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -39,10 +39,24 @@
                     @enderror
                 </div>
 
-                <div class="mb-4">
+                <div class="mb-3">
                     <label class="form-label fw-bold">Deskripsi</label>
                     <textarea name="deskripsi" rows="4" class="form-control @error('deskripsi') is-invalid @enderror">{{ old('deskripsi', $kegiatan->deskripsi) }}</textarea>
                     @error('deskripsi')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Thumbnail Kegiatan</label>
+                    @if($kegiatan->thumbnail)
+                        <div class="mb-2">
+                            <img src="{{ asset('storage/' . $kegiatan->thumbnail) }}" alt="Thumbnail" class="img-thumbnail" style="max-height: 150px;">
+                        </div>
+                    @endif
+                    <input type="file" name="thumbnail" class="form-control @error('thumbnail') is-invalid @enderror" accept="image/*">
+                    <small class="text-muted">Format: jpeg, png, jpg. Maksimal 2MB. Kosongkan jika tidak ingin mengubah.</small>
+                    @error('thumbnail')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>

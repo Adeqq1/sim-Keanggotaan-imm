@@ -27,6 +27,7 @@ class KegiatanRequest extends FormRequest
             'deskripsi' => ['nullable', 'string'],
             'tanggal_waktu' => ['required', 'date'],
             'lokasi' => ['required', 'string', 'max:255'],
+            'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
         ];
     }
 }

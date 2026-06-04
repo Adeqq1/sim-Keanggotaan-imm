@@ -17,6 +17,11 @@
                 <i class="bi bi-calendar-event fs-4 d-block"></i>
                 <small style="font-size: 0.7rem;">Kegiatan</small>
             </a>
+        @elseif(auth()->user()->role === 'instruktur')
+            <a href="{{ route('admin.kegiatan.index') }}" class="nav-link text-center py-2 {{ request()->routeIs('admin.kegiatan.*') ? 'text-primary font-weight-bold' : 'text-muted' }}">
+                <i class="bi bi-calendar-event fs-4 d-block"></i>
+                <small style="font-size: 0.7rem;">Kegiatan</small>
+            </a>
         @else
             <a href="{{ route('kader.dashboard') }}" class="nav-link text-center py-2 {{ request()->routeIs('kader.dashboard') ? 'text-primary font-weight-bold' : 'text-muted' }}">
                 <i class="bi bi-house fs-4 d-block"></i>
