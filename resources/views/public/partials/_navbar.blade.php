@@ -18,7 +18,7 @@
                 <li class="nav-item"><a class="nav-link px-3" href="{{ route('landing') }}#kontak" @click="open=false">Kontak</a></li>
             </ul>
             <div class="d-flex gap-2 mt-2 mt-lg-0">
-                <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm px-3 fw-semibold" style="border-radius:8px;">Masuk</a>
+                <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm px-3 fw-semibold d-inline-flex align-items-center justify-content-center" style="border-radius:8px;">Masuk</a>
                 <a href="{{ route('pendaftaran') }}" class="btn btn-imm-primary btn-sm px-3">Daftar Sekarang</a>
             </div>
         </div>
