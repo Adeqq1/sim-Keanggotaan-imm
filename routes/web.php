@@ -60,6 +60,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         // Modul Presensi
         Route::get('/presensi/{kegiatan}', [PresensiController::class, 'create'])->name('presensi.show');
         Route::post('/presensi/{kegiatan}', [PresensiController::class, 'store'])->name('presensi.store');
+
+        // Modul Verifikasi Sertifikat
+        Route::get('/sertifikat/verifikasi', [SertifikatController::class, 'verifikasiIndex'])->name('sertifikat.verifikasi.index');
+        Route::post('/sertifikat/verifikasi/{presensi}/setuju', [SertifikatController::class, 'setuju'])->name('sertifikat.verifikasi.setuju');
+        Route::post('/sertifikat/verifikasi/{presensi}/tolak', [SertifikatController::class, 'tolak'])->name('sertifikat.verifikasi.tolak');
     });
 });
 
@@ -73,6 +78,10 @@ Route::middleware(['auth', 'role:kader'])->prefix('kader')->name('kader.')->grou
 
     // Modul Sertifikat
     Route::get('/sertifikat', [SertifikatController::class, 'mySertifikat'])->name('sertifikat.index');
+    Route::post('/sertifikat/{presensi}/klaim', [SertifikatController::class, 'klaim'])->name('sertifikat.klaim');
+    Route::get('/sertifikat/{presensi}/klaim', function () {
+        return redirect()->route('kader.riwayat.index')->with('error', 'Sesi Anda telah kedaluwarsa atau halaman kedaluwarsa. Silakan ajukan klaim kembali.');
+    });
     Route::get('/sertifikat/{sertifikat}/download', [SertifikatController::class, 'download'])->name('sertifikat.download');
 
     // Modul Riwayat

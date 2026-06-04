@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Presensi;
+use App\Models\Sertifikat;
 
 class RiwayatKeaktifanController extends Controller
 {
@@ -19,12 +20,16 @@ class RiwayatKeaktifanController extends Controller
             ->latest()
             ->get();
 
+        $sertifikats = Sertifikat::where('anggota_id', $anggota->id)
+            ->get()
+            ->keyBy('kegiatan_id');
+
         $stats = [
             'hadir' => $presensis->where('status_kehadiran', 'hadir')->count(),
             'izin' => $presensis->where('status_kehadiran', 'izin')->count(),
             'alfa' => $presensis->where('status_kehadiran', 'alfa')->count(),
         ];
 
-        return view('kader.riwayat.index', compact('presensis', 'stats'));
+        return view('kader.riwayat.index', compact('presensis', 'sertifikats', 'stats'));
     }
 }

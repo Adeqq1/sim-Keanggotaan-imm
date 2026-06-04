@@ -42,7 +42,65 @@
                     {{ ucfirst($p->status_kehadiran) }}
                 </span>
             </div>
+
+            @php
+                $sertifikat = $sertifikats->get($p->kegiatan_id);
+            @endphp
+            <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+                <div class="small text-muted" style="font-size: 0.75rem;">
+                    Sertifikat: 
+                    @if($p->status_klaim === 'pending')
+                        <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> Menunggu Verifikasi</span>
+                    @elseif($p->status_klaim === 'disetujui' && $sertifikat)
+                        <span class="badge bg-success"><i class="bi bi-patch-check"></i> Disetujui</span>
+                    @elseif($p->status_klaim === 'ditolak')
+                        <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Ditolak</span>
+                    @else
+                        <span class="badge bg-secondary">Belum Diklaim</span>
+                    @endif
+                </div>
+                <div>
+                    @if($p->status_klaim === 'disetujui' && $sertifikat)
+                        <a href="{{ route('kader.sertifikat.download', $sertifikat) }}" class="btn btn-sm btn-outline-success px-3 py-1" style="font-size: 0.7rem; border-radius: 8px;">
+                            <i class="bi bi-download"></i> Unduh
+                        </a>
+                    @elseif($p->status_klaim === null || $p->status_klaim === 'ditolak')
+                        <button type="button" class="btn btn-sm btn-primary px-3 py-1" data-bs-toggle="modal" data-bs-target="#claimModal{{ $p->id }}" style="font-size: 0.7rem; border-radius: 8px;">
+                            <i class="bi bi-upload"></i> Klaim
+                        </button>
+                    @endif
+                </div>
+            </div>
         </div>
+
+        @if($p->status_klaim === null || $p->status_klaim === 'ditolak')
+            <!-- Modal Klaim -->
+            <div class="modal fade" id="claimModal{{ $p->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered mx-3">
+                    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                        <form action="{{ route('kader.sertifikat.klaim', $p) }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="fw-bold mb-0">Klaim Sertifikat</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body py-3">
+                                <p class="text-muted small mb-3">Silakan unggah foto bukti kehadiran Anda pada kegiatan <strong>{{ $p->kegiatan->nama_kegiatan }}</strong>.</p>
+                                
+                                <div class="mb-3 text-start">
+                                    <label for="bukti_kehadiran_{{ $p->id }}" class="form-label fw-semibold small">Foto Bukti Kehadiran (Format: JPG, PNG, max 2MB)</label>
+                                    <input type="file" class="form-control" id="bukti_kehadiran_{{ $p->id }}" name="bukti_kehadiran" accept="image/png, image/jpeg, image/jpg" required style="border-radius: 8px;">
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 pt-0">
+                                <button type="button" class="btn btn-light btn-sm fw-semibold" data-bs-dismiss="modal" style="border-radius: 8px;">Batal</button>
+                                <button type="submit" class="btn btn-primary btn-sm fw-semibold" style="border-radius: 8px;">Kirim Klaim</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @endif
     @empty
         <div class="text-center py-5">
             <i class="bi bi-clock-history display-4 text-muted opacity-25"></i>
@@ -51,4 +109,71 @@
     @endforelse
 
     <div class="pb-3"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const forms = document.querySelectorAll('form[action*="/klaim"]');
+            forms.forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    const fileInput = form.querySelector('input[type="file"]');
+                    const file = fileInput.files[0];
+                    if (!file) return;
+
+                    // Compress only images larger than 500KB
+                    if (file.type.startsWith('image/') && file.size > 500 * 1024) {
+                        e.preventDefault();
+
+                        const submitBtn = form.querySelector('button[type="submit"]');
+                        const originalText = submitBtn.innerHTML;
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Mengompres...';
+
+                        const reader = new FileReader();
+                        reader.readAsDataURL(file);
+                        reader.onload = function (event) {
+                            const img = new Image();
+                            img.src = event.target.result;
+                            img.onload = function () {
+                                const maxDim = 1200;
+                                let width = img.width;
+                                let height = img.height;
+
+                                if (width > maxDim || height > maxDim) {
+                                    if (width > height) {
+                                        height = Math.round((height * maxDim) / width);
+                                        width = maxDim;
+                                    } else {
+                                        width = Math.round((width * maxDim) / height);
+                                        height = maxDim;
+                                    }
+                                }
+
+                                const canvas = document.createElement('canvas');
+                                canvas.width = width;
+                                canvas.height = height;
+
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, width, height);
+
+                                canvas.toBlob(function (blob) {
+                                    const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                                        type: 'image/jpeg',
+                                        lastModified: Date.now()
+                                    });
+
+                                    const dataTransfer = new DataTransfer();
+                                    dataTransfer.items.add(compressedFile);
+                                    fileInput.files = dataTransfer.files;
+
+                                    submitBtn.innerHTML = originalText;
+                                    submitBtn.disabled = false;
+                                    form.submit();
+                                }, 'image/jpeg', 0.7);
+                            };
+                        };
+                    }
+                });
+            });
+        });
+    </script>
 </x-app-layout>
