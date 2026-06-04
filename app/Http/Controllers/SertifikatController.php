@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SertifikatRequest;
+use App\Jobs\GenerateCertificateJob;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\Presensi;
 use App\Models\Sertifikat;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -190,15 +190,9 @@ class SertifikatController extends Controller
             return redirect()->back()->with('error', 'Klaim sertifikat tidak sedang pending.');
         }
 
-        DB::transaction(function () use ($presensi) {
-            $presensi->update([
-                'status_klaim' => 'disetujui',
-                'status_kehadiran' => 'hadir',
-                'waktu_hadir' => $presensi->waktu_hadir ?? now(),
-            ]);
+        $presensi->approveClaim();
 
-            self::generateCertificateFile($presensi->kegiatan, $presensi->anggota);
-        });
+        GenerateCertificateJob::dispatch($presensi);
 
         return redirect()->route('admin.sertifikat.verifikasi.index')->with('success', 'Klaim sertifikat disetujui dan sertifikat berhasil diterbitkan.');
     }
@@ -209,14 +203,7 @@ class SertifikatController extends Controller
             return redirect()->back()->with('error', 'Klaim sertifikat tidak sedang pending.');
         }
 
-        if ($presensi->bukti_kehadiran) {
-            Storage::disk('public')->delete($presensi->bukti_kehadiran);
-        }
-
-        $presensi->update([
-            'status_klaim' => 'ditolak',
-            'bukti_kehadiran' => null,
-        ]);
+        $presensi->rejectClaim();
 
         return redirect()->route('admin.sertifikat.verifikasi.index')->with('info', 'Klaim sertifikat telah ditolak.');
     }
