@@ -25,7 +25,14 @@ class KegiatanController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')->store('kegiatan_thumbnails', 'public');
+            $file = $request->file('thumbnail');
+            $path = 'kegiatan_thumbnails/'.$file->hashName();
+            $stream = fopen($file->getPathname(), 'r');
+            Storage::disk('public')->put($path, $stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+            $data['thumbnail'] = $path;
         }
 
         Kegiatan::create($data);
@@ -46,7 +53,14 @@ class KegiatanController extends Controller
             if ($kegiatan->thumbnail) {
                 Storage::disk('public')->delete($kegiatan->thumbnail);
             }
-            $data['thumbnail'] = $request->file('thumbnail')->store('kegiatan_thumbnails', 'public');
+            $file = $request->file('thumbnail');
+            $path = 'kegiatan_thumbnails/'.$file->hashName();
+            $stream = fopen($file->getPathname(), 'r');
+            Storage::disk('public')->put($path, $stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+            $data['thumbnail'] = $path;
         }
 
         $kegiatan->update($data);
