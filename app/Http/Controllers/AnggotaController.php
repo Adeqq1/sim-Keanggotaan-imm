@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AnggotaRequest;
 use App\Models\Anggota;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class AnggotaController extends Controller
 {
     public function index()
     {
-        $anggotas = Anggota::latest()->paginate(10);
+        $anggotas = Anggota::with('user')->latest()->paginate(10);
 
         return view('admin.anggota.index', compact('anggotas'));
     }
@@ -52,6 +53,10 @@ class AnggotaController extends Controller
     {
         $validated = $request->validated();
 
+        if ($anggota->user_id === auth()->id() && isset($validated['role']) && $validated['role'] !== 'admin') {
+            abort(403, 'Anda tidak bisa menurunkan role akun Anda sendiri.');
+        }
+
         if ($request->hasFile('foto_profil')) {
             if ($anggota->foto_profil) {
                 Storage::disk('public')->delete($anggota->foto_profil);
@@ -60,7 +65,13 @@ class AnggotaController extends Controller
             $validated['foto_profil'] = $path;
         }
 
-        $anggota->update($validated);
+        DB::transaction(function () use ($anggota, $validated) {
+            $anggota->update($validated);
+
+            if (isset($validated['role']) && $anggota->user) {
+                $anggota->user->update(['role' => $validated['role']]);
+            }
+        });
 
         return redirect()->route('admin.anggota.index')->with('success', 'Anggota berhasil diupdate.');
     }

@@ -30,7 +30,14 @@
                     @endif
                 </div>
                 <div class="flex-grow-1">
-                    <h6 class="fw-bold mb-0">{{ $anggota->nama_lengkap }}</h6>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h6 class="fw-bold mb-0">{{ $anggota->nama_lengkap }}</h6>
+                        @if($anggota->user)
+                            <span class="badge {{ $anggota->user->role_color }}" style="font-size: 0.7rem;">
+                                {{ ucfirst($anggota->user->role) }}
+                            </span>
+                        @endif
+                    </div>
                     <small class="text-muted">NIA: {{ $anggota->nia ?? '-' }}</small>
                 </div>
                 <div class="dropdown">

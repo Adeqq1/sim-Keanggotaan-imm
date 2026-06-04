@@ -58,6 +58,19 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the role color badge class.
+     */
+    public function getRoleColorAttribute(): string
+    {
+        return match ($this->role) {
+            'admin' => 'bg-primary',
+            'instruktur' => 'bg-info text-dark',
+            'kader' => 'bg-success',
+            default => 'bg-secondary',
+        };
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
