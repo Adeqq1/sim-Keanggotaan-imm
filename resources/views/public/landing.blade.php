@@ -55,7 +55,7 @@
     @vite(['resources/css/app.css', 'resources/css/landing.css', 'resources/js/app.js'])
 
     {{-- PWA --}}
-    <meta name="theme-color" content="#1e3a8a">
+    <meta name="theme-color" content="#800000">
     <link rel="manifest" href="/manifest.json">
     @verbatim
     <script>

@@ -4,7 +4,7 @@
     </x-slot>
 
     <!-- Stat Card Profile -->
-    <div class="card p-4 mb-4 border-0 shadow-lg" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; border-radius: 20px;">
+    <div class="card p-4 mb-4 border-0 shadow-lg" style="background: linear-gradient(135deg, #800000 0%, #a00000 100%); color: white; border-radius: 20px;">
         <div class="d-flex align-items-center mb-4">
             <div class="me-3 position-relative">
                 @if(auth()->user()->anggota && auth()->user()->anggota->foto_profil)

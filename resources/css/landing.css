@@ -3,11 +3,10 @@
    ========================================================================== */
 
 :root {
-    --imm-blue: #1e3a8a;
-    --imm-blue-mid: #2563eb;
-    --imm-blue-light: #3b82f6;
-    --imm-red: #dc2626;
-    --imm-yellow: #f59e0b;
+    --imm-primary: #800000;
+    --imm-primary-mid: #a00000;
+    --imm-primary-light: #c53030;
+    --imm-accent: #f59e0b;
 }
 
 html {
@@ -39,19 +38,19 @@ html {
 
 .navbar-imm .nav-link:hover,
 .navbar-imm .nav-link:focus {
-    color: var(--imm-blue);
+    color: var(--imm-primary);
 }
 
 .navbar-brand-text {
     font-weight: 800;
-    color: var(--imm-blue);
+    color: var(--imm-primary);
     font-size: 1.1rem;
 }
 
 .navbar-logo-box {
     width: 36px;
     height: 36px;
-    background: var(--imm-blue);
+    background: var(--imm-primary);
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -65,7 +64,7 @@ html {
 .hero-section {
     min-height: 100vh;
     background:
-        linear-gradient(135deg, rgba(30, 58, 138, 0.92) 0%, rgba(37, 99, 235, 0.85) 100%),
+        linear-gradient(135deg, rgba(128, 0, 0, 0.92) 0%, rgba(160, 0, 0, 0.85) 100%),
         url('/images/landing/hero.jpg') center / cover no-repeat;
     display: flex;
     align-items: center;
@@ -95,7 +94,7 @@ html {
    Section Utilities
    -------------------------------------------------------------------------- */
 .section-label {
-    color: var(--imm-blue-light);
+    color: var(--imm-primary-light);
     font-weight: 700;
     font-size: 0.85rem;
     letter-spacing: 0.1em;
@@ -117,7 +116,7 @@ html {
    Statistik
    -------------------------------------------------------------------------- */
 .stats-section {
-    background: linear-gradient(135deg, var(--imm-blue) 0%, var(--imm-blue-mid) 100%);
+    background: linear-gradient(135deg, var(--imm-primary) 0%, var(--imm-primary-mid) 100%);
 }
 
 .stat-card {
@@ -135,7 +134,7 @@ html {
     margin: 1rem;
     padding: 1rem;
     border-radius: 12px;
-    background: var(--imm-blue);
+    background: var(--imm-primary);
     max-width: 220px;
     color: #fff;
 }
@@ -185,24 +184,24 @@ html {
 .visi-card {
     border: none;
     border-radius: 20px;
-    border-top: 4px solid var(--imm-blue);
+    border-top: 4px solid var(--imm-primary);
 }
 
 .misi-card {
     border: none;
     border-radius: 20px;
-    border-top: 4px solid var(--imm-yellow);
+    border-top: 4px solid var(--imm-accent);
 }
 
 .misi-item {
-    border-left: 3px solid var(--imm-blue-light);
+    border-left: 3px solid var(--imm-primary-light);
     padding-left: 1rem;
     margin-bottom: 0.75rem;
 }
 
 .visi-quote {
     background: #eff6ff;
-    border-left: 4px solid var(--imm-blue);
+    border-left: 4px solid var(--imm-primary);
     border-radius: 8px;
     padding: 0.75rem 1rem;
     margin-top: 1.5rem;
@@ -213,7 +212,7 @@ html {
    -------------------------------------------------------------------------- */
 .cta-section {
     background:
-        linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(220, 38, 38, 0.85) 100%),
+        linear-gradient(135deg, rgba(128, 0, 0, 0.95) 0%, rgba(160, 0, 0, 0.85) 100%),
         url('/images/landing/cta.jpg') center / cover no-repeat;
 }
 
@@ -227,7 +226,7 @@ html {
 .footer-logo-box {
     width: 40px;
     height: 40px;
-    background: var(--imm-blue-light);
+    background: var(--imm-primary-light);
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -264,8 +263,8 @@ html {
    Buttons
    -------------------------------------------------------------------------- */
 .btn-imm-primary {
-    background: var(--imm-blue);
-    border-color: var(--imm-blue);
+    background: var(--imm-primary);
+    border-color: var(--imm-primary);
     color: #fff;
     font-weight: 600;
     border-radius: 10px;
@@ -274,8 +273,8 @@ html {
 
 .btn-imm-primary:hover,
 .btn-imm-primary:focus {
-    background: var(--imm-blue-mid);
-    border-color: var(--imm-blue-mid);
+    background: var(--imm-primary-mid);
+    border-color: var(--imm-primary-mid);
     color: #fff;
 }
 

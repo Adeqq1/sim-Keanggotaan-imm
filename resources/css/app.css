@@ -1,2 +1,38 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
+
+/* Override Bootstrap primary color ke maroon */
+:root,
+[data-bs-theme="light"] {
+    --bs-primary: #800000;
+    --bs-primary-rgb: 128, 0, 0;
+    --bs-primary-dark: #600000;
+    --bs-link-color: #800000;
+    --bs-link-color-rgb: 128, 0, 0;
+    --bs-link-hover-color: #a00000;
+    --bs-link-hover-color-rgb: 160, 0, 0;
+    --bs-btn-bg: #800000;
+    --bs-btn-border-color: #800000;
+    --bs-btn-hover-bg: #600000;
+    --bs-btn-hover-border-color: #600000;
+    --bs-btn-active-bg: #600000;
+    --bs-btn-active-border-color: #600000;
+}
+
+.btn-primary {
+    --bs-btn-bg: #800000;
+    --bs-btn-border-color: #800000;
+    --bs-btn-hover-bg: #600000;
+    --bs-btn-hover-border-color: #600000;
+    --bs-btn-active-bg: #600000;
+    --bs-btn-active-border-color: #600000;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: #800000;
+    --bs-btn-border-color: #800000;
+    --bs-btn-hover-bg: #800000;
+    --bs-btn-hover-border-color: #800000;
+    --bs-btn-active-bg: #600000;
+    --bs-btn-active-border-color: #600000;
+}

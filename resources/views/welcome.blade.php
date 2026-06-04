@@ -12,9 +12,9 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <!-- PWA Meta Tags -->
-        <meta name="theme-color" content="#1e3a8a">
+        <meta name="theme-color" content="#800000">
         <link rel="manifest" href="/manifest.json">
-        <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=IMM&background=1e3a8a&color=fff&size=192">
+        <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=IMM&background=800000&color=fff&size=192">
         <script>
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
@@ -25,7 +25,7 @@
         
         <style>
             body {
-                background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+                background: linear-gradient(135deg, #800000 0%, #a00000 100%);
                 min-height: 100vh;
                 color: white;
                 font-family: 'Inter', sans-serif;
@@ -35,7 +35,7 @@
                 padding-bottom: 40px;
             }
             .btn-light {
-                color: #1e3a8a;
+                color: #800000;
                 font-weight: 700;
                 padding: 12px 30px;
                 border-radius: 12px;

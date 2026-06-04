@@ -12,7 +12,7 @@
         .card {
             width: 320px;
             height: 200px;
-            background: #1e3a8a;
+            background: #800000;
             color: white;
             padding: 15px;
             border-radius: 10px;
