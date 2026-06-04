@@ -14,10 +14,10 @@
 
         <div class="collapse navbar-collapse" :class="{ 'show': open }" id="navbarNav">
             <ul class="navbar-nav mx-auto gap-1">
-                <li class="nav-item"><a class="nav-link px-3" href="#tentang" @click="open=false">Tentang</a></li>
-                <li class="nav-item"><a class="nav-link px-3" href="#program" @click="open=false">Program</a></li>
-                <li class="nav-item"><a class="nav-link px-3" href="#visi-misi" @click="open=false">Visi &amp; Misi</a></li>
-                <li class="nav-item"><a class="nav-link px-3" href="#kontak" @click="open=false">Kontak</a></li>
+                <li class="nav-item"><a class="nav-link px-3" href="{{ route('landing') }}#tentang" @click="open=false">Tentang</a></li>
+                <li class="nav-item"><a class="nav-link px-3" href="{{ route('landing') }}#kegiatan" @click="open=false">Kegiatan</a></li>
+                <li class="nav-item"><a class="nav-link px-3" href="{{ route('landing') }}#visi-misi" @click="open=false">Visi &amp; Misi</a></li>
+                <li class="nav-item"><a class="nav-link px-3" href="{{ route('landing') }}#kontak" @click="open=false">Kontak</a></li>
             </ul>
             <div class="d-flex gap-2 mt-2 mt-lg-0">
                 <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm px-3 fw-semibold" style="border-radius:8px;">Masuk</a>

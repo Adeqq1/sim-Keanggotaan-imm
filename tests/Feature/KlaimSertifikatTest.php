@@ -1,11 +1,13 @@
 <?php
 
+use App\Jobs\GenerateCertificateJob;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\Presensi;
 use App\Models\Sertifikat;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 
 // 1x1 Transparent GIF representation to avoid GD dependency in tests
@@ -185,4 +187,30 @@ test('kader cannot download other users certificate but can download theirs', fu
 
     $response = $this->actingAs($kader)->get(route('kader.sertifikat.download', $sertifikat));
     $response->assertSuccessful();
+});
+
+test('admin or instruktur approval dispatches GenerateCertificateJob', function () {
+    Queue::fake();
+
+    $anggota = Anggota::factory()->create();
+    $kegiatan = Kegiatan::factory()->create();
+
+    $presensi = Presensi::create([
+        'kegiatan_id' => $kegiatan->id,
+        'anggota_id' => $anggota->id,
+        'status_kehadiran' => 'alfa',
+        'bukti_kehadiran' => 'bukti_kehadiran/test.jpg',
+        'status_klaim' => 'pending',
+    ]);
+
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin)
+        ->post(route('admin.sertifikat.verifikasi.setuju', $presensi));
+
+    $response->assertRedirect(route('admin.sertifikat.verifikasi.index'));
+
+    Queue::assertPushed(GenerateCertificateJob::class, function ($job) use ($presensi) {
+        return $job->presensi->id === $presensi->id;
+    });
 });

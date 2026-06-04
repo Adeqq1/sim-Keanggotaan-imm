@@ -5,6 +5,7 @@ use App\Http\Controllers\ArsipController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EktaController;
 use App\Http\Controllers\KegiatanController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\PresensiController;
@@ -14,9 +15,8 @@ use App\Http\Controllers\SertifikatController;
 use App\Http\Controllers\ValidasiPendaftaranController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('public.landing');
-})->name('landing');
+Route::get('/', [LandingController::class, 'index'])->name('landing');
+Route::get('/kegiatan/{kegiatan}', [LandingController::class, 'show'])->name('kegiatan.show');
 
 Route::get('/pendaftaran', [PendaftaranController::class, 'create'])->name('pendaftaran');
 Route::post('/pendaftaran', [PendaftaranController::class, 'store'])->name('pendaftaran.store');

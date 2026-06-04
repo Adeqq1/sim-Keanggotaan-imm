@@ -30,10 +30,10 @@
             <div class="col-6 col-lg-2 offset-lg-1">
                 <h2 class="h6 mb-3" style="color:#e2e8f0;font-weight:700;">Navigasi</h2>
                 <ul class="list-unstyled mb-0">
-                    <li class="mb-2"><a href="#beranda" class="footer-link small">Beranda</a></li>
-                    <li class="mb-2"><a href="#tentang" class="footer-link small">Tentang IMM</a></li>
-                    <li class="mb-2"><a href="#program" class="footer-link small">Program Kerja</a></li>
-                    <li class="mb-2"><a href="#visi-misi" class="footer-link small">Visi &amp; Misi</a></li>
+                    <li class="mb-2"><a href="{{ route('landing') }}" class="footer-link small">Beranda</a></li>
+                    <li class="mb-2"><a href="{{ route('landing') }}#tentang" class="footer-link small">Tentang IMM</a></li>
+                    <li class="mb-2"><a href="{{ route('landing') }}#kegiatan" class="footer-link small">Kegiatan</a></li>
+                    <li class="mb-2"><a href="{{ route('landing') }}#visi-misi" class="footer-link small">Visi &amp; Misi</a></li>
                 </ul>
             </div>
 
