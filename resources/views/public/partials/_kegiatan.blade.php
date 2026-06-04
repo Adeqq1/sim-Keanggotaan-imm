@@ -13,7 +13,7 @@
             <div class="col-md-4">
                 <div class="card program-card shadow-sm h-100 border-0">
                     <img
-                        src="{{ $item->thumbnail ? asset('storage/' . $item->thumbnail) : asset('images/landing/hero.jpg') }}"
+                        src="{{ $item->thumbnail_url }}"
                         alt="{{ $item->nama_kegiatan }}"
                         class="card-img-top"
                         loading="lazy"

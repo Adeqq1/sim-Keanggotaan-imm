@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kegiatan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class LandingController extends Controller
@@ -12,7 +13,17 @@ class LandingController extends Controller
      */
     public function index(): View
     {
-        $kegiatan = Kegiatan::latest()->take(3)->get();
+        $kegiatanRaw = Cache::remember('kegiatan.terbaru', 3600, function () {
+            return Kegiatan::latest()->take(3)->get()->toArray();
+        });
+
+        if (! is_array($kegiatanRaw)) {
+            Cache::forget('kegiatan.terbaru');
+            $kegiatanRaw = Kegiatan::latest()->take(3)->get()->toArray();
+            Cache::put('kegiatan.terbaru', $kegiatanRaw, 3600);
+        }
+
+        $kegiatan = Kegiatan::hydrate($kegiatanRaw);
 
         return view('public.landing', compact('kegiatan'));
     }

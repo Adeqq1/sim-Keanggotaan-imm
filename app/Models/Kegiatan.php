@@ -27,4 +27,12 @@ class Kegiatan extends Model
     {
         return $this->hasMany(Sertifikat::class);
     }
+
+    /**
+     * Get the URL of the activity's thumbnail, falling back to a lightweight placeholder image.
+     */
+    public function getThumbnailUrlAttribute(): string
+    {
+        return $this->thumbnail ? asset('storage/'.$this->thumbnail) : asset('images/placeholder-kegiatan.png');
+    }
 }

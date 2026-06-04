@@ -18,7 +18,7 @@
                 <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 16px;">
                     <!-- Image -->
                     <img
-                        src="{{ $kegiatan->thumbnail ? asset('storage/' . $kegiatan->thumbnail) : asset('images/landing/hero.jpg') }}"
+                        src="{{ $kegiatan->thumbnail_url }}"
                         alt="{{ $kegiatan->nama_kegiatan }}"
                         class="img-fluid w-100"
                         style="max-height: 450px; object-fit: cover;"
@@ -63,10 +63,10 @@
                             </a>
                             <div class="d-flex align-items-center gap-2">
                                 <span class="small text-muted me-1">Bagikan:</span>
-                                <a href="https://api.whatsapp.com/send?text={{ rawurlencode($kegiatan->nama_kegiatan . ' - ' . request()->url()) }}" target="_blank" rel="noopener" class="btn btn-light btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 38px; height: 38px;" title="Share WhatsApp">
+                                <a href="https://api.whatsapp.com/send?text={{ rawurlencode($kegiatan->nama_kegiatan . ' - ' . route('kegiatan.show', $kegiatan->id)) }}" target="_blank" rel="noopener" class="btn btn-light btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 38px; height: 38px;" title="Share WhatsApp">
                                     <i class="bi bi-whatsapp text-success fs-5"></i>
                                 </a>
-                                <a href="https://twitter.com/intent/tweet?text={{ rawurlencode($kegiatan->nama_kegiatan) }}&url={{ rawurlencode(request()->url()) }}" target="_blank" rel="noopener" class="btn btn-light btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 38px; height: 38px;" title="Share Twitter">
+                                <a href="https://twitter.com/intent/tweet?text={{ rawurlencode($kegiatan->nama_kegiatan) }}&url={{ rawurlencode(route('kegiatan.show', $kegiatan->id)) }}" target="_blank" rel="noopener" class="btn btn-light btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 38px; height: 38px;" title="Share Twitter">
                                     <i class="bi bi-twitter-x text-dark fs-5"></i>
                                 </a>
                             </div>
@@ -91,7 +91,7 @@
                                 <div class="row g-0">
                                     <div class="col-4">
                                         <img
-                                            src="{{ $rek->thumbnail ? asset('storage/' . $rek->thumbnail) : asset('images/landing/hero.jpg') }}"
+                                            src="{{ $rek->thumbnail_url }}"
                                             alt="{{ $rek->nama_kegiatan }}"
                                             class="w-100 h-100"
                                             style="object-fit: cover; min-height: 100px;"

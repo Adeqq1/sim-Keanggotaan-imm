@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\KegiatanRequest;
 use App\Models\Kegiatan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class KegiatanController extends Controller
@@ -36,6 +37,7 @@ class KegiatanController extends Controller
         }
 
         Kegiatan::create($data);
+        Cache::forget('kegiatan.terbaru');
 
         return redirect()->route('admin.kegiatan.index')->with('success', 'Kegiatan berhasil ditambahkan.');
     }
@@ -64,6 +66,7 @@ class KegiatanController extends Controller
         }
 
         $kegiatan->update($data);
+        Cache::forget('kegiatan.terbaru');
 
         return redirect()->route('admin.kegiatan.index')->with('success', 'Kegiatan berhasil diupdate.');
     }
@@ -75,6 +78,7 @@ class KegiatanController extends Controller
         }
 
         $kegiatan->delete();
+        Cache::forget('kegiatan.terbaru');
 
         return redirect()->route('admin.kegiatan.index')->with('success', 'Kegiatan berhasil dihapus.');
     }
