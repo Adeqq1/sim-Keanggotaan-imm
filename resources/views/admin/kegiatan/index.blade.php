@@ -17,6 +17,9 @@
                     <span class="d-block fw-bold text-primary fs-5">{{ $kegiatan->tanggal_waktu->format('d') }}</span>
                     <span class="small text-muted text-uppercase" style="font-size: 0.65rem;">{{ $kegiatan->tanggal_waktu->format('M Y') }}</span>
                 </div>
+                @if($kegiatan->thumbnail)
+                    <img src="{{ asset('storage/' . $kegiatan->thumbnail) }}" alt="Thumbnail" class="rounded me-3" style="width: 55px; height: 55px; object-fit: cover;">
+                @endif
                 <div class="flex-grow-1">
                     <h6 class="fw-bold mb-1">{{ $kegiatan->nama_kegiatan }}</h6>
                     <small class="text-muted d-block"><i class="bi bi-geo-alt me-1"></i> {{ $kegiatan->lokasi }}</small>

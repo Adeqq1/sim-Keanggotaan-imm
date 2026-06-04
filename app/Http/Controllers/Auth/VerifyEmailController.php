@@ -14,7 +14,7 @@ class VerifyEmailController extends Controller
      */
     public function __invoke(EmailVerificationRequest $request): RedirectResponse
     {
-        $dashboardRoute = $request->user()->role === 'admin' ? 'admin.dashboard' : 'kader.dashboard';
+        $dashboardRoute = $request->user()->getDashboardRoute();
 
         if ($request->user()->hasVerifiedEmail()) {
             return redirect()->intended(route($dashboardRoute, absolute: false).'?verified=1');

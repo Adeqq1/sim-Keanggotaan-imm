@@ -11,7 +11,7 @@
 
     <div class="card shadow-sm border-0">
         <div class="card-body p-4">
-            <form action="{{ route('admin.kegiatan.store') }}" method="POST">
+            <form action="{{ route('admin.kegiatan.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div class="mb-3">
@@ -38,10 +38,19 @@
                     @enderror
                 </div>
 
-                <div class="mb-4">
+                <div class="mb-3">
                     <label class="form-label fw-bold">Deskripsi</label>
                     <textarea name="deskripsi" rows="4" class="form-control @error('deskripsi') is-invalid @enderror" placeholder="Deskripsi kegiatan (opsional)">{{ old('deskripsi') }}</textarea>
                     @error('deskripsi')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Thumbnail Kegiatan</label>
+                    <input type="file" name="thumbnail" class="form-control @error('thumbnail') is-invalid @enderror" accept="image/*">
+                    <small class="text-muted">Format: jpeg, png, jpg. Maksimal 2MB. (Opsional)</small>
+                    @error('thumbnail')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>

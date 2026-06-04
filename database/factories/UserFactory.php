@@ -62,4 +62,14 @@ class UserFactory extends Factory
             'role' => 'kader',
         ]);
     }
+
+    /**
+     * Indicate that the user is an instruktur.
+     */
+    public function instruktur(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'instruktur',
+        ]);
+    }
 }

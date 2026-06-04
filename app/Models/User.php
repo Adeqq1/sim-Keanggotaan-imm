@@ -35,6 +35,29 @@ class User extends Authenticatable
     }
 
     /**
+     * Determine if the user is an instruktur.
+     */
+    public function isInstruktur(): bool
+    {
+        return $this->role === 'instruktur';
+    }
+
+    /**
+     * Get the dashboard route name based on user role.
+     */
+    public function getDashboardRoute(): string
+    {
+        if ($this->role === 'admin') {
+            return 'admin.dashboard';
+        }
+        if ($this->role === 'instruktur') {
+            return 'admin.kegiatan.index';
+        }
+
+        return 'kader.dashboard';
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

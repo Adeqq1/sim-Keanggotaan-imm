@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\KegiatanRequest;
 use App\Models\Kegiatan;
+use Illuminate\Support\Facades\Storage;
 
 class KegiatanController extends Controller
 {
@@ -21,7 +22,20 @@ class KegiatanController extends Controller
 
     public function store(KegiatanRequest $request)
     {
-        Kegiatan::create($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('thumbnail')) {
+            $file = $request->file('thumbnail');
+            $path = 'kegiatan_thumbnails/'.$file->hashName();
+            $stream = fopen($file->getPathname(), 'r');
+            Storage::disk('public')->put($path, $stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+            $data['thumbnail'] = $path;
+        }
+
+        Kegiatan::create($data);
 
         return redirect()->route('admin.kegiatan.index')->with('success', 'Kegiatan berhasil ditambahkan.');
     }
@@ -33,13 +47,33 @@ class KegiatanController extends Controller
 
     public function update(KegiatanRequest $request, Kegiatan $kegiatan)
     {
-        $kegiatan->update($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('thumbnail')) {
+            if ($kegiatan->thumbnail) {
+                Storage::disk('public')->delete($kegiatan->thumbnail);
+            }
+            $file = $request->file('thumbnail');
+            $path = 'kegiatan_thumbnails/'.$file->hashName();
+            $stream = fopen($file->getPathname(), 'r');
+            Storage::disk('public')->put($path, $stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+            $data['thumbnail'] = $path;
+        }
+
+        $kegiatan->update($data);
 
         return redirect()->route('admin.kegiatan.index')->with('success', 'Kegiatan berhasil diupdate.');
     }
 
     public function destroy(Kegiatan $kegiatan)
     {
+        if ($kegiatan->thumbnail) {
+            Storage::disk('public')->delete($kegiatan->thumbnail);
+        }
+
         $kegiatan->delete();
 
         return redirect()->route('admin.kegiatan.index')->with('success', 'Kegiatan berhasil dihapus.');
