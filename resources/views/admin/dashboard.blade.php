@@ -45,6 +45,15 @@
                 <span><i class="bi bi-patch-plus me-2 text-success"></i> Buat Sertifikat</span>
                 <i class="bi bi-chevron-right small text-muted"></i>
             </a>
+            <a href="{{ route('admin.sertifikat.verifikasi.index') }}" class="list-group-item list-group-item-action border-0 py-3 d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="bi bi-patch-check me-2 text-warning"></i> Verifikasi Sertifikat
+                    @if($stats['sertifikat_pending'] > 0)
+                        <span class="badge bg-danger ms-1" style="font-size: 0.65rem; padding: 0.25em 0.5em;">{{ $stats['sertifikat_pending'] }}</span>
+                    @endif
+                </span>
+                <i class="bi bi-chevron-right small text-muted"></i>
+            </a>
             <a href="{{ route('admin.laporan.index') }}" class="list-group-item list-group-item-action border-0 py-3 d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-file-earmark-bar-graph me-2 text-info"></i> Laporan Bulanan</span>
                 <i class="bi bi-chevron-right small text-muted"></i>

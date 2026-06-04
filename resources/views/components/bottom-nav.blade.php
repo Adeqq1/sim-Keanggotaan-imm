@@ -22,6 +22,18 @@
                 <i class="bi bi-calendar-event fs-4 d-block"></i>
                 <small style="font-size: 0.7rem;">Kegiatan</small>
             </a>
+            @php
+                $pendingCount = \App\Models\Presensi::where('status_klaim', 'pending')->count();
+            @endphp
+            <a href="{{ route('admin.sertifikat.verifikasi.index') }}" class="nav-link text-center py-2 position-relative {{ request()->routeIs('admin.sertifikat.verifikasi.*') ? 'text-primary font-weight-bold' : 'text-muted' }}">
+                <i class="bi bi-patch-check fs-4 d-block"></i>
+                <small style="font-size: 0.7rem;">Verifikasi</small>
+                @if($pendingCount > 0)
+                    <span class="position-absolute top-0 start-50 translate-middle-x badge rounded-pill bg-danger" style="font-size: 0.55rem; margin-left: 12px; margin-top: 5px;">
+                        {{ $pendingCount }}
+                    </span>
+                @endif
+            </a>
         @else
             <a href="{{ route('kader.dashboard') }}" class="nav-link text-center py-2 {{ request()->routeIs('kader.dashboard') ? 'text-primary font-weight-bold' : 'text-muted' }}">
                 <i class="bi bi-house fs-4 d-block"></i>

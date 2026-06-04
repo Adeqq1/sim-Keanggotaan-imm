@@ -18,6 +18,7 @@ class DashboardController extends Controller
             'total_kegiatan' => Kegiatan::count(),
             'pendaftar_pending' => Pendaftaran::where('status_validasi', 'pending')->count(),
             'total_arsip' => Arsip::count(),
+            'sertifikat_pending' => Presensi::where('status_klaim', 'pending')->count(),
         ];
 
         $recent_kegiatans = Kegiatan::where('tanggal_waktu', '>=', now())
