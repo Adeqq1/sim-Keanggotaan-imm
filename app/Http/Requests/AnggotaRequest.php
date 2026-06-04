@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\RoleEnum;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class AnggotaRequest extends FormRequest
 {
@@ -33,7 +35,7 @@ class AnggotaRequest extends FormRequest
             'no_telp' => ['required', 'string', 'max:20'],
             'foto_profil' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'status_aktif' => ['nullable', 'boolean'],
-            'role' => ['sometimes', 'required', 'string', 'in:kader,instruktur'],
+            'role' => ['sometimes', 'required', Rule::enum(RoleEnum::class)->except(RoleEnum::ADMIN)],
         ];
     }
 }

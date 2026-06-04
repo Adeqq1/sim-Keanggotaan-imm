@@ -33,7 +33,7 @@
                     <div class="d-flex align-items-center gap-2 mb-1">
                         <h6 class="fw-bold mb-0">{{ $anggota->nama_lengkap }}</h6>
                         @if($anggota->user)
-                            <span class="badge {{ $anggota->user->role === 'admin' ? 'bg-primary' : ($anggota->user->role === 'instruktur' ? 'bg-info text-dark' : 'bg-success') }}" style="font-size: 0.7rem;">
+                            <span class="badge {{ $anggota->user->role_color }}" style="font-size: 0.7rem;">
                                 {{ ucfirst($anggota->user->role) }}
                             </span>
                         @endif

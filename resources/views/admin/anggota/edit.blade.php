@@ -94,13 +94,19 @@
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Peran <span class="text-danger">*</span></label>
                         <select name="role" class="form-select @error('role') is-invalid @enderror" required>
-                            <option value="kader" {{ old('role', $anggota->user?->role) == 'kader' ? 'selected' : '' }}>Kader</option>
-                            <option value="instruktur" {{ old('role', $anggota->user?->role) == 'instruktur' ? 'selected' : '' }}>Instruktur</option>
+                            @foreach(App\Enums\RoleEnum::cases() as $role)
+                                @if($role !== App\Enums\RoleEnum::ADMIN)
+                                    <option value="{{ $role->value }}" {{ old('role', $anggota->user?->role) == $role->value ? 'selected' : '' }}>
+                                        {{ ucfirst($role->value) }}
+                                    </option>
+                                @endif
+                            @endforeach
                         </select>
                         @error('role')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+
                 </div>
 
                 <hr class="my-4">

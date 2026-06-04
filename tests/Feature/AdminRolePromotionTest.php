@@ -112,3 +112,26 @@ test('non-admin users cannot promote or access edit pages', function () {
         ]);
     $response->assertStatus(403);
 });
+
+test('admin cannot demote themselves to kader', function () {
+    $admin = User::factory()->admin()->create();
+    $anggota = Anggota::factory()->create(['user_id' => $admin->id]);
+
+    $response = $this->actingAs($admin)
+        ->from(route('admin.anggota.edit', $anggota->id))
+        ->put(route('admin.anggota.update', $anggota->id), [
+            'nia' => $anggota->nia,
+            'nama_lengkap' => $anggota->nama_lengkap,
+            'tempat_lahir' => $anggota->tempat_lahir,
+            'tanggal_lahir' => $anggota->tanggal_lahir->format('Y-m-d'),
+            'alamat' => $anggota->alamat,
+            'no_telp' => $anggota->no_telp,
+            'status_aktif' => 1,
+            'role' => 'kader',
+        ]);
+
+    $response->assertStatus(403);
+
+    $admin->refresh();
+    expect($admin->role)->toBe('admin');
+});
