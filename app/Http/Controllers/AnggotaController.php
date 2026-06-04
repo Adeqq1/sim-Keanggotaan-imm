@@ -10,7 +10,7 @@ class AnggotaController extends Controller
 {
     public function index()
     {
-        $anggotas = Anggota::latest()->paginate(10);
+        $anggotas = Anggota::with('user')->latest()->paginate(10);
 
         return view('admin.anggota.index', compact('anggotas'));
     }
@@ -61,6 +61,10 @@ class AnggotaController extends Controller
         }
 
         $anggota->update($validated);
+
+        if (isset($validated['role'])) {
+            $anggota->user->update(['role' => $validated['role']]);
+        }
 
         return redirect()->route('admin.anggota.index')->with('success', 'Anggota berhasil diupdate.');
     }

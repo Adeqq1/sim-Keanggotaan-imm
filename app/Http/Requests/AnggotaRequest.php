@@ -33,6 +33,7 @@ class AnggotaRequest extends FormRequest
             'no_telp' => ['required', 'string', 'max:20'],
             'foto_profil' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'status_aktif' => ['nullable', 'boolean'],
+            'role' => ['sometimes', 'required', 'string', 'in:kader,instruktur'],
         ];
     }
 }
