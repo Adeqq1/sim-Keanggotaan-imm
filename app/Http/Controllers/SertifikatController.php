@@ -40,9 +40,10 @@ class SertifikatController extends Controller
         $nomorSertifikat = 'CERT-'.$kegiatan->id.'-'.$anggota->id.'-'.now()->format('Ymd');
         $role = $anggota->user ? ucfirst($anggota->user->role) : 'Kader';
         $instruktur = $instruktur ?? User::where('role', 'instruktur')->first()?->name ?? 'Pimpinan Cabang';
+        $useBackground = self::useBackground();
 
         // Generate PDF
-        $pdf = Pdf::loadView('pdf.sertifikat', compact('kegiatan', 'anggota', 'nomorSertifikat', 'role', 'instruktur'))
+        $pdf = Pdf::loadView('pdf.sertifikat', compact('kegiatan', 'anggota', 'nomorSertifikat', 'role', 'instruktur', 'useBackground'))
             ->setPaper('a4', 'landscape');
         $path = 'sertifikat/'.$nomorSertifikat.'.pdf';
         Storage::disk('public')->put($path, $pdf->output());
@@ -211,5 +212,83 @@ class SertifikatController extends Controller
         $presensi->rejectClaim();
 
         return redirect()->route('admin.sertifikat.verifikasi.index')->with('info', 'Klaim sertifikat telah ditolak.');
+    }
+
+    public static function useBackground(): bool
+    {
+        if (Storage::disk('local')->exists('sertifikat_settings.json')) {
+            $settings = json_decode(Storage::disk('local')->get('sertifikat_settings.json'), true);
+
+            return (bool) ($settings['use_background'] ?? true);
+        }
+
+        return true;
+    }
+
+    public function settings()
+    {
+        $bgPath = 'images/sertificate-asset/bg-sertificate.jpg';
+        $bgExists = file_exists(public_path($bgPath));
+        $useBackground = self::useBackground();
+
+        return view('admin.sertifikat.settings', compact('bgExists', 'bgPath', 'useBackground'));
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $request->validate([
+            'background_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:4096'],
+            'use_background' => ['nullable', 'boolean'],
+        ]);
+
+        // Save use_background setting
+        $useBackground = $request->has('use_background');
+        Storage::disk('local')->put('sertifikat_settings.json', json_encode([
+            'use_background' => $useBackground,
+        ]));
+
+        if ($request->hasFile('background_image')) {
+            $file = $request->file('background_image');
+            $destinationPath = public_path('images/sertificate-asset/bg-sertificate.jpg');
+
+            // Ensure directory exists
+            if (! file_exists(dirname($destinationPath))) {
+                mkdir(dirname($destinationPath), 0755, true);
+            }
+
+            if (extension_loaded('gd') && class_exists(ImageManager::class) && function_exists('imagejpeg')) {
+                try {
+                    $manager = new ImageManager(new Driver);
+                    $image = $manager->decodePath($file->getPathname());
+
+                    // Resize & Crop dynamically to A4 Landscape dimension (1122x794 pixels)
+                    $image->cover(1122, 794);
+
+                    $encoded = $image->encodeUsingFormat(Format::JPEG, quality: 90);
+                    file_put_contents($destinationPath, (string) $encoded);
+                } catch (\Throwable $e) {
+                    Log::error('Failed to resize certificate background', [
+                        'message' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+
+                    return redirect()->back()->with('error', 'Gagal memproses gambar background: '.$e->getMessage());
+                }
+            } else {
+                // Fallback: Save directly if GD / imagejpeg is not available
+                try {
+                    copy($file->getRealPath(), $destinationPath);
+                } catch (\Throwable $e) {
+                    Log::error('Failed to save certificate background directly', [
+                        'message' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+
+                    return redirect()->back()->with('error', 'Gagal menyimpan gambar background: '.$e->getMessage());
+                }
+            }
+        }
+
+        return redirect()->route('admin.sertifikat.settings')->with('success', 'Pengaturan sertifikat berhasil diperbarui.');
     }
 }

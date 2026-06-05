@@ -5,9 +5,14 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h6 class="fw-bold mb-0">Riwayat Sertifikat</h6>
-        <a href="{{ route('admin.sertifikat.create') }}" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg"></i> Generate
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('admin.sertifikat.settings') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-image"></i> Pengaturan BG
+            </a>
+            <a href="{{ route('admin.sertifikat.create') }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg"></i> Generate
+            </a>
+        </div>
     </div>
 
     @forelse($sertifikats as $cert)
