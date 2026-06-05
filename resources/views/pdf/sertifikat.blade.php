@@ -4,7 +4,30 @@
     <meta charset="utf-8">
     <title>Sertifikat {{ $anggota->nama_lengkap }}</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Montserrat:wght@400;500;700&display=swap');
+        @font-face {
+            font-family: 'Alex Brush';
+            src: url('{{ public_path("fonts/AlexBrush-Regular.ttf") }}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Montserrat';
+            src: url('{{ public_path("fonts/Montserrat-Regular.ttf") }}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Montserrat';
+            src: url('{{ public_path("fonts/Montserrat-Medium.ttf") }}') format('truetype');
+            font-weight: 500;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Montserrat';
+            src: url('{{ public_path("fonts/Montserrat-Bold.ttf") }}') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
 
         @page {
             size: a4 landscape;
