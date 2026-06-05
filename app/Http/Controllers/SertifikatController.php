@@ -65,10 +65,10 @@ class SertifikatController extends Controller
 
         foreach ($validated['anggota_ids'] as $anggotaId) {
             $anggota = Anggota::findOrFail($anggotaId);
-            self::generateCertificateFile($kegiatan, $anggota, $instruktur);
+            GenerateCertificateJob::dispatch(null, $kegiatan, $anggota, $instruktur);
         }
 
-        return redirect()->route('admin.sertifikat.index')->with('success', 'Sertifikat berhasil di-generate.');
+        return redirect()->route('admin.sertifikat.index')->with('success', 'Sertifikat sedang di-generate di latar belakang.');
     }
 
     public function mySertifikat()
