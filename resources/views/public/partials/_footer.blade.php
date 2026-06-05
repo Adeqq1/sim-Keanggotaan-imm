@@ -5,8 +5,8 @@
             {{-- Brand & Sosmed --}}
             <div class="col-lg-4">
                 <div class="d-flex align-items-center gap-2 mb-3">
-                    <div class="footer-logo-box">
-                        <span style="color:#fff;font-weight:900;font-size:.9rem;">IMM</span>
+                    <div class="footer-logo-box" style="rgb(255, 255, 255);">
+                        <img src="{{ asset('images/logo.png') }}" alt="IMM Logo" class="navbar-logo-img" style="max-height:2.5rem;">
                     </div>
                     <span style="color:#e2e8f0;font-weight:700;font-size:1rem;">Ikatan Mahasiswa Muhammadiyah</span>
                 </div>
