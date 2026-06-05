@@ -8,6 +8,7 @@ use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\Presensi;
 use App\Models\Sertifikat;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -37,9 +38,12 @@ class SertifikatController extends Controller
     public static function generateCertificateFile(Kegiatan $kegiatan, Anggota $anggota): Sertifikat
     {
         $nomorSertifikat = 'CERT-'.$kegiatan->id.'-'.$anggota->id.'-'.now()->format('Ymd');
+        $role = $anggota->user ? ucfirst($anggota->user->role) : 'Kader';
+        $instruktur = User::where('role', 'instruktur')->first()?->name ?? 'Pimpinan Cabang';
 
         // Generate PDF
-        $pdf = Pdf::loadView('pdf.sertifikat', compact('kegiatan', 'anggota', 'nomorSertifikat'));
+        $pdf = Pdf::loadView('pdf.sertifikat', compact('kegiatan', 'anggota', 'nomorSertifikat', 'role', 'instruktur'))
+            ->setPaper('a4', 'landscape');
         $path = 'sertifikat/'.$nomorSertifikat.'.pdf';
         Storage::disk('public')->put($path, $pdf->output());
 
