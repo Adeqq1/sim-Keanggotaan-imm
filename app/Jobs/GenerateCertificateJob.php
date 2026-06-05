@@ -3,6 +3,8 @@
 namespace App\Jobs;
 
 use App\Http\Controllers\SertifikatController;
+use App\Models\Anggota;
+use App\Models\Kegiatan;
 use App\Models\Presensi;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -14,8 +16,12 @@ class GenerateCertificateJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public Presensi $presensi)
-    {
+    public function __construct(
+        public ?Presensi $presensi = null,
+        public ?Kegiatan $kegiatan = null,
+        public ?Anggota $anggota = null,
+        public ?string $instruktur = null
+    ) {
         //
     }
 
@@ -24,6 +30,11 @@ class GenerateCertificateJob implements ShouldQueue
      */
     public function handle(): void
     {
-        SertifikatController::generateCertificateFile($this->presensi->kegiatan, $this->presensi->anggota);
+        $kegiatan = $this->kegiatan ?? $this->presensi?->kegiatan;
+        $anggota = $this->anggota ?? $this->presensi?->anggota;
+
+        if ($kegiatan && $anggota) {
+            SertifikatController::generateCertificateFile($kegiatan, $anggota, $this->instruktur);
+        }
     }
 }

@@ -43,6 +43,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         // Modul Sertifikat
         Route::get('/sertifikat', [SertifikatController::class, 'index'])->name('sertifikat.index');
         Route::get('/sertifikat/create', [SertifikatController::class, 'create'])->name('sertifikat.create');
+        Route::get('/sertifikat/settings', [SertifikatController::class, 'settings'])->name('sertifikat.settings');
+        Route::post('/sertifikat/settings', [SertifikatController::class, 'updateSettings'])->name('sertifikat.settings.update');
         Route::post('/sertifikat/generate', [SertifikatController::class, 'generate'])->name('sertifikat.generate');
         Route::get('/sertifikat/{sertifikat}/download', [SertifikatController::class, 'download'])->name('sertifikat.download');
 

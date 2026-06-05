@@ -134,9 +134,11 @@
 </head>
 <body>
     <!-- Background Wrapper to avoid GD imagecreatefromjpeg dependency crash in DomPDF -->
+    @if($useBackground)
     <div class="bg-container">
         <img class="bg-image" src="{{ public_path('images/sertificate-asset/bg-sertificate.jpg') }}" alt="Background" />
     </div>
+    @endif
 
     <div class="container">
         <!-- Heading / Kop Surat -->
