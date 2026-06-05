@@ -10,12 +10,15 @@
             
             <div class="mb-3">
                 <label class="form-label small fw-bold">Pilih Kegiatan</label>
-                <select name="kegiatan_id" class="form-select @error('kegiatan_id') is-invalid @enderror" required>
+                <select name="kegiatan_id" class="form-select text-truncate @error('kegiatan_id') is-invalid @enderror" required>
                     <option value="" disabled selected>Pilih kegiatan...</option>
                     @foreach($kegiatans as $k)
-                        <option value="{{ $k->id }}">{{ $k->nama_kegiatan }} ({{ $k->tanggal_waktu->format('d/m/Y') }})</option>
+                        <option value="{{ $k->id }}" title="{{ $k->nama_kegiatan }} ({{ $k->tanggal_waktu->format('d/m/Y') }})">
+                            {{ Str::limit($k->nama_kegiatan, 70) }} ({{ $k->tanggal_waktu->format('d/m/Y') }})
+                        </option>
                     @endforeach
                 </select>
+                <div class="form-text">Nama kegiatan panjang akan dipersingkat di dropdown agar tidak menembus layar.</div>
                 @error('kegiatan_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
 

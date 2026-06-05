@@ -43,6 +43,17 @@
             box-sizing: border-box;
             overflow: hidden;
         }
+
+        .page-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
         .inner-card {
             position: absolute;
             top: 25px;
@@ -52,7 +63,15 @@
             background-color: #faf6f0; /* Cream background like reference.jpg */
             overflow: hidden;
             box-sizing: border-box;
+            z-index: 1;
         }
+
+        @if($useBackground && $bgExists)
+        .inner-card {
+            background-color: rgba(255, 255, 255, 0.75) !important;
+            border: none !important;
+        }
+        @endif
         
         /* ==========================================
            DEKORASI SUDUT & SISI (Pure CSS & DIV)
@@ -212,18 +231,24 @@
     </style>
 </head>
 <body>
+    @if($useBackground && $bgExists)
+        <img class="page-background" src="{{ public_path($bgPath) }}" alt="Certificate Background" />
+    @endif
+
     <div class="inner-card">
-        <!-- Ornamen Kiri (Pure CSS) -->
-        <div class="decor-left-bar"></div>
-        <div class="decor-left-circle-outer"></div>
-        <div class="decor-left-circle-inner"></div>
+        @if(! $useBackground || ! $bgExists)
+            <!-- Ornamen Kiri (Pure CSS) -->
+            <div class="decor-left-bar"></div>
+            <div class="decor-left-circle-outer"></div>
+            <div class="decor-left-circle-inner"></div>
 
-        <!-- Ornamen Kanan Atas (Pure CSS) -->
-        <div class="decor-top-right"></div>
-        <div class="decor-top-right-line"></div>
+            <!-- Ornamen Kanan Atas (Pure CSS) -->
+            <div class="decor-top-right"></div>
+            <div class="decor-top-right-line"></div>
 
-        <!-- Ornamen Kanan Bawah (Pure CSS) -->
-        <div class="decor-bottom-right-triangle"></div>
+            <!-- Ornamen Kanan Bawah (Pure CSS) -->
+            <div class="decor-bottom-right-triangle"></div>
+        @endif
 
         <!-- Konten Surat -->
         <div class="container">
