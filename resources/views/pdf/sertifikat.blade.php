@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <title>Sertifikat {{ $anggota->nama_lengkap }}</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Montserrat:wght@400;500;700&display=swap');
+
         @page {
             size: a4 landscape;
             margin: 0;
@@ -13,171 +15,229 @@
             padding: 0;
             width: 100%;
             height: 100%;
+            background-color: #800000; /* Maroon outer border */
             font-family: 'Georgia', 'Times New Roman', Times, serif;
+            box-sizing: border-box;
+            overflow: hidden;
         }
-        .bg-container {
+        .inner-card {
             position: absolute;
-            left: 0;
+            top: 25px;
+            bottom: 25px;
+            left: 25px;
+            right: 25px;
+            background-color: #faf6f0; /* Cream background like reference.jpg */
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        
+        /* ==========================================
+           DEKORASI SUDUT & SISI (Pure CSS & DIV)
+           ========================================== */
+        
+        /* Top-Right Gold Block */
+        .decor-top-right {
+            position: absolute;
             top: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -100;
+            right: 0;
+            width: 140px;
+            height: 35px;
+            background-color: #fcd34d; /* Gold */
         }
-        .bg-image {
-            width: 100%;
-            height: 100%;
-        }
-        .container {
+        .decor-top-right-line {
             position: absolute;
             top: 35px;
-            left: 60px;
-            right: 60px;
-            bottom: 35px;
-            text-align: center;
+            right: 35px;
+            width: 50px;
+            height: 25px;
+            border-left: 2px solid #800000;
+            border-bottom: 2px solid #800000;
         }
-        .header-section {
-            margin-top: 5px;
+
+        /* Middle-Left Gold Bar & Circles */
+        .decor-left-bar {
+            position: absolute;
+            left: 0;
+            top: 160px;
+            width: 20px;
+            height: 180px;
+            background-color: #fcd34d;
+        }
+        .decor-left-circle-outer {
+            position: absolute;
+            left: -10px;
+            top: 220px;
+            width: 60px;
+            height: 60px;
+            border: 3px solid #800000;
+            border-radius: 50%;
+        }
+        .decor-left-circle-inner {
+            position: absolute;
+            left: -4px;
+            top: 226px;
+            width: 48px;
+            height: 48px;
+            border: 2px solid #800000;
+            border-radius: 50%;
+        }
+
+        /* Bottom-Right Gold Triangle */
+        .decor-bottom-right-triangle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-bottom: 80px solid #fcd34d;
+            border-left: 80px solid transparent;
+        }
+
+        /* ==========================================
+           KONTEN UTAMA
+           ========================================== */
+        .container {
+            position: absolute;
+            top: 40px;
+            left: 80px;
+            right: 80px;
+            bottom: 40px;
+            text-align: center;
+            box-sizing: border-box;
         }
         .logo {
-            height: 70px;
-            margin-bottom: 5px;
-        }
-        .instansi-title-sub {
-            font-size: 12px;
-            font-weight: bold;
-            color: #555;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-        .instansi-title {
-            font-size: 19px;
-            font-weight: bold;
-            color: #800000;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-top: 2px;
-        }
-        .divider {
-            width: 45%;
-            height: 2px;
-            background-color: #800000;
-            margin: 12px auto 15px auto;
-        }
-        .title-section {
-            margin-top: 20px;
-        }
-        .doc-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #800000;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            line-height: 1.2;
-        }
-        .doc-number {
-            font-size: 12px;
-            font-weight: bold;
-            color: #333;
-            margin-top: 4px;
-            letter-spacing: 0.5px;
-        }
-        .recipient-section {
-            margin-top: 30px;
-        }
-        .given-to {
-            font-size: 14px;
-            font-style: italic;
-            color: #666;
+            height: 60px;
             margin-bottom: 8px;
         }
-        .recipient-name {
-            font-size: 26px;
+        .title {
+            font-family: 'Georgia', 'Times New Roman', Times, serif;
+            font-size: 28pt;
             font-weight: bold;
+            color: #b45309; /* Orange-brown like reference.jpg */
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin: 5px 0 0 0;
+        }
+        .doc-number {
+            font-family: 'Montserrat', 'Helvetica', sans-serif;
+            font-size: 9pt;
+            color: #555;
+            letter-spacing: 1px;
+            margin-top: 4px;
+            margin-bottom: 20px;
+        }
+        .given-to {
+            font-family: 'Montserrat', 'Helvetica', sans-serif;
+            font-size: 11pt;
+            font-weight: 500;
             color: #111;
-            border-bottom: 2px solid #800000;
-            display: inline-block;
-            padding-bottom: 3px;
-            min-width: 320px;
+            margin-bottom: 5px;
         }
-        .content-section {
-            margin-top: 25px;
-            padding: 0 50px;
-            font-size: 14px;
-            line-height: 1.7;
+        .recipient-name {
+            font-family: 'Alex Brush', 'Georgia', cursive, serif;
+            font-size: 42pt;
+            font-style: italic; /* Menjaga keanggunan jika font Google gagal di-load */
+            color: #b45309;
+            margin: 5px 0;
+            font-weight: normal;
+        }
+        .reason {
+            font-family: 'Montserrat', 'Helvetica', sans-serif;
+            font-size: 9.5pt;
+            line-height: 1.8;
             color: #333;
+            margin: 15px 40px 0 40px;
         }
-        .content-section strong {
+        .reason strong {
             color: #800000;
         }
-        .signature-section {
-            margin-top: 30px;
+
+        /* ==========================================
+           TANDA TANGAN (Normal flow inside container)
+           ========================================== */
+        .sig-table {
             width: 100%;
-        }
-        .signature-table {
-            width: 100%;
+            margin-top: 60px; /* Memberi jarak aman dari teks deskripsi */
             border-collapse: collapse;
+            border: none;
         }
-        .signature-title {
+        .sig-cell {
+            width: 50%;
+            text-align: center;
+            vertical-align: bottom;
+        }
+        .sig-line {
+            width: 180px;
+            height: 1.5px;
+            background-color: #333;
+            margin: 0 auto 8px auto;
+        }
+        .sig-name {
+            font-family: 'Montserrat', 'Helvetica', sans-serif;
+            font-size: 10pt;
             font-weight: bold;
-            margin-bottom: 50px;
+            color: #b45309;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .signature-name {
-            font-weight: bold;
-            text-decoration: underline;
-        }
-        .signature-id {
-            font-size: 10px;
-            color: #555;
+        .sig-title {
+            font-family: 'Montserrat', 'Helvetica', sans-serif;
+            font-size: 9pt;
+            color: #111;
             margin-top: 2px;
         }
     </style>
 </head>
 <body>
-    <!-- Background Wrapper to avoid GD imagecreatefromjpeg dependency crash in DomPDF -->
-    @if($useBackground)
-    <div class="bg-container">
-        <img class="bg-image" src="{{ public_path('images/sertificate-asset/bg-sertificate.jpg') }}" alt="Background" />
-    </div>
-    @endif
+    <div class="inner-card">
+        <!-- Ornamen Kiri (Pure CSS) -->
+        <div class="decor-left-bar"></div>
+        <div class="decor-left-circle-outer"></div>
+        <div class="decor-left-circle-inner"></div>
 
-    <div class="container">
-        <!-- Heading / Kop Surat -->
-        <div class="header-section">
-            <img class="logo" src="{{ public_path('images/sertificate-asset/logo.png') }}" alt="Logo IMM" />
-            <div class="instansi-title-sub">Ikatan Mahasiswa Muhammadiyah</div>
-            <div class="instansi-title">{{ config('app.org_name', 'IMM Kabupaten Bungo') }}</div>
-        </div>
+        <!-- Ornamen Kanan Atas (Pure CSS) -->
+        <div class="decor-top-right"></div>
+        <div class="decor-top-right-line"></div>
 
-        <div class="divider"></div>
+        <!-- Ornamen Kanan Bawah (Pure CSS) -->
+        <div class="decor-bottom-right-triangle"></div>
 
-        <!-- Judul Dokumen & Nomor -->
-        <div class="title-section">
-            <div class="doc-title">Sertifikat {{ $kegiatan->nama_kegiatan }}</div>
-            <div class="doc-number">No: {{ $nomorSertifikat }}</div>
-        </div>
+        <!-- Konten Surat -->
+        <div class="container">
+            <!-- Kop Surat / Logo -->
+            <div>
+                <img class="logo" src="{{ public_path('images/sertificate-asset/logo.png') }}" alt="Logo IMM" />
+            </div>
 
-        <!-- Penerima -->
-        <div class="recipient-section">
-            <div class="given-to">Diberikan kepada:</div>
+            <!-- Title & Nomor -->
+            <h1 class="title">SERTIFIKAT</h1>
+            <div class="doc-number">Nomor: {{ $nomorSertifikat }}</div>
+
+            <!-- Penerima -->
+            <div class="given-to">Dengan ini diberikan kepada:</div>
             <div class="recipient-name">{{ $anggota->nama_lengkap }}</div>
-        </div>
 
-        <!-- Deskripsi Partisipasi -->
-        <div class="content-section">
-            Atas partisipasi sebagai <strong>{{ $role }}</strong> dalam <strong>{{ $kegiatan->nama_kegiatan }}</strong>,<br>
-            yang diselenggarakan pada tanggal <strong>{{ $kegiatan->tanggal_waktu->translatedFormat('d F Y') }}</strong> bertempat di <strong>{{ $kegiatan->lokasi }}</strong>.
-        </div>
+            <!-- Deskripsi -->
+            <div class="reason">
+                Sebagai penghargaan atas partisipasinya sebagai <strong>{{ $role }}</strong> dalam kegiatan<br>
+                <strong>"{{ $kegiatan->nama_kegiatan }}"</strong> yang diselenggarakan pada tanggal<br>
+                {{ $kegiatan->tanggal_waktu->translatedFormat('d F Y') }} bertempat di {{ $kegiatan->lokasi }}.
+            </div>
 
-        <!-- Tanda Tangan / Pengesahan -->
-        <div class="signature-section">
-            <table class="signature-table">
+            <!-- Bagian Tanda Tangan (Normal Flow di dalam container) -->
+            <table class="sig-table">
                 <tr>
-                    <td style="width: 65%;"></td>
-                    <td style="width: 35%; text-align: center; font-size: 13px;">
-                        <div>Bungo, {{ now()->translatedFormat('d F Y') }}</div>
-                        <div class="signature-title">Instruktur,</div>
-                        <div class="signature-name">{{ $instruktur }}</div>
-                        <div class="signature-id">NBM. ----------------------</div>
+                    <td class="sig-cell">
+                        <div style="height: 12px; margin-bottom: 45px;"></div>
+                        <div class="sig-line"></div>
+                        <div class="sig-name">{{ config('app.ketua_umum', 'Pimpinan Komisariat') }}</div>
+                        <div class="sig-title">Pimpinan Komisariat</div>
+                    </td>
+                    <td class="sig-cell">
+                        <div style="font-size: 8.5pt; color: #555; margin-bottom: 45px;">Bungo, {{ now()->translatedFormat('d F Y') }}</div>
+                        <div class="sig-line"></div>
+                        <div class="sig-name">{{ $instruktur }}</div>
+                        <div class="sig-title">Instruktur Pendamping</div>
                     </td>
                 </tr>
             </table>
