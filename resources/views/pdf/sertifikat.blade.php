@@ -143,7 +143,7 @@
         <div class="header-section">
             <img class="logo" src="{{ public_path('images/sertificate-asset/logo.png') }}" alt="Logo IMM" />
             <div class="instansi-title-sub">Ikatan Mahasiswa Muhammadiyah</div>
-            <div class="instansi-title">IMM Kabupaten Bungo</div>
+            <div class="instansi-title">{{ config('app.org_name', 'IMM Kabupaten Bungo') }}</div>
         </div>
 
         <div class="divider"></div>
@@ -163,7 +163,7 @@
         <!-- Deskripsi Partisipasi -->
         <div class="content-section">
             Atas partisipasi sebagai <strong>{{ $role }}</strong> dalam <strong>{{ $kegiatan->nama_kegiatan }}</strong>,<br>
-            yang diselenggarakan pada tanggal <strong>{{ $kegiatan->tanggal_waktu->format('d F Y') }}</strong> bertempat di <strong>{{ $kegiatan->lokasi }}</strong>.
+            yang diselenggarakan pada tanggal <strong>{{ $kegiatan->tanggal_waktu->translatedFormat('d F Y') }}</strong> bertempat di <strong>{{ $kegiatan->lokasi }}</strong>.
         </div>
 
         <!-- Tanda Tangan / Pengesahan -->
@@ -172,7 +172,7 @@
                 <tr>
                     <td style="width: 65%;"></td>
                     <td style="width: 35%; text-align: center; font-size: 13px;">
-                        <div>Bungo, {{ now()->format('d F Y') }}</div>
+                        <div>Bungo, {{ now()->translatedFormat('d F Y') }}</div>
                         <div class="signature-title">Instruktur,</div>
                         <div class="signature-name">{{ $instruktur }}</div>
                         <div class="signature-id">NBM. ----------------------</div>
