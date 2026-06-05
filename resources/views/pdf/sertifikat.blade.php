@@ -253,7 +253,7 @@
                     <td class="sig-cell">
                         <div style="height: 12px; margin-bottom: 45px;"></div>
                         <div class="sig-line"></div>
-                        <div class="sig-name">{{ config('app.ketua_umum', 'Pimpinan Komisariat') }}</div>
+                        <div class="sig-name">{{ config('app.ketua_umum', 'Ade Rifqy Aulian, M. Kom') }}</div>
                         <div class="sig-title">Pimpinan Komisariat</div>
                     </td>
                     <td class="sig-cell">
