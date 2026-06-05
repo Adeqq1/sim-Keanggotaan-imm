@@ -40,12 +40,9 @@ class SertifikatController extends Controller
         $nomorSertifikat = 'CERT-'.$kegiatan->id.'-'.$anggota->id.'-'.now()->format('Ymd');
         $role = $anggota->user ? ucfirst($anggota->user->role) : 'Kader';
         $instruktur = $instruktur ?? User::where('role', 'instruktur')->first()?->name ?? 'Pimpinan Cabang';
-        $useBackground = self::useBackground();
-        $bgPath = 'images/sertificate-asset/bg-sertificate.jpg';
-        $bgExists = file_exists(public_path($bgPath));
 
         // Generate PDF
-        $pdf = Pdf::loadView('pdf.sertifikat', compact('kegiatan', 'anggota', 'nomorSertifikat', 'role', 'instruktur', 'useBackground', 'bgPath', 'bgExists'))
+        $pdf = Pdf::loadView('pdf.sertifikat', compact('kegiatan', 'anggota', 'nomorSertifikat', 'role', 'instruktur'))
             ->setPaper('a4', 'landscape');
         $path = 'sertifikat/'.$nomorSertifikat.'.pdf';
         Storage::disk('public')->put($path, $pdf->output());
