@@ -7,10 +7,10 @@
         <h6 class="fw-bold mb-0">Riwayat Sertifikat</h6>
         <div class="d-flex gap-2">
             <a href="{{ route('admin.sertifikat.settings') }}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">
-                <i class="bi bi-image"></i> Pengaturan BG
+                <i class="bi bi-image"></i> 
             </a>
             <a href="{{ route('admin.sertifikat.create') }}" class="btn btn-primary btn-sm">
-                <i class="bi bi-plus-lg"></i> Generate
+                <i class="bi bi-plus-lg"></i> Tambah
             </a>
         </div>
     </div>
