@@ -8,6 +8,7 @@ use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\Presensi;
 use App\Models\Sertifikat;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -34,12 +35,15 @@ class SertifikatController extends Controller
         return view('admin.sertifikat.create', compact('kegiatans', 'anggotas'));
     }
 
-    public static function generateCertificateFile(Kegiatan $kegiatan, Anggota $anggota): Sertifikat
+    public static function generateCertificateFile(Kegiatan $kegiatan, Anggota $anggota, ?string $instruktur = null): Sertifikat
     {
         $nomorSertifikat = 'CERT-'.$kegiatan->id.'-'.$anggota->id.'-'.now()->format('Ymd');
+        $role = $anggota->user ? ucfirst($anggota->user->role) : 'Kader';
+        $instruktur = $instruktur ?? User::where('role', 'instruktur')->first()?->name ?? 'Pimpinan Cabang';
 
         // Generate PDF
-        $pdf = Pdf::loadView('pdf.sertifikat', compact('kegiatan', 'anggota', 'nomorSertifikat'));
+        $pdf = Pdf::loadView('pdf.sertifikat', compact('kegiatan', 'anggota', 'nomorSertifikat', 'role', 'instruktur'))
+            ->setPaper('a4', 'landscape');
         $path = 'sertifikat/'.$nomorSertifikat.'.pdf';
         Storage::disk('public')->put($path, $pdf->output());
 
@@ -56,10 +60,11 @@ class SertifikatController extends Controller
     {
         $validated = $request->validated();
         $kegiatan = Kegiatan::findOrFail($validated['kegiatan_id']);
+        $instruktur = User::where('role', 'instruktur')->first()?->name ?? 'Pimpinan Cabang';
 
         foreach ($validated['anggota_ids'] as $anggotaId) {
             $anggota = Anggota::findOrFail($anggotaId);
-            self::generateCertificateFile($kegiatan, $anggota);
+            self::generateCertificateFile($kegiatan, $anggota, $instruktur);
         }
 
         return redirect()->route('admin.sertifikat.index')->with('success', 'Sertifikat berhasil di-generate.');
