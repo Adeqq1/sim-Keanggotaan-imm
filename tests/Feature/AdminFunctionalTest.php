@@ -59,6 +59,21 @@ test('admin can reject pendaftaran', function () {
     expect($pendaftaran->catatan_admin)->toBe('Data tidak lengkap.');
 });
 
+test('admin must provide catatan admin when rejecting pendaftaran', function () {
+    $admin = User::factory()->admin()->create();
+    $pendaftaran = Pendaftaran::factory()->create();
+
+    $response = $this->actingAs($admin)
+        ->post(route('admin.pendaftaran.validate', $pendaftaran->id), [
+            'status' => 'ditolak',
+        ]);
+
+    $response->assertSessionHasErrors('catatan_admin');
+
+    $pendaftaran->refresh();
+    expect($pendaftaran->status_validasi)->toBe('pending');
+});
+
 test('admin can store presensi data', function () {
     $admin = User::factory()->admin()->create();
     $kegiatan = Kegiatan::factory()->create();

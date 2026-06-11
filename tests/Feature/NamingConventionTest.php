@@ -23,3 +23,8 @@ it('keeps English framework naming for auth user model and profile routes', func
         ->and(Route::has('profile.edit'))->toBeTrue()
         ->and(Route::has('profile.update'))->toBeTrue();
 });
+
+it('keeps the pendaftaran validation route stable after controller method rename', function () {
+    expect(Route::has('admin.pendaftaran.validate'))->toBeTrue()
+        ->and(route('admin.pendaftaran.validate', 1, false))->toBe('/admin/pendaftaran/1/validate');
+});

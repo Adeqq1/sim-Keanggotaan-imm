@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ValidasiPendaftaranRequest;
 use App\Mail\PendaftaranDisetujuiMail;
 use App\Models\Anggota;
 use App\Models\Pendaftaran;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -28,10 +28,11 @@ class ValidasiPendaftaranController extends Controller
         return view('admin.pendaftaran.show', compact('pendaftaran'));
     }
 
-    public function prosesValidasiPendaftaran(Request $request, $id)
+    public function prosesValidasiPendaftaran(ValidasiPendaftaranRequest $request, $id)
     {
         $pendaftar = Pendaftaran::findOrFail($id);
-        $status = $request->status;
+        $validated = $request->validated();
+        $status = $validated['status'];
 
         if ($status === 'disetujui') {
             $password = Str::password(8);
@@ -67,13 +68,9 @@ class ValidasiPendaftaranController extends Controller
             return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftaran disetujui.');
         }
 
-        $request->validate([
-            'catatan_admin' => 'required|string',
-        ]);
-
         $pendaftar->update([
             'status_validasi' => 'ditolak',
-            'catatan_admin' => $request->catatan_admin,
+            'catatan_admin' => $validated['catatan_admin'],
         ]);
 
         return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftaran ditolak.');
