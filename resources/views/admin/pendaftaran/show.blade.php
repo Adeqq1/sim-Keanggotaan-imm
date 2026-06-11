@@ -45,21 +45,35 @@
     @if($pendaftaran->status_validasi === 'pending')
         <div class="card p-4">
             <h6 class="fw-bold mb-3">Tindakan Validasi</h6>
+
+            @error('email')
+                <div class="alert alert-danger">
+                    {{ $message }}
+                </div>
+            @enderror
+
+            <form action="{{ route('admin.pendaftaran.validate', $pendaftaran) }}" method="POST" class="mb-3">
+                @csrf
+                <input type="hidden" name="status" value="disetujui">
+
+                <button type="submit" class="btn btn-success w-100 py-3 fw-bold">
+                    <i class="bi bi-check-circle me-2"></i> Setujui & Buat Akun
+                </button>
+            </form>
+
             <form action="{{ route('admin.pendaftaran.validate', $pendaftaran) }}" method="POST">
                 @csrf
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Catatan Admin</label>
-                    <textarea name="catatan_admin" class="form-control" rows="3" placeholder="Alasan penolakan atau catatan tambahan..."></textarea>
-                </div>
-                
-                <div class="d-grid gap-2">
-                    <button type="submit" name="status" value="disetujui" class="btn btn-success py-3 fw-bold">
-                        <i class="bi bi-check-circle me-2"></i> Setujui & Buat Akun
-                    </button>
-                    <button type="submit" name="status" value="ditolak" class="btn btn-danger py-3 fw-bold">
-                        <i class="bi bi-x-circle me-2"></i> Tolak Pendaftaran
-                    </button>
-                </div>
+                <input type="hidden" name="status" value="ditolak">
+
+                <label class="form-label small fw-bold">Catatan Admin</label>
+                <textarea name="catatan_admin" class="form-control @error('catatan_admin') is-invalid @enderror" rows="3" placeholder="Alasan penolakan atau catatan tambahan...">{{ old('catatan_admin') }}</textarea>
+                @error('catatan_admin')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+
+                <button type="submit" class="btn btn-danger w-100 py-3 fw-bold mt-3">
+                    <i class="bi bi-x-circle me-2"></i> Tolak Pendaftaran
+                </button>
             </form>
         </div>
     @else

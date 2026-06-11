@@ -42,6 +42,18 @@ test('admin can approve pendaftaran and create kader account', function () {
     });
 });
 
+test('admin pendaftaran detail page posts explicit status for approval action', function () {
+    $admin = User::factory()->admin()->create();
+    $pendaftaran = Pendaftaran::factory()->create();
+
+    $response = $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.show', $pendaftaran));
+
+    $response->assertOk()
+        ->assertSee('name="status" value="disetujui"', false)
+        ->assertSeeText('Setujui & Buat Akun');
+});
+
 test('admin cannot approve pendaftaran when email already belongs to a user', function () {
     Mail::fake();
 
