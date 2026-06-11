@@ -28,7 +28,7 @@ class ValidasiPendaftaranController extends Controller
         return view('admin.pendaftaran.show', compact('pendaftaran'));
     }
 
-    public function validatePendaftaran(Request $request, $id)
+    public function prosesValidasiPendaftaran(Request $request, $id)
     {
         $pendaftar = Pendaftaran::findOrFail($id);
         $status = $request->status;

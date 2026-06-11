@@ -31,6 +31,9 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - You must follow all existing code conventions used in this application. When creating or editing a file, check sibling files for the correct structure, approach, and naming.
 - Use descriptive names for variables and methods. For example, `isRegisteredForDiscounts`, not `discount()`.
 - Check for existing components to reuse before writing a new one.
+- Use Bahasa Indonesia for business/domain concepts such as models, domain tables, domain columns, routes, and views.
+- Use English for framework/system concepts such as Laravel auth, queue, cache, timestamps, and framework-standard fields like `user_id`, `created_at`, and `updated_at`.
+- Do not introduce mixed synonyms for the same domain concept. Reuse existing terms already established in the project.
 
 ## Verification Scripts
 
