@@ -30,7 +30,7 @@ class Presensi extends Model
         return $this->belongsTo(Anggota::class);
     }
 
-    public function approveClaim(): void
+    public function setujuiKlaim(): void
     {
         DB::transaction(function () {
             $this->update([
@@ -41,7 +41,7 @@ class Presensi extends Model
         });
     }
 
-    public function rejectClaim(): void
+    public function tolakKlaim(): void
     {
         DB::transaction(function () {
             if ($this->bukti_kehadiran) {

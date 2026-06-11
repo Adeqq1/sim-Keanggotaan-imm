@@ -195,7 +195,7 @@ class SertifikatController extends Controller
             return redirect()->back()->with('error', 'Klaim sertifikat tidak sedang pending.');
         }
 
-        $presensi->approveClaim();
+        $presensi->setujuiKlaim();
 
         GenerateCertificateJob::dispatch($presensi);
 
@@ -208,7 +208,7 @@ class SertifikatController extends Controller
             return redirect()->back()->with('error', 'Klaim sertifikat tidak sedang pending.');
         }
 
-        $presensi->rejectClaim();
+        $presensi->tolakKlaim();
 
         return redirect()->route('admin.sertifikat.verifikasi.index')->with('info', 'Klaim sertifikat telah ditolak.');
     }

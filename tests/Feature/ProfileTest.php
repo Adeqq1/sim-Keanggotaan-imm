@@ -15,7 +15,7 @@ test('profile page is displayed', function () {
 
 test('profile information can be updated', function () {
     $user = User::factory()->kader()->create();
-    Anggota::factory()->create(['user_id' => $user->id]);
+    $anggota = Anggota::factory()->create(['user_id' => $user->id]);
 
     $response = $this
         ->actingAs($user)
@@ -34,10 +34,16 @@ test('profile information can be updated', function () {
         ->assertRedirect('/profile');
 
     $user->refresh();
+    $anggota->refresh();
 
     $this->assertSame('Test User', $user->name);
     $this->assertSame('test@example.com', $user->email);
     $this->assertNull($user->email_verified_at);
+    $this->assertSame('Test User Lengkap', $anggota->nama_lengkap);
+    $this->assertSame('Jakarta', $anggota->tempat_lahir);
+    $this->assertSame('2000-01-01', $anggota->tanggal_lahir?->toDateString());
+    $this->assertSame('Jl. Test No. 1', $anggota->alamat);
+    $this->assertSame('081234567890', $anggota->no_telp);
 });
 
 test('email verification status is unchanged when the email address is unchanged', function () {

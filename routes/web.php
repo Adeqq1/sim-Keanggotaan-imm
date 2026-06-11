@@ -31,7 +31,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         // Modul Pendaftaran
         Route::get('/pendaftaran', [ValidasiPendaftaranController::class, 'index'])->name('pendaftaran.index');
         Route::get('/pendaftaran/{id}', [ValidasiPendaftaranController::class, 'show'])->name('pendaftaran.show');
-        Route::post('/pendaftaran/{id}/validate', [ValidasiPendaftaranController::class, 'validatePendaftaran'])->name('pendaftaran.validate');
+        Route::post('/pendaftaran/{id}/validate', [ValidasiPendaftaranController::class, 'prosesValidasiPendaftaran'])->name('pendaftaran.validate');
 
         // Modul Anggota
         Route::resource('anggota', AnggotaController::class)->parameters(['anggota' => 'anggota']);

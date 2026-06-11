@@ -42,6 +42,42 @@ test('admin can approve pendaftaran and create kader account', function () {
     });
 });
 
+test('admin pendaftaran detail page posts explicit status for approval action', function () {
+    $admin = User::factory()->admin()->create();
+    $pendaftaran = Pendaftaran::factory()->create();
+
+    $response = $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.show', $pendaftaran));
+
+    $response->assertOk()
+        ->assertSee('name="status" value="disetujui"', false)
+        ->assertSeeText('Setujui & Buat Akun');
+});
+
+test('admin cannot approve pendaftaran when email already belongs to a user', function () {
+    Mail::fake();
+
+    $admin = User::factory()->admin()->create();
+    $existingUser = User::factory()->kader()->create();
+    $pendaftaran = Pendaftaran::factory()->create([
+        'email' => $existingUser->email,
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->post(route('admin.pendaftaran.validate', $pendaftaran->id), [
+            'status' => 'disetujui',
+        ]);
+
+    $response->assertSessionHasErrors('email');
+
+    $pendaftaran->refresh();
+    expect($pendaftaran->status_validasi)->toBe('pending')
+        ->and($pendaftaran->user_id)->toBeNull();
+
+    $this->assertDatabaseCount('users', 2);
+    Mail::assertNothingQueued();
+});
+
 test('admin can reject pendaftaran', function () {
     $admin = User::factory()->admin()->create();
     $pendaftaran = Pendaftaran::factory()->create();
@@ -57,6 +93,21 @@ test('admin can reject pendaftaran', function () {
     $pendaftaran->refresh();
     expect($pendaftaran->status_validasi)->toBe('ditolak');
     expect($pendaftaran->catatan_admin)->toBe('Data tidak lengkap.');
+});
+
+test('admin must provide catatan admin when rejecting pendaftaran', function () {
+    $admin = User::factory()->admin()->create();
+    $pendaftaran = Pendaftaran::factory()->create();
+
+    $response = $this->actingAs($admin)
+        ->post(route('admin.pendaftaran.validate', $pendaftaran->id), [
+            'status' => 'ditolak',
+        ]);
+
+    $response->assertSessionHasErrors('catatan_admin');
+
+    $pendaftaran->refresh();
+    expect($pendaftaran->status_validasi)->toBe('pending');
 });
 
 test('admin can store presensi data', function () {
