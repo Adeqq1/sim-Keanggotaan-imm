@@ -4,29 +4,36 @@ use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\Presensi;
 use App\Models\User;
+use Carbon\Carbon;
 
-test('admin can view admin dashboard and see chart data structure', function () {
+beforeEach(function () {
+    Carbon::setTestNow('2026-06-24 12:00:00');
+});
+
+afterEach(function () {
+    Carbon::setTestNow();
+});
+
+test('admin can view admin dashboard and see chart data structure with correct data indexes', function () {
     $admin = User::factory()->admin()->create();
 
     // Create some dummy data in various months to test aggregation
-    // Month 1: current month
-    $anggotaCurrent = Anggota::factory()->create(['created_at' => now()]);
-    $kegiatanCurrent = Kegiatan::factory()->create(['tanggal_waktu' => now()]);
-    Presensi::create([
+    // Month 1: current month (June 2026)
+    $anggotaCurrent = Anggota::factory()->create(['created_at' => Carbon::now()]);
+    $kegiatanCurrent = Kegiatan::factory()->create(['tanggal_waktu' => Carbon::now()]);
+    Presensi::factory()->hadir()->create([
         'kegiatan_id' => $kegiatanCurrent->id,
         'anggota_id' => $anggotaCurrent->id,
-        'status_kehadiran' => 'hadir',
-        'waktu_hadir' => now(),
+        'waktu_hadir' => Carbon::now(),
     ]);
 
-    // Month 2: 5 months ago
-    $anggotaPast = Anggota::factory()->create(['created_at' => now()->subMonths(5)]);
-    $kegiatanPast = Kegiatan::factory()->create(['tanggal_waktu' => now()->subMonths(5)]);
-    Presensi::create([
+    // Month 2: 5 months ago (January 2026)
+    $anggotaPast = Anggota::factory()->create(['created_at' => Carbon::now()->subMonths(5)]);
+    $kegiatanPast = Kegiatan::factory()->create(['tanggal_waktu' => Carbon::now()->subMonths(5)]);
+    Presensi::factory()->hadir()->create([
         'kegiatan_id' => $kegiatanPast->id,
         'anggota_id' => $anggotaPast->id,
-        'status_kehadiran' => 'hadir',
-        'waktu_hadir' => now()->subMonths(5),
+        'waktu_hadir' => Carbon::now()->subMonths(5),
     ]);
 
     $response = $this->actingAs($admin)
@@ -50,14 +57,23 @@ test('admin can view admin dashboard and see chart data structure', function () 
     expect($chartData['kehadiran_per_bulan']['data'])->toHaveCount(12);
 
     // Verify correct month labels are present
-    $expectedLabel = now()->format('M Y');
+    $expectedLabel = Carbon::now()->format('M Y');
     expect(end($chartData['anggota_per_bulan']['labels']))->toBe($expectedLabel);
 
     // Verify value counts mapping
-    // Current month should have 1 anggota, 1 kegiatan, 1 kehadiran
+    // Current month (June 2026) should have 1 anggota, 1 kegiatan, 1 kehadiran
     expect(end($chartData['anggota_per_bulan']['data']))->toBe(1);
     expect(end($chartData['kegiatan_per_bulan']['data']))->toBe(1);
     expect(end($chartData['kehadiran_per_bulan']['data']))->toBe(1);
+
+    // Verify historical month (5 months ago: Jan 2026) mapping
+    $pastLabel = Carbon::now()->subMonths(5)->format('M Y');
+    $pastIndex = array_search($pastLabel, $chartData['anggota_per_bulan']['labels']);
+
+    expect($pastIndex)->not->toBeFalse();
+    expect($chartData['anggota_per_bulan']['data'][$pastIndex])->toBe(1);
+    expect($chartData['kegiatan_per_bulan']['data'][$pastIndex])->toBe(1);
+    expect($chartData['kehadiran_per_bulan']['data'][$pastIndex])->toBe(1);
 });
 
 test('non-admin is forbidden to access admin dashboard', function () {

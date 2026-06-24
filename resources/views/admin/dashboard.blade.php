@@ -17,7 +17,7 @@
                     <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
                         <h6 class="fw-bold text-muted mb-3"><i class="bi bi-people-fill me-1 text-primary"></i> Anggota per Bulan</h6>
                         <div style="position: relative; height: 220px;">
-                            <canvas id="anggotaChart"></canvas>
+                            <canvas id="anggotaChart" role="img" aria-label="Grafik pendaftaran anggota baru per bulan selama 12 bulan terakhir"></canvas>
                         </div>
                     </div>
                 </div>
@@ -25,7 +25,7 @@
                     <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
                         <h6 class="fw-bold text-muted mb-3"><i class="bi bi-calendar-event-fill me-1 text-success"></i> Kegiatan per Bulan</h6>
                         <div style="position: relative; height: 220px;">
-                            <canvas id="kegiatanChart"></canvas>
+                            <canvas id="kegiatanChart" role="img" aria-label="Grafik jumlah kegiatan per bulan selama 12 bulan terakhir"></canvas>
                         </div>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
                     <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
                         <h6 class="fw-bold text-muted mb-3"><i class="bi bi-person-check-fill me-1 text-danger"></i> Kehadiran Anggota</h6>
                         <div style="position: relative; height: 220px;">
-                            <canvas id="kehadiranChart"></canvas>
+                            <canvas id="kehadiranChart" role="img" aria-label="Grafik jumlah kehadiran anggota per bulan selama 12 bulan terakhir"></canvas>
                         </div>
                     </div>
                 </div>
@@ -134,11 +134,45 @@
 
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const collapseEl = document.getElementById('chartCollapse');
+            if (!collapseEl) return;
+
             let chartsInitialized = false;
+
+            function createChart(ctxId, type, labels, data, datasetLabel, colors, options = {}) {
+                const ctx = document.getElementById(ctxId);
+                if (!ctx) return null;
+
+                return new Chart(ctx.getContext('2d'), {
+                    type: type,
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: datasetLabel,
+                            data: data,
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            ...colors
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 }
+                            }
+                        },
+                        ...options
+                    }
+                });
+            }
 
             collapseEl.addEventListener('shown.bs.collapse', function () {
                 if (chartsInitialized) return;
@@ -146,94 +180,25 @@
                 const chartData = @json($chartData);
 
                 // 1. Anggota per Bulan Chart
-                const ctxAnggota = document.getElementById('anggotaChart').getContext('2d');
-                new Chart(ctxAnggota, {
-                    type: 'bar',
-                    data: {
-                        labels: chartData.anggota_per_bulan.labels,
-                        datasets: [{
-                            label: 'Anggota Baru',
-                            data: chartData.anggota_per_bulan.data,
-                            backgroundColor: '#800000', // Maroon
-                            borderColor: '#800000',
-                            borderWidth: 1,
-                            borderRadius: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { stepSize: 1 }
-                            }
-                        }
-                    }
+                createChart('anggotaChart', 'bar', chartData.anggota_per_bulan.labels, chartData.anggota_per_bulan.data, 'Anggota Baru', {
+                    backgroundColor: '#800000', // Maroon
+                    borderColor: '#800000'
                 });
 
                 // 2. Kegiatan per Bulan Chart
-                const ctxKegiatan = document.getElementById('kegiatanChart').getContext('2d');
-                new Chart(ctxKegiatan, {
-                    type: 'bar',
-                    data: {
-                        labels: chartData.kegiatan_per_bulan.labels,
-                        datasets: [{
-                            label: 'Jumlah Kegiatan',
-                            data: chartData.kegiatan_per_bulan.data,
-                            backgroundColor: '#198754', // Success green
-                            borderColor: '#198754',
-                            borderWidth: 1,
-                            borderRadius: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { stepSize: 1 }
-                            }
-                        }
-                    }
+                createChart('kegiatanChart', 'bar', chartData.kegiatan_per_bulan.labels, chartData.kegiatan_per_bulan.data, 'Jumlah Kegiatan', {
+                    backgroundColor: '#198754', // Success green
+                    borderColor: '#198754'
                 });
 
                 // 3. Kehadiran Anggota Chart
-                const ctxKehadiran = document.getElementById('kehadiranChart').getContext('2d');
-                new Chart(ctxKehadiran, {
-                    type: 'line',
-                    data: {
-                        labels: chartData.kehadiran_per_bulan.labels,
-                        datasets: [{
-                            label: 'Kehadiran',
-                            data: chartData.kehadiran_per_bulan.data,
-                            backgroundColor: 'rgba(220, 53, 69, 0.2)', // Danger red soft
-                            borderColor: '#dc3545', // Danger red
-                            borderWidth: 2,
-                            tension: 0.3,
-                            fill: true
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { stepSize: 1 }
-                            }
-                        }
-                    }
+                createChart('kehadiranChart', 'line', chartData.kehadiran_per_bulan.labels, chartData.kehadiran_per_bulan.data, 'Kehadiran', {
+                    backgroundColor: 'rgba(220, 53, 69, 0.2)', // Danger red soft
+                    borderColor: '#dc3545', // Danger red
+                    borderWidth: 2
+                }, {
+                    tension: 0.3,
+                    fill: true
                 });
 
                 chartsInitialized = true;

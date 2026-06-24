@@ -9,6 +9,7 @@ use App\Models\Pendaftaran;
 use App\Models\Presensi;
 use App\Models\Sertifikat;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -22,21 +23,23 @@ class DashboardController extends Controller
             'sertifikat_pending' => Presensi::where('status_klaim', 'pending')->count(),
         ];
 
-        $recent_kegiatans = Kegiatan::where('tanggal_waktu', '>=', now())
+        $now = now();
+
+        $recent_kegiatans = Kegiatan::where('tanggal_waktu', '>=', $now)
             ->orderBy('tanggal_waktu', 'asc')
             ->take(5)
             ->get();
 
-        $chartData = $this->getChartData();
+        $chartData = $this->getChartData($now);
 
         return view('admin.dashboard', compact('stats', 'recent_kegiatans', 'chartData'));
     }
 
-    private function getChartData(): array
+    private function getChartData(Carbon $now): array
     {
         $months = [];
         for ($i = 11; $i >= 0; $i--) {
-            $date = now()->subMonths($i);
+            $date = $now->copy()->subMonths($i);
             $key = $date->format('Y-m');
             $months[$key] = [
                 'label' => $date->format('M Y'),
@@ -44,21 +47,34 @@ class DashboardController extends Controller
             ];
         }
 
-        $anggotaCounts = Anggota::where('created_at', '>=', now()->subMonths(11)->startOfMonth())
-            ->get(['created_at'])
-            ->groupBy(fn ($item) => $item->created_at->format('Y-m'))
-            ->map(fn ($group) => $group->count());
+        $driver = DB::getDriverName();
+        if ($driver === 'sqlite') {
+            $dateSelect = "strftime('%Y-%m', created_at)";
+            $kegiatanSelect = "strftime('%Y-%m', tanggal_waktu)";
+            $presensiSelect = "strftime('%Y-%m', waktu_hadir)";
+        } else {
+            $dateSelect = "DATE_FORMAT(created_at, '%Y-%m')";
+            $kegiatanSelect = "DATE_FORMAT(tanggal_waktu, '%Y-%m')";
+            $presensiSelect = "DATE_FORMAT(waktu_hadir, '%Y-%m')";
+        }
 
-        $kegiatanCounts = Kegiatan::where('tanggal_waktu', '>=', now()->subMonths(11)->startOfMonth())
-            ->get(['tanggal_waktu'])
-            ->groupBy(fn ($item) => Carbon::parse($item->tanggal_waktu)->format('Y-m'))
-            ->map(fn ($group) => $group->count());
+        $startLimit = $now->copy()->subMonths(11)->startOfMonth();
 
-        $presensiCounts = Presensi::where('status_kehadiran', 'hadir')
-            ->where('waktu_hadir', '>=', now()->subMonths(11)->startOfMonth())
-            ->get(['waktu_hadir'])
-            ->groupBy(fn ($item) => Carbon::parse($item->waktu_hadir)->format('Y-m'))
-            ->map(fn ($group) => $group->count());
+        $anggotaCounts = Anggota::selectRaw("$dateSelect as month, count(*) as total")
+            ->where('created_at', '>=', $startLimit)
+            ->groupBy('month')
+            ->pluck('total', 'month');
+
+        $kegiatanCounts = Kegiatan::selectRaw("$kegiatanSelect as month, count(*) as total")
+            ->where('tanggal_waktu', '>=', $startLimit)
+            ->groupBy('month')
+            ->pluck('total', 'month');
+
+        $presensiCounts = Presensi::selectRaw("$presensiSelect as month, count(*) as total")
+            ->where('status_kehadiran', 'hadir')
+            ->where('waktu_hadir', '>=', $startLimit)
+            ->groupBy('month')
+            ->pluck('total', 'month');
 
         $anggotaLabels = [];
         $anggotaData = [];
@@ -70,13 +86,13 @@ class DashboardController extends Controller
         foreach ($months as $key => $info) {
             $label = $info['label'];
             $anggotaLabels[] = $label;
-            $anggotaData[] = $anggotaCounts->get($key, 0);
+            $anggotaData[] = (int) $anggotaCounts->get($key, 0);
 
             $kegiatanLabels[] = $label;
-            $kegiatanData[] = $kegiatanCounts->get($key, 0);
+            $kegiatanData[] = (int) $kegiatanCounts->get($key, 0);
 
             $kehadiranLabels[] = $label;
-            $kehadiranData[] = $presensiCounts->get($key, 0);
+            $kehadiranData[] = (int) $presensiCounts->get($key, 0);
         }
 
         return [
