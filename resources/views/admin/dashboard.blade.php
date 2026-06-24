@@ -3,6 +3,44 @@
         Dashboard Admin
     </x-slot>
 
+    {{-- Area Statistik Grafik: hanya di desktop --}}
+    <div class="d-none d-lg-block mb-4">
+        <div class="d-flex justify-content-end mb-3">
+            <button class="btn btn-primary btn-sm shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#chartCollapse" aria-expanded="false" aria-controls="chartCollapse">
+                <i class="bi bi-graph-up me-1"></i> Tampilkan Grafik Statistik
+            </button>
+        </div>
+        
+        <div class="collapse" id="chartCollapse">
+            <div class="row g-3 mb-4">
+                <div class="col-lg-4">
+                    <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
+                        <h6 class="fw-bold text-muted mb-3"><i class="bi bi-people-fill me-1 text-primary"></i> Anggota per Bulan</h6>
+                        <div style="position: relative; height: 220px;">
+                            <canvas id="anggotaChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
+                        <h6 class="fw-bold text-muted mb-3"><i class="bi bi-calendar-event-fill me-1 text-success"></i> Kegiatan per Bulan</h6>
+                        <div style="position: relative; height: 220px;">
+                            <canvas id="kegiatanChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
+                        <h6 class="fw-bold text-muted mb-3"><i class="bi bi-person-check-fill me-1 text-danger"></i> Kehadiran Anggota</h6>
+                        <div style="position: relative; height: 220px;">
+                            <canvas id="kehadiranChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Statistik: mobile 2 kolom, desktop 4 kolom --}}
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3">
@@ -95,4 +133,111 @@
         </div>
 
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const collapseEl = document.getElementById('chartCollapse');
+            let chartsInitialized = false;
+
+            collapseEl.addEventListener('shown.bs.collapse', function () {
+                if (chartsInitialized) return;
+
+                const chartData = @json($chartData);
+
+                // 1. Anggota per Bulan Chart
+                const ctxAnggota = document.getElementById('anggotaChart').getContext('2d');
+                new Chart(ctxAnggota, {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.anggota_per_bulan.labels,
+                        datasets: [{
+                            label: 'Anggota Baru',
+                            data: chartData.anggota_per_bulan.data,
+                            backgroundColor: '#800000', // Maroon
+                            borderColor: '#800000',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 }
+                            }
+                        }
+                    }
+                });
+
+                // 2. Kegiatan per Bulan Chart
+                const ctxKegiatan = document.getElementById('kegiatanChart').getContext('2d');
+                new Chart(ctxKegiatan, {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.kegiatan_per_bulan.labels,
+                        datasets: [{
+                            label: 'Jumlah Kegiatan',
+                            data: chartData.kegiatan_per_bulan.data,
+                            backgroundColor: '#198754', // Success green
+                            borderColor: '#198754',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 }
+                            }
+                        }
+                    }
+                });
+
+                // 3. Kehadiran Anggota Chart
+                const ctxKehadiran = document.getElementById('kehadiranChart').getContext('2d');
+                new Chart(ctxKehadiran, {
+                    type: 'line',
+                    data: {
+                        labels: chartData.kehadiran_per_bulan.labels,
+                        datasets: [{
+                            label: 'Kehadiran',
+                            data: chartData.kehadiran_per_bulan.data,
+                            backgroundColor: 'rgba(220, 53, 69, 0.2)', // Danger red soft
+                            borderColor: '#dc3545', // Danger red
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 }
+                            }
+                        }
+                    }
+                });
+
+                chartsInitialized = true;
+            });
+        });
+    </script>
 </x-app-layout>

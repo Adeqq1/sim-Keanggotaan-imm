@@ -8,6 +8,7 @@ use App\Models\Kegiatan;
 use App\Models\Pendaftaran;
 use App\Models\Presensi;
 use App\Models\Sertifikat;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -26,7 +27,72 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        return view('admin.dashboard', compact('stats', 'recent_kegiatans'));
+        $chartData = $this->getChartData();
+
+        return view('admin.dashboard', compact('stats', 'recent_kegiatans', 'chartData'));
+    }
+
+    private function getChartData(): array
+    {
+        $months = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $key = $date->format('Y-m');
+            $months[$key] = [
+                'label' => $date->format('M Y'),
+                'count' => 0,
+            ];
+        }
+
+        $anggotaCounts = Anggota::where('created_at', '>=', now()->subMonths(11)->startOfMonth())
+            ->get(['created_at'])
+            ->groupBy(fn ($item) => $item->created_at->format('Y-m'))
+            ->map(fn ($group) => $group->count());
+
+        $kegiatanCounts = Kegiatan::where('tanggal_waktu', '>=', now()->subMonths(11)->startOfMonth())
+            ->get(['tanggal_waktu'])
+            ->groupBy(fn ($item) => Carbon::parse($item->tanggal_waktu)->format('Y-m'))
+            ->map(fn ($group) => $group->count());
+
+        $presensiCounts = Presensi::where('status_kehadiran', 'hadir')
+            ->where('waktu_hadir', '>=', now()->subMonths(11)->startOfMonth())
+            ->get(['waktu_hadir'])
+            ->groupBy(fn ($item) => Carbon::parse($item->waktu_hadir)->format('Y-m'))
+            ->map(fn ($group) => $group->count());
+
+        $anggotaLabels = [];
+        $anggotaData = [];
+        $kegiatanLabels = [];
+        $kegiatanData = [];
+        $kehadiranLabels = [];
+        $kehadiranData = [];
+
+        foreach ($months as $key => $info) {
+            $label = $info['label'];
+            $anggotaLabels[] = $label;
+            $anggotaData[] = $anggotaCounts->get($key, 0);
+
+            $kegiatanLabels[] = $label;
+            $kegiatanData[] = $kegiatanCounts->get($key, 0);
+
+            $kehadiranLabels[] = $label;
+            $kehadiranData[] = $presensiCounts->get($key, 0);
+        }
+
+        return [
+            'anggota_per_bulan' => [
+                'labels' => $anggotaLabels,
+                'data' => $anggotaData,
+            ],
+            'kegiatan_per_bulan' => [
+                'labels' => $kegiatanLabels,
+                'data' => $kegiatanData,
+            ],
+            'kehadiran_per_bulan' => [
+                'labels' => $kehadiranLabels,
+                'data' => $kehadiranData,
+            ],
+        ];
     }
 
     public function kaderDashboard()
