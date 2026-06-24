@@ -1,31 +1,34 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
+@extends('layouts.auth')
+
+@section('content')
+    <div class="mb-4 text-center">
+        <h4 class="fw-bold">Verifikasi Email</h4>
+        <p class="text-muted small">
+            Terima kasih sudah mendaftar! Sebelum memulai, mohon verifikasi alamat email kamu dengan mengklik
+            tautan yang baru saja kami kirimkan. Jika kamu tidak menerima email, kami akan dengan senang hati
+            mengirimkan yang lain.
+        </p>
     </div>
 
     @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
+        <div class="alert alert-success small py-2 mb-3">
+            Tautan verifikasi baru telah dikirim ke alamat email yang kamu daftarkan.
         </div>
     @endif
 
-    <div class="mt-4 flex items-center justify-between">
+    <div class="d-grid gap-2">
         <form method="POST" action="{{ route('verification.send') }}">
             @csrf
-
-            <div>
-                <x-primary-button>
-                    {{ __('Resend Verification Email') }}
-                </x-primary-button>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary py-2 fw-bold shadow-sm">Kirim Ulang Email Verifikasi</button>
             </div>
         </form>
 
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-
-            <button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                {{ __('Log Out') }}
-            </button>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-outline-secondary py-2">Keluar</button>
+            </div>
         </form>
     </div>
-</x-guest-layout>
+@endsection
