@@ -9,6 +9,16 @@
         </a>
     </div>
 
+    {{-- Form generate NIA diletakkan di LUAR form update agar tidak nested --}}
+    @if(empty($anggota->nia))
+        <form id="form-generate-nia"
+              action="{{ route('admin.anggota.generate-nia', $anggota) }}"
+              method="POST"
+              class="d-none">
+            @csrf
+        </form>
+    @endif
+
     <div class="card shadow-sm border-0">
         <div class="card-body p-4">
             @if(session('warning'))
@@ -49,12 +59,13 @@
                         <div class="input-group">
                             <input type="text" name="nia" id="nia" class="form-control @error('nia') is-invalid @enderror" value="{{ old('nia', $anggota->nia) }}" placeholder="8 digit angka" maxlength="8">
                             @if(empty($anggota->nia))
-                                <form action="{{ route('admin.anggota.generate-nia', $anggota) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="btn btn-outline-primary" title="Generate NIA otomatis">
-                                        <i class="bi bi-magic"></i> Generate NIA
-                                    </button>
-                                </form>
+                                {{-- form="form-generate-nia" mengaitkan button ini ke form di luar, menghindari nested form --}}
+                                <button type="submit"
+                                        form="form-generate-nia"
+                                        class="btn btn-outline-primary"
+                                        title="Generate NIA otomatis">
+                                    <i class="bi bi-magic"></i> Generate NIA
+                                </button>
                             @else
                                 <span class="input-group-text bg-light text-muted" title="NIA sudah terisi">
                                     <i class="bi bi-check-circle-fill text-success me-1"></i> Terisi
