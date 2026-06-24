@@ -1,4 +1,4 @@
-<nav class="navbar fixed-bottom bg-white shadow-lg border-top p-0">
+<nav class="navbar fixed-bottom bg-white shadow-lg border-top p-0 d-lg-none">
     <div class="container-fluid d-flex justify-content-around">
         @if(auth()->user()->role === 'admin')
             <a href="{{ route('admin.dashboard') }}" class="nav-link text-center py-2 {{ request()->routeIs('admin.dashboard') ? 'text-primary font-weight-bold' : 'text-muted' }}">
