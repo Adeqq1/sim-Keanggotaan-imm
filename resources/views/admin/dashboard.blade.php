@@ -3,6 +3,44 @@
         Dashboard Admin
     </x-slot>
 
+    {{-- Area Statistik Grafik: hanya di desktop --}}
+    <div class="d-none d-lg-block mb-4">
+        <div class="d-flex justify-content-end mb-3">
+            <button class="btn btn-primary btn-sm shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#chartCollapse" aria-expanded="false" aria-controls="chartCollapse">
+                <i class="bi bi-graph-up me-1"></i> Tampilkan Grafik Statistik
+            </button>
+        </div>
+        
+        <div class="collapse" id="chartCollapse">
+            <div class="row g-3 mb-4">
+                <div class="col-lg-4">
+                    <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
+                        <h6 class="fw-bold text-muted mb-3"><i class="bi bi-people-fill me-1 text-primary"></i> Anggota per Bulan</h6>
+                        <div style="position: relative; height: 220px;">
+                            <canvas id="anggotaChart" role="img" aria-label="Grafik pendaftaran anggota baru per bulan selama 12 bulan terakhir"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
+                        <h6 class="fw-bold text-muted mb-3"><i class="bi bi-calendar-event-fill me-1 text-success"></i> Kegiatan per Bulan</h6>
+                        <div style="position: relative; height: 220px;">
+                            <canvas id="kegiatanChart" role="img" aria-label="Grafik jumlah kegiatan per bulan selama 12 bulan terakhir"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
+                        <h6 class="fw-bold text-muted mb-3"><i class="bi bi-person-check-fill me-1 text-danger"></i> Kehadiran Anggota</h6>
+                        <div style="position: relative; height: 220px;">
+                            <canvas id="kehadiranChart" role="img" aria-label="Grafik jumlah kehadiran anggota per bulan selama 12 bulan terakhir"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Statistik: mobile 2 kolom, desktop 4 kolom --}}
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3">
@@ -95,4 +133,76 @@
         </div>
 
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const collapseEl = document.getElementById('chartCollapse');
+            if (!collapseEl) return;
+
+            let chartsInitialized = false;
+
+            function createChart(ctxId, type, labels, data, datasetLabel, colors, options = {}) {
+                const ctx = document.getElementById(ctxId);
+                if (!ctx) return null;
+
+                return new Chart(ctx.getContext('2d'), {
+                    type: type,
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: datasetLabel,
+                            data: data,
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            ...colors
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 }
+                            }
+                        },
+                        ...options
+                    }
+                });
+            }
+
+            collapseEl.addEventListener('shown.bs.collapse', function () {
+                if (chartsInitialized) return;
+
+                const chartData = @json($chartData);
+
+                // 1. Anggota per Bulan Chart
+                createChart('anggotaChart', 'bar', chartData.anggota_per_bulan.labels, chartData.anggota_per_bulan.data, 'Anggota Baru', {
+                    backgroundColor: '#800000', // Maroon
+                    borderColor: '#800000'
+                });
+
+                // 2. Kegiatan per Bulan Chart
+                createChart('kegiatanChart', 'bar', chartData.kegiatan_per_bulan.labels, chartData.kegiatan_per_bulan.data, 'Jumlah Kegiatan', {
+                    backgroundColor: '#198754', // Success green
+                    borderColor: '#198754'
+                });
+
+                // 3. Kehadiran Anggota Chart
+                createChart('kehadiranChart', 'line', chartData.kehadiran_per_bulan.labels, chartData.kehadiran_per_bulan.data, 'Kehadiran', {
+                    backgroundColor: 'rgba(220, 53, 69, 0.2)', // Danger red soft
+                    borderColor: '#dc3545', // Danger red
+                    borderWidth: 2
+                }, {
+                    tension: 0.3,
+                    fill: true
+                });
+
+                chartsInitialized = true;
+            });
+        });
+    </script>
 </x-app-layout>
