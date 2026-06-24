@@ -34,7 +34,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::post('/pendaftaran/{id}/validate', [ValidasiPendaftaranController::class, 'prosesValidasiPendaftaran'])->name('pendaftaran.validate');
 
         // Modul Anggota
+        Route::post('/anggota/generate-nia-bulk', [AnggotaController::class, 'generateBulkNia'])->name('anggota.generate-nia-bulk');
         Route::resource('anggota', AnggotaController::class)->parameters(['anggota' => 'anggota']);
+        Route::post('/anggota/{anggota}/generate-nia', [AnggotaController::class, 'generateNia'])->name('anggota.generate-nia');
 
         // Modul Arsip
         Route::resource('arsip', ArsipController::class)->except(['create', 'edit', 'update', 'show']);

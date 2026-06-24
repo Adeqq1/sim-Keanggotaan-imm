@@ -41,4 +41,14 @@ class AnggotaFactory extends Factory
             'status_aktif' => false,
         ]);
     }
+
+    /**
+     * Indicate that the anggota belum memiliki NIA.
+     */
+    public function tanpaNia(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'nia' => null,
+        ]);
+    }
 }

@@ -27,7 +27,7 @@ class AnggotaRequest extends FormRequest
         $anggotaId = $this->route('anggota')?->id;
 
         return [
-            'nia' => ['nullable', 'string', 'unique:anggota,nia,'.$anggotaId],
+            'nia' => ['nullable', 'digits:8', 'unique:anggota,nia,'.$anggotaId],
             'nama_lengkap' => ['required', 'string', 'max:255'],
             'tempat_lahir' => ['required', 'string', 'max:255'],
             'tanggal_lahir' => ['required', 'date'],

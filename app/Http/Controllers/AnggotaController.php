@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AnggotaRequest;
 use App\Models\Anggota;
+use App\Services\NiaGenerator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -92,5 +93,46 @@ class AnggotaController extends Controller
         $anggota->delete();
 
         return redirect()->route('admin.anggota.index')->with('success', 'Anggota berhasil dihapus.');
+    }
+
+    /**
+     * Generate NIA untuk satu anggota (hanya jika NIA masih kosong).
+     */
+    public function generateNia(Anggota $anggota, NiaGenerator $generator)
+    {
+        if (! empty($anggota->nia)) {
+            return redirect()->route('admin.anggota.edit', $anggota)
+                ->with('warning', 'Anggota sudah memiliki NIA: '.$anggota->nia.'. Tidak bisa di-generate ulang secara otomatis.');
+        }
+
+        $generator->generateForAnggota($anggota);
+
+        return redirect()->route('admin.anggota.edit', $anggota)
+            ->with('success', 'NIA berhasil di-generate: '.$anggota->fresh()->nia);
+    }
+
+    /**
+     * Generate NIA massal untuk semua anggota yang belum memiliki NIA.
+     */
+    public function generateBulkNia(NiaGenerator $generator)
+    {
+        $anggotas = Anggota::whereNull('nia')
+            ->orWhere('nia', '')
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
+
+        $jumlahDiproses = 0;
+
+        foreach ($anggotas as $anggota) {
+            $generator->generateForAnggota($anggota);
+            $jumlahDiproses++;
+        }
+
+        $pesan = $jumlahDiproses > 0
+            ? "Berhasil generate NIA untuk {$jumlahDiproses} anggota."
+            : 'Tidak ada anggota yang perlu di-generate NIA-nya.';
+
+        return redirect()->route('admin.anggota.index')->with('success', $pesan);
     }
 }
