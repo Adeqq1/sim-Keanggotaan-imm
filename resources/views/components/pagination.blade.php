@@ -12,12 +12,30 @@
                 </li>
             @endif
 
-            {{-- Page Indicator --}}
-            <li class="page-item">
-                <span class="page-link border-0 py-2 px-3 bg-white text-dark fw-bold">
-                    {{ $paginator->currentPage() }} <span class="text-muted fw-normal">/</span> {{ $paginator->lastPage() }}
-                </span>
-            </li>
+            {{-- Pagination Elements --}}
+            @foreach ($elements as $element)
+                {{-- "Three Dots" Separator --}}
+                @if (is_string($element))
+                    <li class="page-item disabled" aria-disabled="true">
+                        <span class="page-link border-0 py-2 px-3 bg-white text-muted">{{ $element }}</span>
+                    </li>
+                @endif
+
+                {{-- Array Of Links --}}
+                @if (is_array($element))
+                    @foreach ($element as $page => $url)
+                        @if ($page == $paginator->currentPage())
+                            <li class="page-item active" aria-current="page">
+                                <span class="page-link border-0 py-2 px-3 bg-primary text-white fw-bold">{{ $page }}</span>
+                            </li>
+                        @else
+                            <li class="page-item">
+                                <a class="page-link border-0 py-2 px-3 bg-white text-primary" href="{{ $url }}">{{ $page }}</a>
+                            </li>
+                        @endif
+                    @endforeach
+                @endif
+            @endforeach
 
             {{-- Next Page Link --}}
             @if ($paginator->hasMorePages())

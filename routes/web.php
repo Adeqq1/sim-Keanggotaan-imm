@@ -93,8 +93,8 @@ Route::middleware(['auth', 'role:kader'])->prefix('kader')->name('kader.')->grou
 
     // Modul Arsip
     Route::get('/arsip', [ArsipController::class, 'kaderIndex'])->name('arsip.index');
-    Route::post('/arsip', [ArsipController::class, 'store'])->name('arsip.store');
-    Route::get('/arsip/{arsip}/download', [ArsipController::class, 'download'])->name('arsip.download');
+    Route::post('/arsip', [ArsipController::class, 'kaderStore'])->name('arsip.store');
+    Route::get('/arsip/{arsip}/download', [ArsipController::class, 'kaderDownload'])->name('arsip.download');
 });
 
 Route::middleware('auth')->group(function () {

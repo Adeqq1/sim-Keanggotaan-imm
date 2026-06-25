@@ -86,8 +86,14 @@
         />
     @empty
         <div class="text-center py-5">
-            <i class="bi bi-people display-4 text-muted"></i>
-            <p class="text-muted mt-2">Belum ada data anggota.</p>
+            @if(request('search'))
+                <i class="bi bi-search display-4 text-muted opacity-50"></i>
+                <p class="text-muted mt-2">Anggota dengan kata kunci "{{ request('search') }}" tidak ditemukan.</p>
+                <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-primary btn-sm mt-2">Bersihkan Pencarian</a>
+            @else
+                <i class="bi bi-people display-4 text-muted"></i>
+                <p class="text-muted mt-2">Belum ada data anggota.</p>
+            @endif
         </div>
     @endforelse
 
