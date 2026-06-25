@@ -13,7 +13,18 @@ class AnggotaController extends Controller
 {
     public function index()
     {
-        $anggotas = Anggota::with('user')->latest()->paginate(10);
+        $search = trim(request('search'));
+
+        $query = Anggota::with('user');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                    ->orWhere('nia', 'like', "%{$search}%");
+            });
+        }
+
+        $anggotas = $query->latest()->paginate(10)->withQueryString();
 
         return view('admin.anggota.index', compact('anggotas'));
     }
