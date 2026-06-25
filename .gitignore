@@ -34,3 +34,4 @@ AGENTS.md
 /docs
 /.kiro
 issue.md
+/database/seeders/StressTestSeeder.php

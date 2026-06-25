@@ -504,30 +504,34 @@ body {
 /* ============================================
    RESPONSIF LAINNYA
    ============================================ */
-/* Stat card hover effect */
+/* Stat card */
 .stat-card-hover {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.stat-card-hover:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
-}
 
-/* Quick action card hover */
+/* Quick action card */
 .quick-action-card {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
-}
-.quick-action-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12) !important;
 }
 
 /* Kegiatan card */
 .kegiatan-card {
     transition: box-shadow 0.2s ease;
 }
-.kegiatan-card:hover {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1) !important;
+
+/* Hover effects only for mobile devices (max-width: 991.98px) */
+@media (max-width: 991.98px) {
+    .stat-card-hover:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+    }
+    .quick-action-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12) !important;
+    }
+    .kegiatan-card:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1) !important;
+    }
 }
 

@@ -40,8 +40,13 @@
 
         <div class="mb-3">
             <label class="form-label small fw-bold">Email</label>
-            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" required autocomplete="username">
-            @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            @if(in_array($user->role, ['instruktur', 'kader']))
+                <input type="email" name="email" class="form-control bg-light text-muted" value="{{ $user->email }}" readonly disabled>
+                <small class="text-muted">Role Anda tidak diizinkan untuk mengubah alamat email.</small>
+            @else
+                <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" required autocomplete="username">
+                @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            @endif
         </div>
 
         <div class="row">
