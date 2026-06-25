@@ -31,10 +31,13 @@ class ProfileController extends Controller
         $user = $request->user();
         $validated = $request->validated();
 
-        $user->fill([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-        ]);
+        $fillData = ['name' => $validated['name']];
+
+        if (! in_array($user->role, ['instruktur', 'kader'])) {
+            $fillData['email'] = $validated['email'];
+        }
+
+        $user->fill($fillData);
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
