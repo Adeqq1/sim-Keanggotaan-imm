@@ -9,8 +9,30 @@
         </a>
     </div>
 
+    {{-- Form generate NIA diletakkan di LUAR form update agar tidak nested --}}
+    @if(empty($anggota->nia))
+        <form id="form-generate-nia"
+              action="{{ route('admin.anggota.generate-nia', $anggota) }}"
+              method="POST"
+              class="d-none">
+            @csrf
+        </form>
+    @endif
+
     <div class="card shadow-sm border-0">
         <div class="card-body p-4">
+            @if(session('warning'))
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>{{ session('warning') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
             <form action="{{ route('admin.anggota.update', $anggota->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
@@ -33,11 +55,27 @@
 
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">NIA <span class="text-danger">*</span></label>
-                        <input type="text" name="nia" class="form-control @error('nia') is-invalid @enderror" value="{{ old('nia', $anggota->nia) }}" required>
+                        <label class="form-label fw-bold">NIA</label>
+                        <div class="input-group">
+                            <input type="text" name="nia" id="nia" class="form-control @error('nia') is-invalid @enderror" value="{{ old('nia', $anggota->nia) }}" placeholder="8 digit angka" maxlength="8">
+                            @if(empty($anggota->nia))
+                                {{-- form="form-generate-nia" mengaitkan button ini ke form di luar, menghindari nested form --}}
+                                <button type="submit"
+                                        form="form-generate-nia"
+                                        class="btn btn-outline-primary"
+                                        title="Generate NIA otomatis">
+                                    <i class="bi bi-magic"></i> Generate NIA
+                                </button>
+                            @else
+                                <span class="input-group-text bg-light text-muted" title="NIA sudah terisi">
+                                    <i class="bi bi-check-circle-fill text-success me-1"></i> Terisi
+                                </span>
+                            @endif
+                        </div>
                         @error('nia')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Format: 8 digit angka (contoh: 24260001). Kosongkan bila belum ada.</small>
                     </div>
 
                     <div class="col-md-6">

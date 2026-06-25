@@ -5,10 +5,31 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h6 class="fw-bold mb-0">Daftar Anggota</h6>
-        <a href="{{ route('admin.anggota.create') }}" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg"></i> Tambah
-        </a>
+        <div class="d-flex gap-2">
+            <form action="{{ route('admin.anggota.generate-nia-bulk') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-outline-secondary btn-sm" title="Generate NIA untuk anggota yang belum memiliki NIA" onclick="return confirm('Generate NIA untuk semua anggota yang belum memiliki NIA?')">
+                    <i class="bi bi-magic"></i> Generate NIA Kosong
+                </button>
+            </form>
+            <a href="{{ route('admin.anggota.create') }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg"></i> Tambah
+            </a>
+        </div>
     </div>
+
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    @if(session('warning'))
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>{{ session('warning') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
 
     <form action="{{ route('admin.anggota.index') }}" method="GET" class="mb-4">
         <div class="input-group shadow-sm">
