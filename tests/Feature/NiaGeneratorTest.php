@@ -61,6 +61,18 @@ describe('NiaGenerator::generateNextNia', function () {
 
         expect($nia)->toMatch('/^[0-9]{8}$/');
     });
+
+    test('melempar exception jika nomor urut melebihi 9999', function () {
+        Anggota::factory()->tanpaNia()->create([
+            'nia' => '24269999',
+            'created_at' => Carbon::create(2026, 1, 1),
+        ]);
+
+        $generator = new NiaGenerator;
+
+        expect(fn () => $generator->generateNextNia('26'))
+            ->toThrow(OverflowException::class);
+    });
 });
 
 describe('NiaGenerator::generateForAnggota', function () {
@@ -186,5 +198,19 @@ describe('POST admin/anggota/generate-nia-bulk', function () {
             ->post(route('admin.anggota.generate-nia-bulk'));
 
         $response->assertForbidden();
+    });
+
+    test('bulk generate menangani anggota dengan tahun created_at berbeda', function () {
+        $admin = User::factory()->admin()->create();
+        Anggota::factory()->tanpaNia()->create(['created_at' => Carbon::create(2024, 1, 1)]);
+        Anggota::factory()->tanpaNia()->create(['created_at' => Carbon::create(2026, 6, 1)]);
+
+        $this->actingAs($admin)->post(route('admin.anggota.generate-nia-bulk'));
+
+        $anggota2024 = Anggota::where('nia', 'like', '2424%')->first();
+        $anggota2026 = Anggota::where('nia', 'like', '2426%')->first();
+
+        expect($anggota2024)->not->toBeNull()
+            ->and($anggota2026)->not->toBeNull();
     });
 });

@@ -22,7 +22,7 @@ class AnggotaFactory extends Factory
     {
         return [
             'user_id' => User::factory()->kader(),
-            'nia' => fake()->unique()->numerify('##########'),
+            'nia' => '24'.fake()->numerify('##').fake()->unique()->numerify('####'),
             'nama_lengkap' => fake()->name(),
             'tempat_lahir' => fake()->city(),
             'tanggal_lahir' => fake()->date('Y-m-d', '2005-01-01'),

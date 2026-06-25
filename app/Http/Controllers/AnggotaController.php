@@ -6,6 +6,7 @@ use App\Http\Requests\AnggotaRequest;
 use App\Models\Anggota;
 use App\Services\NiaGenerator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class AnggotaController extends Controller
@@ -100,15 +101,15 @@ class AnggotaController extends Controller
      */
     public function generateNia(Anggota $anggota, NiaGenerator $generator)
     {
-        if (! empty($anggota->nia)) {
+        try {
+            $generator->generateForAnggota($anggota);
+
             return redirect()->route('admin.anggota.edit', $anggota)
-                ->with('warning', 'Anggota sudah memiliki NIA: '.$anggota->nia.'. Tidak bisa di-generate ulang secara otomatis.');
+                ->with('success', 'NIA berhasil di-generate: '.$anggota->fresh()->nia);
+        } catch (\RuntimeException $e) {
+            return redirect()->route('admin.anggota.edit', $anggota)
+                ->with('warning', $e->getMessage());
         }
-
-        $generator->generateForAnggota($anggota);
-
-        return redirect()->route('admin.anggota.edit', $anggota)
-            ->with('success', 'NIA berhasil di-generate: '.$anggota->fresh()->nia);
     }
 
     /**
@@ -123,16 +124,35 @@ class AnggotaController extends Controller
             ->get();
 
         $jumlahDiproses = 0;
+        $jumlahGagal = 0;
 
         foreach ($anggotas as $anggota) {
-            $generator->generateForAnggota($anggota);
-            $jumlahDiproses++;
+            try {
+                $generator->generateForAnggota($anggota);
+                $jumlahDiproses++;
+            } catch (\Throwable $e) {
+                $jumlahGagal++;
+                Log::warning('Gagal generate NIA untuk anggota ID: '.$anggota->id, [
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
-        $pesan = $jumlahDiproses > 0
-            ? "Berhasil generate NIA untuk {$jumlahDiproses} anggota."
-            : 'Tidak ada anggota yang perlu di-generate NIA-nya.';
+        if ($jumlahDiproses > 0) {
+            $pesan = "Berhasil generate NIA untuk {$jumlahDiproses} anggota.";
+            if ($jumlahGagal > 0) {
+                $pesan .= " Namun, {$jumlahGagal} anggota gagal diproses.";
+            }
 
-        return redirect()->route('admin.anggota.index')->with('success', $pesan);
+            return redirect()->route('admin.anggota.index')->with('success', $pesan);
+        }
+
+        if ($jumlahGagal > 0) {
+            return redirect()->route('admin.anggota.index')
+                ->with('warning', "Gagal generate NIA untuk {$jumlahGagal} anggota. Silakan periksa log sistem.");
+        }
+
+        return redirect()->route('admin.anggota.index')
+            ->with('success', 'Tidak ada anggota yang perlu di-generate NIA-nya.');
     }
 }

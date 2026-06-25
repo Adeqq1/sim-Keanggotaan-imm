@@ -8,11 +8,6 @@ use Illuminate\Support\Facades\DB;
 class NiaGenerator
 {
     /**
-     * Kode wilayah IMM Kabupaten Bungo.
-     */
-    private const KODE_WILAYAH = '24';
-
-    /**
      * Generate NIA untuk satu anggota dan simpan ke database.
      * Hanya memproses anggota yang belum memiliki NIA.
      *
@@ -39,17 +34,25 @@ class NiaGenerator
      */
     public function generateNextNia(string $tahunDuaDigit): string
     {
-        $prefix = self::KODE_WILAYAH.$tahunDuaDigit;
+        $kodeWilayah = config('nia.kode_wilayah', '24');
+        $prefix = $kodeWilayah.$tahunDuaDigit;
 
         /** @var string|null $lastNia */
         $lastNia = Anggota::where('nia', 'like', $prefix.'%')
+            ->lockForUpdate()
             ->orderByDesc('nia')
             ->value('nia');
 
         $lastSequence = $lastNia ? (int) substr($lastNia, -4) : 0;
-        $nextSequence = str_pad((string) ($lastSequence + 1), 4, '0', STR_PAD_LEFT);
+        $nextSequence = $lastSequence + 1;
 
-        return $prefix.$nextSequence;
+        if ($nextSequence > 9999) {
+            throw new \OverflowException(
+                "Nomor urut NIA untuk prefix {$prefix} telah mencapai batas maksimum (9999)."
+            );
+        }
+
+        return $prefix.str_pad((string) $nextSequence, 4, '0', STR_PAD_LEFT);
     }
 
     /**

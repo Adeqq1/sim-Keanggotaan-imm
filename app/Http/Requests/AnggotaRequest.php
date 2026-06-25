@@ -38,4 +38,16 @@ class AnggotaRequest extends FormRequest
             'role' => ['sometimes', 'required', Rule::enum(RoleEnum::class)->except(RoleEnum::ADMIN)],
         ];
     }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'nia.digits' => 'NIA harus terdiri dari tepat 8 digit angka (contoh: 24260001).',
+        ];
+    }
 }
