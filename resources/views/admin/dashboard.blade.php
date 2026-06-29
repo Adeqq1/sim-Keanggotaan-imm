@@ -12,26 +12,30 @@
         </div>
         
         <div class="collapse" id="chartCollapse">
-            <div class="row g-3 mb-4">
-                <div class="col-lg-4">
-                    <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
-                        <h6 class="fw-bold text-muted mb-3"><i class="bi bi-people-fill me-1 text-primary"></i> Anggota per Bulan</h6>
+            <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px;">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-3 pb-0">
+                    <button class="btn btn-light btn-sm" id="chartPrevButton" type="button">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <h6 class="fw-bold text-muted mb-0" id="activeChartTitle">
+                        <i class="bi bi-people-fill me-1 text-primary"></i> Anggota per Bulan
+                    </h6>
+                    <button class="btn btn-light btn-sm" id="chartNextButton" type="button">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="panelAnggota" class="chart-panel d-block">
                         <div style="position: relative; height: 220px;">
                             <canvas id="anggotaChart" role="img" aria-label="Grafik pendaftaran anggota baru per bulan selama 12 bulan terakhir"></canvas>
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
-                        <h6 class="fw-bold text-muted mb-3"><i class="bi bi-calendar-event-fill me-1 text-success"></i> Kegiatan per Bulan</h6>
+                    <div id="panelKegiatan" class="chart-panel d-none">
                         <div style="position: relative; height: 220px;">
                             <canvas id="kegiatanChart" role="img" aria-label="Grafik jumlah kegiatan per bulan selama 12 bulan terakhir"></canvas>
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
-                        <h6 class="fw-bold text-muted mb-3"><i class="bi bi-person-check-fill me-1 text-danger"></i> Kehadiran Anggota</h6>
+                    <div id="panelKehadiran" class="chart-panel d-none">
                         <div style="position: relative; height: 220px;">
                             <canvas id="kehadiranChart" role="img" aria-label="Grafik jumlah kehadiran anggota per bulan selama 12 bulan terakhir"></canvas>
                         </div>
@@ -141,6 +145,63 @@
 
             let chartsInitialized = false;
 
+            const chartsMeta = [
+                {
+                    id: 'anggota',
+                    title: '<i class="bi bi-people-fill me-1 text-primary"></i> Anggota (Bulan)',
+                    panelId: 'panelAnggota'
+                },
+                {
+                    id: 'kegiatan',
+                    title: '<i class="bi bi-calendar-event-fill me-1 text-success"></i> Kegiatan (Bulan)',
+                    panelId: 'panelKegiatan'
+                },
+                {
+                    id: 'kehadiran',
+                    title: '<i class="bi bi-person-check-fill me-1 text-danger"></i> Kehadiran Anggota',
+                    panelId: 'panelKehadiran'
+                }
+            ];
+
+            let activeChartIndex = 0;
+
+            function renderActiveChartPanel() {
+                const titleEl = document.getElementById('activeChartTitle');
+                if (titleEl) {
+                    titleEl.innerHTML = chartsMeta[activeChartIndex].title;
+                }
+
+                chartsMeta.forEach((meta, index) => {
+                    const panel = document.getElementById(meta.panelId);
+                    if (panel) {
+                        if (index === activeChartIndex) {
+                            panel.classList.remove('d-none');
+                            panel.classList.add('d-block');
+                        } else {
+                            panel.classList.remove('d-block');
+                            panel.classList.add('d-none');
+                        }
+                    }
+                });
+            }
+
+            const btnPrev = document.getElementById('chartPrevButton');
+            const btnNext = document.getElementById('chartNextButton');
+
+            if (btnPrev) {
+                btnPrev.addEventListener('click', function() {
+                    activeChartIndex = (activeChartIndex > 0) ? activeChartIndex - 1 : chartsMeta.length - 1;
+                    renderActiveChartPanel();
+                });
+            }
+
+            if (btnNext) {
+                btnNext.addEventListener('click', function() {
+                    activeChartIndex = (activeChartIndex < chartsMeta.length - 1) ? activeChartIndex + 1 : 0;
+                    renderActiveChartPanel();
+                });
+            }
+
             function createChart(ctxId, type, labels, data, datasetLabel, colors, options = {}) {
                 const ctx = document.getElementById(ctxId);
                 if (!ctx) return null;
@@ -202,6 +263,7 @@
                 });
 
                 chartsInitialized = true;
+                renderActiveChartPanel();
             });
         });
     </script>
