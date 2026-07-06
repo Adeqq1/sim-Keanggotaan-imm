@@ -17,6 +17,10 @@
                 <i class="bi bi-calendar-event fs-4 d-block"></i>
                 <small style="font-size: 0.7rem;">Kegiatan</small>
             </a>
+            <a href="{{ route('admin.arsip.index') }}" class="nav-link text-center py-2 {{ request()->routeIs('admin.arsip.*') ? 'text-primary font-weight-bold' : 'text-muted' }}">
+                <i class="bi bi-folder2-open fs-4 d-block"></i>
+                <small style="font-size: 0.7rem;">Arsip</small>
+            </a>
         @elseif(auth()->user()->role === 'instruktur')
             <a href="{{ route('admin.kegiatan.index') }}" class="nav-link text-center py-2 {{ request()->routeIs('admin.kegiatan.*') ? 'text-primary font-weight-bold' : 'text-muted' }}">
                 <i class="bi bi-calendar-event fs-4 d-block"></i>
@@ -50,6 +54,10 @@
             <a href="{{ route('kader.riwayat.index') }}" class="nav-link text-center py-2 {{ request()->routeIs('kader.riwayat.*') ? 'text-primary font-weight-bold' : 'text-muted' }}">
                 <i class="bi bi-clock-history fs-4 d-block"></i>
                 <small style="font-size: 0.7rem;">Riwayat</small>
+            </a>
+            <a href="{{ route('kader.arsip.index') }}" class="nav-link text-center py-2 {{ request()->routeIs('kader.arsip.*') ? 'text-primary font-weight-bold' : 'text-muted' }}">
+                <i class="bi bi-folder2-open fs-4 d-block"></i>
+                <small style="font-size: 0.7rem;">Arsip</small>
             </a>
         @endif
         <a href="{{ route('profile.edit') }}" class="nav-link text-center py-2 {{ request()->routeIs('profile.edit') ? 'text-primary font-weight-bold' : 'text-muted' }}">

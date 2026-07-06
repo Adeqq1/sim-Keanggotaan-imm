@@ -39,7 +39,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::post('/anggota/{anggota}/generate-nia', [AnggotaController::class, 'generateNia'])->name('anggota.generate-nia');
 
         // Modul Arsip
-        Route::resource('arsip', ArsipController::class)->except(['create', 'edit', 'update', 'show']);
+        Route::get('/arsip/create', [ArsipController::class, 'create'])->name('arsip.create');
+        Route::resource('arsip', ArsipController::class)->only(['index', 'store', 'destroy']);
         Route::get('/arsip/{arsip}/download', [ArsipController::class, 'download'])->name('arsip.download');
 
         // Modul Sertifikat
@@ -93,6 +94,7 @@ Route::middleware(['auth', 'role:kader'])->prefix('kader')->name('kader.')->grou
 
     // Modul Arsip
     Route::get('/arsip', [ArsipController::class, 'kaderIndex'])->name('arsip.index');
+    Route::get('/arsip/create', [ArsipController::class, 'kaderCreate'])->name('arsip.create');
     Route::post('/arsip', [ArsipController::class, 'kaderStore'])->name('arsip.store');
     Route::get('/arsip/{arsip}/download', [ArsipController::class, 'kaderDownload'])->name('arsip.download');
 });

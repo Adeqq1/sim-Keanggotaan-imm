@@ -11,6 +11,7 @@
                 <button type="submit" class="btn btn-outline-secondary btn-ui btn-ui-sm" title="Generate NIA untuk anggota yang belum memiliki NIA" onclick="return confirm('Generate NIA untuk semua anggota yang belum memiliki NIA?')">
                     <i class="bi bi-magic"></i> Generate NIA Kosong
                 </button>
+                </button>
             </form>
             <a href="{{ route('admin.anggota.create') }}" class="btn btn-primary btn-ui btn-ui-sm">
                 <i class="bi bi-plus-lg"></i> Tambah

@@ -73,6 +73,11 @@
                         <i class="bi bi-patch-plus"></i>
                         Sertifikat
                     </a>
+                    <a href="{{ route('admin.arsip.index') }}"
+                       class="sidebar-link {{ request()->routeIs('admin.arsip.*') ? 'active' : '' }}">
+                        <i class="bi bi-folder2-open"></i>
+                        E-Arsip
+                    </a>
                     @php
                         $sertifikatPending = \App\Models\Presensi::where('status_klaim', 'pending')->count();
                     @endphp
@@ -125,6 +130,11 @@
                        class="sidebar-link {{ request()->routeIs('kader.sertifikat.*') ? 'active' : '' }}">
                         <i class="bi bi-award"></i>
                         E-Sertifikat
+                    </a>
+                    <a href="{{ route('kader.arsip.index') }}"
+                       class="sidebar-link {{ request()->routeIs('kader.arsip.*') ? 'active' : '' }}">
+                        <i class="bi bi-folder2-open"></i>
+                        E-Arsip
                     </a>
                     <a href="{{ route('kader.riwayat.index') }}"
                        class="sidebar-link {{ request()->routeIs('kader.riwayat.*') ? 'active' : '' }}">

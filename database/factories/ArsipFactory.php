@@ -24,7 +24,7 @@ class ArsipFactory extends Factory
             'anggota_id' => Anggota::factory(),
             'nomor_dokumen' => fake()->unique()->numerify('DOC-####'),
             'judul_dokumen' => fake()->sentence(3),
-            'kategori_arsip' => fake()->randomElement(['surat', 'laporan', 'foto', 'lainnya']),
+            'kategori_arsip' => fake()->randomElement(array_keys(Arsip::KATEGORI)),
             'file_arsip' => 'arsip/dummy.pdf',
             'tanggal_unggah' => now()->toDateString(),
         ];
