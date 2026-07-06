@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    Storage::fake('public');
+    Storage::fake('local');
 });
 
 describe('Kader Arsip Index', function () {
@@ -26,6 +26,7 @@ describe('Kader Arsip Index', function () {
 
     test('kader bisa mengakses halaman upload arsip terpisah', function () {
         $user = User::factory()->create(['role' => 'kader']);
+        $anggota = Anggota::factory()->create(['user_id' => $user->id]);
 
         $response = $this->actingAs($user)->get(route('kader.arsip.create'));
 
@@ -33,6 +34,15 @@ describe('Kader Arsip Index', function () {
         $response->assertViewIs('kader.arsip.create');
         $response->assertSee('Surat Masuk');
         $response->assertSee('Laporan Pertanggung Jawaban (LPJ)');
+    });
+
+    test('kader tanpa profil anggota tidak bisa mengakses halaman upload arsip', function () {
+        $user = User::factory()->create(['role' => 'kader']);
+
+        $response = $this->actingAs($user)->get(route('kader.arsip.create'));
+
+        $response->assertRedirect(route('kader.dashboard'));
+        $response->assertSessionHas('error');
     });
 
     test('kader yang tidak terdaftar sebagai anggota diredirect dengan pesan error', function () {
@@ -92,6 +102,7 @@ describe('Kader Arsip Index', function () {
         $response->assertSuccessful();
         $response->assertSee('Proposal Musyawarah');
         $response->assertDontSee('Surat Undangan');
+        $response->assertSee('Reset filter');
     });
 });
 
@@ -120,7 +131,7 @@ describe('Kader Arsip Upload (Store)', function () {
         ]);
 
         $arsip = Arsip::where('anggota_id', $anggota->id)->first();
-        Storage::disk('public')->assertExists($arsip->file_arsip);
+        Storage::disk('local')->assertExists($arsip->file_arsip);
     });
 
     test('anggota_id diset otomatis dari backend meskipun kader mencoba manipulasi request', function () {
@@ -191,7 +202,7 @@ describe('Kader Arsip Download', function () {
         $anggota = Anggota::factory()->create(['user_id' => $user->id]);
 
         $filePdf = UploadedFile::fake()->create('dokumen.pdf', 100, 'application/pdf');
-        $path = Storage::disk('public')->putFile('arsip', $filePdf);
+        $path = Storage::disk('local')->putFile('arsip', $filePdf);
 
         $arsip = Arsip::factory()->create([
             'anggota_id' => $anggota->id,
@@ -213,7 +224,7 @@ describe('Kader Arsip Download', function () {
         $anggotaB = Anggota::factory()->create(['user_id' => $kaderB->id]);
 
         $filePdf = UploadedFile::fake()->create('rahasia.pdf', 100, 'application/pdf');
-        $path = Storage::disk('public')->putFile('arsip', $filePdf);
+        $path = Storage::disk('local')->putFile('arsip', $filePdf);
 
         $arsipB = Arsip::factory()->create([
             'anggota_id' => $anggotaB->id,

@@ -25,6 +25,11 @@
         <div class="col-4 col-md-2">
             <button type="submit" class="btn btn-primary w-100">Cari</button>
         </div>
+        @if(request()->filled('q') || request()->filled('kategori'))
+            <div class="col-12">
+                <a href="{{ route('admin.arsip.index') }}" class="small text-decoration-none">Reset filter</a>
+            </div>
+        @endif
     </form>
 
     @forelse($arsips as $arsip)
