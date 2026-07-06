@@ -149,18 +149,57 @@ test('admin can upload arsip', function () {
         ->post(route('admin.arsip.store'), [
             'anggota_id' => $anggota->id,
             'judul_dokumen' => 'Surat Keterangan',
-            'kategori_arsip' => 'surat',
+            'kategori_arsip' => 'surat_masuk',
             'file_arsip' => $file,
-            'tanggal_unggah' => now()->toDateString(),
         ]);
 
-    $response->assertRedirect();
+    $response->assertRedirect(route('admin.arsip.index'));
 
     $this->assertDatabaseHas('arsip', [
         'anggota_id' => $anggota->id,
         'judul_dokumen' => 'Surat Keterangan',
-        'kategori_arsip' => 'surat',
+        'kategori_arsip' => 'surat_masuk',
     ]);
+
+    expect(Arsip::where('anggota_id', $anggota->id)->first()->tanggal_unggah->toDateString())
+        ->toBe(now()->toDateString());
+});
+
+test('admin can access separate arsip upload page', function () {
+    $admin = User::factory()->admin()->create();
+    $anggota = Anggota::factory()->create(['nama_lengkap' => 'Ahmad Arsip']);
+
+    $response = $this->actingAs($admin)->get(route('admin.arsip.create'));
+
+    $response->assertSuccessful();
+    $response->assertViewIs('admin.arsip.create');
+    $response->assertSee('Ahmad Arsip');
+    $response->assertSee('Surat Keluar');
+});
+
+test('admin can search and filter arsip', function () {
+    $admin = User::factory()->admin()->create();
+
+    Arsip::factory()->create([
+        'judul_dokumen' => 'Proposal Rapat Kerja',
+        'nomor_dokumen' => 'PROP-002',
+        'kategori_arsip' => 'proposal',
+    ]);
+
+    Arsip::factory()->create([
+        'judul_dokumen' => 'Surat Keluar Cabang',
+        'nomor_dokumen' => 'SK-002',
+        'kategori_arsip' => 'surat_keluar',
+    ]);
+
+    $response = $this->actingAs($admin)->get(route('admin.arsip.index', [
+        'q' => 'PROP',
+        'kategori' => 'proposal',
+    ]));
+
+    $response->assertSuccessful();
+    $response->assertSee('Proposal Rapat Kerja');
+    $response->assertDontSee('Surat Keluar Cabang');
 });
 
 test('admin can download arsip', function () {

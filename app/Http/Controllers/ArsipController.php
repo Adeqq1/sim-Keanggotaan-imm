@@ -4,19 +4,44 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ArsipRequest;
 use App\Http\Requests\KaderArsipRequest;
+use App\Models\Anggota;
 use App\Models\Arsip;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ArsipController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $arsips = Arsip::with('anggota')->latest()->paginate(10);
+        $query = Arsip::with('anggota')->latest();
 
-        return view('admin.arsip.index', compact('arsips'));
+        if ($request->filled('q')) {
+            $q = $request->input('q');
+            $query->where(function ($subQuery) use ($q) {
+                $subQuery->where('judul_dokumen', 'like', "%{$q}%")
+                    ->orWhere('nomor_dokumen', 'like', "%{$q}%");
+            });
+        }
+
+        if ($request->filled('kategori')) {
+            $query->where('kategori_arsip', $request->input('kategori'));
+        }
+
+        return view('admin.arsip.index', [
+            'arsips' => $query->paginate(10)->withQueryString(),
+            'kategori' => Arsip::KATEGORI,
+        ]);
     }
 
-    public function kaderIndex()
+    public function create()
+    {
+        return view('admin.arsip.create', [
+            'anggotas' => Anggota::orderBy('nama_lengkap')->get(),
+            'kategori' => Arsip::KATEGORI,
+        ]);
+    }
+
+    public function kaderIndex(Request $request)
     {
         $anggota = auth()->user()->anggota;
 
@@ -24,9 +49,31 @@ class ArsipController extends Controller
             return redirect()->route('kader.dashboard')->with('error', 'Profil anggota Anda belum dibuat. Silakan hubungi admin.');
         }
 
-        $arsips = Arsip::where('anggota_id', $anggota->id)->latest()->paginate(10);
+        $query = Arsip::where('anggota_id', $anggota->id)->latest();
 
-        return view('kader.arsip.index', compact('arsips'));
+        if ($request->filled('q')) {
+            $q = $request->input('q');
+            $query->where(function ($subQuery) use ($q) {
+                $subQuery->where('judul_dokumen', 'like', "%{$q}%")
+                    ->orWhere('nomor_dokumen', 'like', "%{$q}%");
+            });
+        }
+
+        if ($request->filled('kategori')) {
+            $query->where('kategori_arsip', $request->input('kategori'));
+        }
+
+        return view('kader.arsip.index', [
+            'arsips' => $query->paginate(10)->withQueryString(),
+            'kategori' => Arsip::KATEGORI,
+        ]);
+    }
+
+    public function kaderCreate()
+    {
+        return view('kader.arsip.create', [
+            'kategori' => Arsip::KATEGORI,
+        ]);
     }
 
     public function store(ArsipRequest $request)
@@ -38,9 +85,11 @@ class ArsipController extends Controller
             $validated['file_arsip'] = $path;
         }
 
+        $validated['tanggal_unggah'] = now()->toDateString();
+
         Arsip::create($validated);
 
-        return redirect()->back()->with('success', 'Arsip berhasil diunggah.');
+        return redirect()->route('admin.arsip.index')->with('success', 'Arsip berhasil diunggah.');
     }
 
     public function kaderStore(KaderArsipRequest $request)
@@ -63,7 +112,7 @@ class ArsipController extends Controller
 
         Arsip::create($validated);
 
-        return redirect()->back()->with('success', 'Dokumen berhasil diunggah.');
+        return redirect()->route('kader.arsip.index')->with('success', 'Dokumen berhasil diunggah.');
     }
 
     public function download(Arsip $arsip)

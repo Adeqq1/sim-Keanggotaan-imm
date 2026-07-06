@@ -40,9 +40,8 @@ test('upload with disallowed file extension is rejected', function () {
         ->post(route('admin.arsip.store'), [
             'anggota_id' => $anggota->id,
             'judul_dokumen' => 'Bad File',
-            'kategori_arsip' => 'surat',
+            'kategori_arsip' => 'surat_masuk',
             'file_arsip' => $file,
-            'tanggal_unggah' => now()->toDateString(),
         ]);
 
     $response->assertSessionHasErrors('file_arsip');

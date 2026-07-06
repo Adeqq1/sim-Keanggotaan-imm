@@ -9,7 +9,7 @@
             <form action="{{ route('admin.anggota.generate-nia-bulk') }}" method="POST">
                 @csrf
                 <button type="submit" class="btn btn-outline-secondary btn-sm" title="Generate NIA untuk anggota yang belum memiliki NIA" onclick="return confirm('Generate NIA untuk semua anggota yang belum memiliki NIA?')">
-                    <i class="bi bi-magic"></i> Generate NIA Kosong
+                    <i class="bi bi-magic"></i> Generate NIA
                 </button>
             </form>
             <a href="{{ route('admin.anggota.create') }}" class="btn btn-primary btn-sm">

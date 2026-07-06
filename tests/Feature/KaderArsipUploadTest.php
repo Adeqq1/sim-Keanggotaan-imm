@@ -20,8 +20,19 @@ describe('Kader Arsip Index', function () {
 
         $response = $this->actingAs($user)->get(route('kader.arsip.index'));
 
-        $response->assertStatus(200);
+        $response->assertSuccessful();
         $response->assertViewIs('kader.arsip.index');
+    });
+
+    test('kader bisa mengakses halaman upload arsip terpisah', function () {
+        $user = User::factory()->create(['role' => 'kader']);
+
+        $response = $this->actingAs($user)->get(route('kader.arsip.create'));
+
+        $response->assertSuccessful();
+        $response->assertViewIs('kader.arsip.create');
+        $response->assertSee('Surat Masuk');
+        $response->assertSee('Laporan Pertanggung Jawaban (LPJ)');
     });
 
     test('kader yang tidak terdaftar sebagai anggota diredirect dengan pesan error', function () {
@@ -50,9 +61,37 @@ describe('Kader Arsip Index', function () {
 
         $response = $this->actingAs($kaderA)->get(route('kader.arsip.index'));
 
-        $response->assertStatus(200);
+        $response->assertSuccessful();
         $response->assertSee('Dokumen Kader A');
         $response->assertDontSee('Dokumen Kader B');
+    });
+
+    test('kader bisa mencari dan memfilter arsip miliknya', function () {
+        $user = User::factory()->create(['role' => 'kader']);
+        $anggota = Anggota::factory()->create(['user_id' => $user->id]);
+
+        Arsip::factory()->create([
+            'anggota_id' => $anggota->id,
+            'judul_dokumen' => 'Proposal Musyawarah',
+            'nomor_dokumen' => 'PROP-001',
+            'kategori_arsip' => 'proposal',
+        ]);
+
+        Arsip::factory()->create([
+            'anggota_id' => $anggota->id,
+            'judul_dokumen' => 'Surat Undangan',
+            'nomor_dokumen' => 'SM-001',
+            'kategori_arsip' => 'surat_masuk',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('kader.arsip.index', [
+            'q' => 'PROP',
+            'kategori' => 'proposal',
+        ]));
+
+        $response->assertSuccessful();
+        $response->assertSee('Proposal Musyawarah');
+        $response->assertDontSee('Surat Undangan');
     });
 });
 
@@ -65,18 +104,18 @@ describe('Kader Arsip Upload (Store)', function () {
 
         $response = $this->actingAs($user)->post(route('kader.arsip.store'), [
             'judul_dokumen' => 'Laporan Pertanggungjawaban',
-            'kategori_arsip' => 'laporan',
+            'kategori_arsip' => 'lpj',
             'nomor_dokumen' => '001/LPJ/2026',
             'file_arsip' => $filePdf,
         ]);
 
-        $response->assertRedirect();
+        $response->assertRedirect(route('kader.arsip.index'));
         $response->assertSessionHas('success', 'Dokumen berhasil diunggah.');
 
         $this->assertDatabaseHas('arsip', [
             'anggota_id' => $anggota->id,
             'judul_dokumen' => 'Laporan Pertanggungjawaban',
-            'kategori_arsip' => 'laporan',
+            'kategori_arsip' => 'lpj',
             'nomor_dokumen' => '001/LPJ/2026',
         ]);
 
@@ -101,7 +140,7 @@ describe('Kader Arsip Upload (Store)', function () {
             'file_arsip' => $filePdf,
         ]);
 
-        $response->assertRedirect();
+        $response->assertRedirect(route('kader.arsip.index'));
 
         // Dokumen harus tetap masuk atas nama Kader A
         $this->assertDatabaseHas('arsip', [
@@ -184,7 +223,7 @@ describe('Kader Arsip Download', function () {
 
         $response = $this->actingAs($kaderA)->get(route('kader.arsip.download', $arsipB));
 
-        $response->assertStatus(403);
+        $response->assertForbidden();
     });
 });
 
