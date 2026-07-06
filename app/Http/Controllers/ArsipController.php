@@ -71,6 +71,12 @@ class ArsipController extends Controller
 
     public function kaderCreate()
     {
+        $anggota = auth()->user()->anggota;
+
+        if (! $anggota) {
+            return redirect()->route('kader.dashboard')->with('error', 'Profil anggota Anda belum dibuat. Silakan hubungi admin.');
+        }
+
         return view('kader.arsip.create', [
             'kategori' => Arsip::KATEGORI,
         ]);
@@ -81,7 +87,7 @@ class ArsipController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('file_arsip')) {
-            $path = $request->file('file_arsip')->store('arsip', 'public');
+            $path = $request->file('file_arsip')->store('arsip', 'local');
             $validated['file_arsip'] = $path;
         }
 
@@ -103,7 +109,7 @@ class ArsipController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('file_arsip')) {
-            $path = $request->file('file_arsip')->store('arsip', 'public');
+            $path = $request->file('file_arsip')->store('arsip', 'local');
             $validated['file_arsip'] = $path;
         }
 
@@ -120,7 +126,7 @@ class ArsipController extends Controller
         $extension = pathinfo($arsip->file_arsip, PATHINFO_EXTENSION);
         $filename = str_replace(' ', '_', $arsip->judul_dokumen).'.'.$extension;
 
-        return Storage::disk('public')->download($arsip->file_arsip, $filename);
+        return Storage::disk('local')->download($arsip->file_arsip, $filename);
     }
 
     public function kaderDownload(Arsip $arsip)
@@ -134,13 +140,13 @@ class ArsipController extends Controller
         $extension = pathinfo($arsip->file_arsip, PATHINFO_EXTENSION);
         $filename = str_replace(' ', '_', $arsip->judul_dokumen).'.'.$extension;
 
-        return Storage::disk('public')->download($arsip->file_arsip, $filename);
+        return Storage::disk('local')->download($arsip->file_arsip, $filename);
     }
 
     public function destroy(Arsip $arsip)
     {
         if ($arsip->file_arsip) {
-            Storage::disk('public')->delete($arsip->file_arsip);
+            Storage::disk('local')->delete($arsip->file_arsip);
         }
 
         $arsip->delete();

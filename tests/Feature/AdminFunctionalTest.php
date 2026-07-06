@@ -227,6 +227,8 @@ test('admin can store presensi data', function () {
 });
 
 test('admin can upload arsip', function () {
+    Storage::fake('local');
+
     $admin = User::factory()->admin()->create();
     $anggota = Anggota::factory()->create();
 
@@ -250,6 +252,8 @@ test('admin can upload arsip', function () {
 
     expect(Arsip::where('anggota_id', $anggota->id)->first()->tanggal_unggah->toDateString())
         ->toBe(now()->toDateString());
+
+    Storage::disk('local')->assertExists(Arsip::where('anggota_id', $anggota->id)->first()->file_arsip);
 });
 
 test('admin can access separate arsip upload page', function () {
@@ -287,13 +291,14 @@ test('admin can search and filter arsip', function () {
     $response->assertSuccessful();
     $response->assertSee('Proposal Rapat Kerja');
     $response->assertDontSee('Surat Keluar Cabang');
+    $response->assertSee('Reset filter');
 });
 
 test('admin can download arsip', function () {
     $admin = User::factory()->admin()->create();
 
-    Storage::fake('public');
-    Storage::disk('public')->put('arsip/test.pdf', 'dummy content');
+    Storage::fake('local');
+    Storage::disk('local')->put('arsip/test.pdf', 'dummy content');
 
     $arsip = Arsip::factory()->create([
         'file_arsip' => 'arsip/test.pdf',
@@ -309,8 +314,8 @@ test('admin can download arsip', function () {
 test('admin can delete arsip', function () {
     $admin = User::factory()->admin()->create();
 
-    Storage::fake('public');
-    Storage::disk('public')->put('arsip/test.pdf', 'dummy content');
+    Storage::fake('local');
+    Storage::disk('local')->put('arsip/test.pdf', 'dummy content');
 
     $arsip = Arsip::factory()->create([
         'file_arsip' => 'arsip/test.pdf',
@@ -322,5 +327,5 @@ test('admin can delete arsip', function () {
     $response->assertRedirect();
 
     $this->assertDatabaseMissing('arsip', ['id' => $arsip->id]);
-    Storage::disk('public')->assertMissing('arsip/test.pdf');
+    Storage::disk('local')->assertMissing('arsip/test.pdf');
 });
