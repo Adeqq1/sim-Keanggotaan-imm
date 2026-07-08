@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\RoleEnum;
 use App\Models\Pendaftaran;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -27,6 +28,7 @@ class ValidasiPendaftaranRequest extends FormRequest
     {
         return [
             'status' => ['required', Rule::in(['disetujui', 'ditolak'])],
+            'role' => ['required_if:status,disetujui', Rule::enum(RoleEnum::class)->except(RoleEnum::ADMIN)],
             'catatan_admin' => ['required_if:status,ditolak', 'nullable', 'string'],
         ];
     }

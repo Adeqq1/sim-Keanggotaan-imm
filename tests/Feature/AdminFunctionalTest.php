@@ -19,6 +19,7 @@ test('admin can approve pendaftaran and create kader account', function () {
     $response = $this->actingAs($admin)
         ->post(route('admin.pendaftaran.validate', $pendaftaran->id), [
             'status' => 'disetujui',
+            'role' => 'kader',
         ]);
 
     $response->assertRedirect(route('admin.pendaftaran.index'));
@@ -51,7 +52,9 @@ test('admin pendaftaran detail page posts explicit status for approval action', 
 
     $response->assertOk()
         ->assertSee('name="status" value="disetujui"', false)
+        ->assertSee('name="role"', false)
         ->assertSeeText('Daftar Sebagai')
+        ->assertSeeText('Role Akun')
         ->assertSeeText('Instruktur')
         ->assertSeeText('Setujui & Buat Akun');
 });
@@ -79,6 +82,7 @@ test('admin can approve pendaftaran and create instruktur account when applicant
     $response = $this->actingAs($admin)
         ->post(route('admin.pendaftaran.validate', $pendaftaran->id), [
             'status' => 'disetujui',
+            'role' => 'instruktur',
         ]);
 
     $response->assertRedirect(route('admin.pendaftaran.index'));
@@ -87,6 +91,53 @@ test('admin can approve pendaftaran and create instruktur account when applicant
         'email' => $pendaftaran->email,
         'role' => 'instruktur',
     ]);
+});
+
+test('admin can override selected pendaftaran role during approval', function () {
+    Mail::fake();
+
+    $admin = User::factory()->admin()->create();
+    $pendaftaran = Pendaftaran::factory()->instruktur()->create();
+
+    $response = $this->actingAs($admin)
+        ->post(route('admin.pendaftaran.validate', $pendaftaran->id), [
+            'status' => 'disetujui',
+            'role' => 'kader',
+        ]);
+
+    $response->assertRedirect(route('admin.pendaftaran.index'));
+
+    $this->assertDatabaseHas('users', [
+        'email' => $pendaftaran->email,
+        'role' => 'kader',
+    ]);
+
+    $this->assertDatabaseHas('pendaftaran', [
+        'email' => $pendaftaran->email,
+        'role' => 'kader',
+        'status_validasi' => 'disetujui',
+    ]);
+});
+
+test('admin cannot approve pendaftaran with admin role', function () {
+    Mail::fake();
+
+    $admin = User::factory()->admin()->create();
+    $pendaftaran = Pendaftaran::factory()->create();
+
+    $response = $this->actingAs($admin)
+        ->post(route('admin.pendaftaran.validate', $pendaftaran->id), [
+            'status' => 'disetujui',
+            'role' => 'admin',
+        ]);
+
+    $response->assertSessionHasErrors('role');
+
+    $pendaftaran->refresh();
+    expect($pendaftaran->status_validasi)->toBe('pending')
+        ->and($pendaftaran->user_id)->toBeNull();
+
+    Mail::assertNothingQueued();
 });
 
 test('admin cannot approve pendaftaran when email already belongs to a user', function () {
@@ -101,6 +152,7 @@ test('admin cannot approve pendaftaran when email already belongs to a user', fu
     $response = $this->actingAs($admin)
         ->post(route('admin.pendaftaran.validate', $pendaftaran->id), [
             'status' => 'disetujui',
+            'role' => 'kader',
         ]);
 
     $response->assertSessionHasErrors('email');
