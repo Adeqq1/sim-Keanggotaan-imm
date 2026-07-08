@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\RoleEnum;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -62,12 +63,7 @@ class User extends Authenticatable
      */
     public function getRoleColorAttribute(): string
     {
-        return match ($this->role) {
-            'admin' => 'bg-primary',
-            'instruktur' => 'bg-info text-dark',
-            'kader' => 'bg-success',
-            default => 'bg-secondary',
-        };
+        return RoleEnum::badgeClassFor($this->role);
     }
 
     /**

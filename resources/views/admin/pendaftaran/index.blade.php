@@ -14,6 +14,7 @@
                 <div>
                     <h6 class="fw-bold mb-1">{{ $item->nama_lengkap }}</h6>
                     <small class="text-muted d-block"><i class="bi bi-envelope me-1"></i> {{ $item->email }}</small>
+                    <small class="text-muted d-block"><i class="bi bi-person-badge me-1"></i> Daftar sebagai: {{ \App\Enums\RoleEnum::labelFor($item->role) }}</small>
                     <small class="text-muted d-block"><i class="bi bi-calendar-check me-1"></i> {{ $item->tanggal_daftar->format('d M Y') }}</small>
                 </div>
                 <span class="badge {{ $item->status_validasi === 'pending' ? 'bg-warning' : ($item->status_validasi === 'disetujui' ? 'bg-success' : 'bg-danger') }}">

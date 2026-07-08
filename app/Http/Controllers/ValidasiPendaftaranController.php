@@ -35,15 +35,16 @@ class ValidasiPendaftaranController extends Controller
         $status = $validated['status'];
 
         if ($status === 'disetujui') {
+            $role = $validated['role'];
             $password = Str::password(8);
             $user = null;
 
-            DB::transaction(function () use ($pendaftar, $password, &$user) {
+            DB::transaction(function () use ($pendaftar, $password, $role, &$user) {
                 $user = User::create([
                     'name' => $pendaftar->nama_lengkap,
                     'email' => $pendaftar->email,
                     'password' => Hash::make($password),
-                    'role' => 'kader',
+                    'role' => $role,
                 ]);
 
                 Anggota::create([
@@ -58,6 +59,7 @@ class ValidasiPendaftaranController extends Controller
 
                 $pendaftar->update([
                     'user_id' => $user->id,
+                    'role' => $role,
                     'status_validasi' => 'disetujui',
                     'catatan_admin' => 'Pendaftaran disetujui.',
                 ]);

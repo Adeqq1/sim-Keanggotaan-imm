@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\RoleEnum;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PendaftaranRequest extends FormRequest
 {
@@ -24,7 +26,15 @@ class PendaftaranRequest extends FormRequest
     {
         return [
             'nama_lengkap' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255'],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email'),
+                Rule::unique('pendaftaran', 'email')->where('status_validasi', 'pending'),
+            ],
+            'role' => ['required', Rule::enum(RoleEnum::class)->except(RoleEnum::ADMIN)],
             'tempat_lahir' => ['required', 'string', 'max:255'],
             'tanggal_lahir' => ['required', 'date'],
             'no_telp' => ['required', 'string', 'max:20'],

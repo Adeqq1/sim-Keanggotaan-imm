@@ -14,6 +14,12 @@
                 <small class="text-muted d-block">Email</small>
                 <span class="fw-bold">{{ $pendaftaran->email }}</span>
             </div>
+            <div class="col-12">
+                <small class="text-muted d-block">Daftar Sebagai</small>
+                <span class="badge {{ \App\Enums\RoleEnum::badgeClassFor($pendaftaran->role) }}">
+                    {{ \App\Enums\RoleEnum::labelFor($pendaftaran->role) }}
+                </span>
+            </div>
             <div class="col-6">
                 <small class="text-muted d-block">Tempat Lahir</small>
                 <span class="fw-bold">{{ $pendaftaran->tempat_lahir }}</span>
@@ -55,6 +61,16 @@
             <form action="{{ route('admin.pendaftaran.validate', $pendaftaran) }}" method="POST" class="mb-3">
                 @csrf
                 <input type="hidden" name="status" value="disetujui">
+
+                <label class="form-label small fw-bold">Role Akun</label>
+                <select name="role" class="form-select @error('role') is-invalid @enderror mb-3" required>
+                    <option value="kader" @selected(old('role', $pendaftaran->role ?? 'kader') === 'kader')>Kader</option>
+                    <option value="instruktur" @selected(old('role', $pendaftaran->role ?? 'kader') === 'instruktur')>Instruktur</option>
+                </select>
+                <div class="form-text small mb-3">Konfirmasi role final sebelum akun dibuat.</div>
+                @error('role')
+                    <div class="invalid-feedback d-block mb-3">{{ $message }}</div>
+                @enderror
 
                 <button type="submit" class="btn btn-success w-100 py-3 fw-bold">
                     <i class="bi bi-check-circle me-2"></i> Setujui & Buat Akun
