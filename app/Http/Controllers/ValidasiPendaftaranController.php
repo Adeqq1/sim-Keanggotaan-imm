@@ -43,7 +43,7 @@ class ValidasiPendaftaranController extends Controller
                     'name' => $pendaftar->nama_lengkap,
                     'email' => $pendaftar->email,
                     'password' => Hash::make($password),
-                    'role' => 'kader',
+                    'role' => $pendaftar->role ?? 'kader',
                 ]);
 
                 Anggota::create([

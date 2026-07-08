@@ -21,6 +21,17 @@
             @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
 
+        <div class="mb-3">
+            <label class="form-label small fw-bold">Daftar Sebagai</label>
+            <select name="role" class="form-select @error('role') is-invalid @enderror" required>
+                <option value="">Pilih jenis pendaftaran</option>
+                <option value="kader" @selected(old('role') === 'kader')>Kader</option>
+                <option value="instruktur" @selected(old('role') === 'instruktur')>Instruktur</option>
+            </select>
+            <div class="form-text small">Pilihan ini akan menentukan role akun Anda jika pendaftaran disetujui admin.</div>
+            @error('role') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
+
         <div class="row">
             <div class="col-6 mb-3">
                 <label class="form-label small fw-bold">Tempat Lahir</label>

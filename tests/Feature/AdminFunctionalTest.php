@@ -44,14 +44,49 @@ test('admin can approve pendaftaran and create kader account', function () {
 
 test('admin pendaftaran detail page posts explicit status for approval action', function () {
     $admin = User::factory()->admin()->create();
-    $pendaftaran = Pendaftaran::factory()->create();
+    $pendaftaran = Pendaftaran::factory()->instruktur()->create();
 
     $response = $this->actingAs($admin)
         ->get(route('admin.pendaftaran.show', $pendaftaran));
 
     $response->assertOk()
         ->assertSee('name="status" value="disetujui"', false)
+        ->assertSeeText('Daftar Sebagai')
+        ->assertSeeText('Instruktur')
         ->assertSeeText('Setujui & Buat Akun');
+});
+
+test('admin pendaftaran index shows selected role', function () {
+    $admin = User::factory()->admin()->create();
+    Pendaftaran::factory()->instruktur()->create([
+        'nama_lengkap' => 'Fatimah Instruktur',
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.index'));
+
+    $response->assertOk();
+    $response->assertSeeText('Fatimah Instruktur');
+    $response->assertSeeText('Daftar sebagai: Instruktur');
+});
+
+test('admin can approve pendaftaran and create instruktur account when applicant chooses instruktur role', function () {
+    Mail::fake();
+
+    $admin = User::factory()->admin()->create();
+    $pendaftaran = Pendaftaran::factory()->instruktur()->create();
+
+    $response = $this->actingAs($admin)
+        ->post(route('admin.pendaftaran.validate', $pendaftaran->id), [
+            'status' => 'disetujui',
+        ]);
+
+    $response->assertRedirect(route('admin.pendaftaran.index'));
+
+    $this->assertDatabaseHas('users', [
+        'email' => $pendaftaran->email,
+        'role' => 'instruktur',
+    ]);
 });
 
 test('admin cannot approve pendaftaran when email already belongs to a user', function () {

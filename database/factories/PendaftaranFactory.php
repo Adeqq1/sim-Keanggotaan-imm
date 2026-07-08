@@ -22,6 +22,7 @@ class PendaftaranFactory extends Factory
         return [
             'nama_lengkap' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'role' => 'kader',
             'tempat_lahir' => fake()->city(),
             'tanggal_lahir' => fake()->date('Y-m-d', '2005-01-01'),
             'no_telp' => fake()->phoneNumber(),
@@ -39,6 +40,16 @@ class PendaftaranFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'status_validasi' => 'disetujui',
             'catatan_admin' => 'Pendaftaran disetujui.',
+        ]);
+    }
+
+    /**
+     * Indicate that the pendaftaran is for an instruktur account.
+     */
+    public function instruktur(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'instruktur',
         ]);
     }
 

@@ -14,6 +14,12 @@
                 <small class="text-muted d-block">Email</small>
                 <span class="fw-bold">{{ $pendaftaran->email }}</span>
             </div>
+            <div class="col-12">
+                <small class="text-muted d-block">Daftar Sebagai</small>
+                <span class="badge {{ ($pendaftaran->role ?? 'kader') === 'instruktur' ? 'bg-info text-dark' : 'bg-success' }}">
+                    {{ ucfirst($pendaftaran->role ?? 'kader') }}
+                </span>
+            </div>
             <div class="col-6">
                 <small class="text-muted d-block">Tempat Lahir</small>
                 <span class="fw-bold">{{ $pendaftaran->tempat_lahir }}</span>
