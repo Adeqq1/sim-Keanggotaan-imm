@@ -47,7 +47,7 @@
         @if($claim->bukti_kehadiran)
             <!-- Modal Detail Bukti -->
             <div class="modal fade" id="proofModal{{ $claim->id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-lg mx-3">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg mx-3">
                     <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
                         <div class="modal-header border-0 pb-0">
                             <h5 class="fw-bold mb-0">Bukti Kehadiran - {{ $claim->anggota->nama_lengkap }}</h5>

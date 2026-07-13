@@ -56,7 +56,7 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label fw-bold">NIA</label>
-                        <div class="input-group">
+                        <div class="input-group responsive-input-group">
                             <input type="text" name="nia" id="nia" class="form-control @error('nia') is-invalid @enderror" value="{{ old('nia', $anggota->nia) }}" placeholder="8 digit angka" maxlength="8">
                             @if(empty($anggota->nia))
                                 {{-- form="form-generate-nia" mengaitkan button ini ke form di luar, menghindari nested form --}}
@@ -149,7 +149,7 @@
 
                 <hr class="my-4">
 
-                <div class="d-flex gap-2">
+                <div class="d-flex flex-column flex-sm-row gap-2">
                     <button type="submit" class="btn btn-primary btn-ui">
                         <i class="bi bi-save"></i> Update
                     </button>

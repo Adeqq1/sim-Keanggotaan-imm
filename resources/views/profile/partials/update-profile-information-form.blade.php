@@ -45,11 +45,11 @@
         </div>
 
         <div class="row">
-            <div class="col-6 mb-3">
+            <div class="col-12 col-sm-6 mb-3">
                 <label class="form-label small fw-bold">Tempat Lahir</label>
                 <input type="text" name="tempat_lahir" class="form-control @error('tempat_lahir') is-invalid @enderror" value="{{ old('tempat_lahir', $user->anggota->tempat_lahir ?? '') }}">
             </div>
-            <div class="col-6 mb-3">
+            <div class="col-12 col-sm-6 mb-3">
                 <label class="form-label small fw-bold">Tanggal Lahir</label>
                 <input type="date" name="tanggal_lahir" class="form-control @error('tanggal_lahir') is-invalid @enderror" value="{{ old('tanggal_lahir', $user->anggota && $user->anggota->tanggal_lahir ? $user->anggota->tanggal_lahir->format('Y-m-d') : '') }}">
             </div>
@@ -65,7 +65,7 @@
             <textarea name="alamat" class="form-control @error('alamat') is-invalid @enderror" rows="3">{{ old('alamat', $user->anggota->alamat ?? '') }}</textarea>
         </div>
 
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3">
             <button type="submit" class="btn btn-primary btn-ui px-4">Simpan Perubahan</button>
 
             @if (session('status') === 'profile-updated')

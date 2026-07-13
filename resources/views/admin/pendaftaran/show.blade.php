@@ -20,11 +20,11 @@
                     {{ \App\Enums\RoleEnum::labelFor($pendaftaran->role) }}
                 </span>
             </div>
-            <div class="col-6">
+            <div class="col-12 col-sm-6">
                 <small class="text-muted d-block">Tempat Lahir</small>
                 <span class="fw-bold">{{ $pendaftaran->tempat_lahir }}</span>
             </div>
-            <div class="col-6">
+            <div class="col-12 col-sm-6">
                 <small class="text-muted d-block">Tanggal Lahir</small>
                 <span class="fw-bold">{{ $pendaftaran->tanggal_lahir->format('d/m/Y') }}</span>
             </div>

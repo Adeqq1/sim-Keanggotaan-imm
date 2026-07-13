@@ -10,7 +10,7 @@
         <div class="col-12 col-lg-5">
             <div class="card p-4 border-0 shadow-lg h-100"
                  style="background: linear-gradient(135deg, #800000 0%, #a00000 100%); color: white; border-radius: 20px;">
-                <div class="d-flex align-items-center mb-4">
+                <div class="d-flex align-items-center min-w-0 mb-4">
                     <div class="me-3 position-relative">
                         @if(auth()->user()->anggota && auth()->user()->anggota->foto_profil)
                             <img src="{{ Storage::url(auth()->user()->anggota->foto_profil) }}"
@@ -25,8 +25,8 @@
                         @endif
                         <span class="position-absolute bottom-0 end-0 bg-success border border-white border-2 rounded-circle p-2 shadow-sm"></span>
                     </div>
-                    <div>
-                        <h5 class="fw-bold mb-0 text-white">{{ auth()->user()->name }}</h5>
+                    <div class="min-w-0">
+                        <h5 class="fw-bold mb-0 text-white text-break">{{ auth()->user()->name }}</h5>
                         <small class="opacity-75 text-white">NIA: {{ auth()->user()->anggota->nia ?? '-' }}</small>
                     </div>
                 </div>
@@ -98,14 +98,14 @@
         @forelse($kegiatan_terdekat as $kegiatan)
             <div class="col-12 col-lg-6">
                 <div class="card p-3 border-0 shadow-sm kegiatan-card" style="border-radius: 15px;">
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center min-w-0">
                         <div class="bg-light rounded p-2 me-3 text-center" style="min-width: 55px; border-radius: 12px !important;">
                             <span class="d-block fw-bold text-primary fs-5">{{ $kegiatan->tanggal_waktu->format('d') }}</span>
                             <span class="small text-muted text-uppercase fw-bold" style="font-size: 0.6rem;">{{ $kegiatan->tanggal_waktu->format('M Y') }}</span>
                         </div>
-                        <div class="overflow-hidden">
-                            <h6 class="mb-0 fw-bold text-truncate">{{ $kegiatan->nama_kegiatan }}</h6>
-                            <small class="text-muted d-block text-truncate"><i class="bi bi-geo-alt me-1"></i> {{ $kegiatan->lokasi }}</small>
+                        <div class="min-w-0">
+                            <h6 class="mb-0 fw-bold text-break">{{ $kegiatan->nama_kegiatan }}</h6>
+                            <small class="text-muted d-block text-break"><i class="bi bi-geo-alt me-1"></i> {{ $kegiatan->lokasi }}</small>
                             <small class="text-primary fw-bold" style="font-size: 0.65rem;"><i class="bi bi-clock me-1"></i> {{ $kegiatan->tanggal_waktu->format('H:i') }} WIB</small>
                         </div>
                     </div>

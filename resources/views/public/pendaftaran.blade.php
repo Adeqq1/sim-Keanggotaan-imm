@@ -33,11 +33,11 @@
         </div>
 
         <div class="row">
-            <div class="col-6 mb-3">
+            <div class="col-12 col-sm-6 mb-3">
                 <label class="form-label small fw-bold">Tempat Lahir</label>
                 <input type="text" name="tempat_lahir" class="form-control @error('tempat_lahir') is-invalid @enderror" value="{{ old('tempat_lahir') }}" required>
             </div>
-            <div class="col-6 mb-3">
+            <div class="col-12 col-sm-6 mb-3">
                 <label class="form-label small fw-bold">Tanggal Lahir</label>
                 <input type="date" name="tanggal_lahir" class="form-control @error('tanggal_lahir') is-invalid @enderror" value="{{ old('tanggal_lahir') }}" required>
             </div>

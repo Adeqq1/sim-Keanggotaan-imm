@@ -22,7 +22,7 @@
                 <i class="bi bi-shield-check text-white fs-3"></i>
             </div>
 
-            <div class="d-flex align-items-center mt-3">
+            <div class="d-flex align-items-center min-w-0 mt-3">
                 <div class="me-3">
                     @if($anggota->foto_profil)
                         <img src="{{ Storage::url($anggota->foto_profil) }}" class="rounded-3 border border-2 border-white shadow-sm" width="70" height="85" style="object-fit: cover;">
@@ -32,8 +32,8 @@
                         </div>
                     @endif
                 </div>
-                <div class="text-white">
-                    <h6 class="fw-bold mb-0" style="font-size: 0.9rem;">{{ strtoupper($anggota->nama_lengkap) }}</h6>
+                <div class="text-white min-w-0">
+                    <h6 class="fw-bold mb-0 text-break" style="font-size: 0.9rem;">{{ strtoupper($anggota->nama_lengkap) }}</h6>
                     <p class="mb-1 fw-bold text-warning" style="font-size: 0.8rem; letter-spacing: 1px;">NIA: {{ $anggota->nia }}</p>
                     <small class="d-block opacity-75" style="font-size: 0.6rem;">AKTIF SEJAK: {{ $anggota->created_at->format('Y') }}</small>
                 </div>

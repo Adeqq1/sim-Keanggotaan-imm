@@ -28,13 +28,13 @@
     <h6 class="fw-bold mb-3">Daftar Kehadiran</h6>
     @forelse($presensis as $p)
         <div class="card mb-2 p-3 border-0 shadow-sm" style="border-radius: 15px;">
-            <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center overflow-hidden">
+            <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="d-flex align-items-center min-w-0">
                     <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; min-width: 40px;">
                         <i class="bi bi-calendar-check text-primary"></i>
                     </div>
-                    <div class="overflow-hidden">
-                        <h6 class="mb-0 fw-bold text-truncate" style="font-size: 0.85rem;">{{ $p->kegiatan->nama_kegiatan }}</h6>
+                    <div class="min-w-0">
+                        <h6 class="mb-0 fw-bold text-break" style="font-size: 0.85rem;">{{ $p->kegiatan->nama_kegiatan }}</h6>
                         <small class="text-muted d-block" style="font-size: 0.7rem;">{{ $p->kegiatan->tanggal_waktu->format('d M Y') }}</small>
                     </div>
                 </div>
@@ -46,7 +46,7 @@
             @php
                 $sertifikat = $sertifikats->get($p->kegiatan_id);
             @endphp
-            <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+            <div class="mt-3 pt-2 border-top d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
                 <div class="small text-muted" style="font-size: 0.75rem;">
                     Sertifikat: 
                     @if($p->status_klaim === 'pending')
@@ -76,7 +76,7 @@
         @if($p->status_klaim === null || $p->status_klaim === 'ditolak')
             <!-- Modal Klaim -->
             <div class="modal fade" id="claimModal{{ $p->id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered mx-3">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable mx-3">
                     <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
                         <form action="{{ route('kader.sertifikat.klaim', $p) }}" method="POST" enctype="multipart/form-data">
                             @csrf

@@ -17,20 +17,20 @@
                 $status = $presensi ? $presensi->status_kehadiran : 'hadir';
             @endphp
             <div class="card mb-2 p-3">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center">
+                <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2">
+                    <div class="d-flex align-items-center min-w-0">
                         <div class="me-3">
                             <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-primary small fw-bold" style="width: 35px; height: 35px;">
                                 {{ substr($anggota->nama_lengkap, 0, 1) }}
                             </div>
                         </div>
-                        <div>
-                            <h6 class="fw-bold mb-0" style="font-size: 0.9rem;">{{ $anggota->nama_lengkap }}</h6>
+                        <div class="min-w-0">
+                            <h6 class="fw-bold mb-0 text-break" style="font-size: 0.9rem;">{{ $anggota->nama_lengkap }}</h6>
                             <small class="text-muted" style="font-size: 0.75rem;">NIA: {{ $anggota->nia ?? '-' }}</small>
                         </div>
                     </div>
                     
-                    <div class="btn-group btn-group-sm presensi-control" role="group" aria-label="Status kehadiran {{ $anggota->nama_lengkap }}">
+                    <div class="btn-group btn-group-sm presensi-control align-self-end align-self-sm-auto" role="group" aria-label="Status kehadiran {{ $anggota->nama_lengkap }}">
                         <input type="radio" class="btn-check" name="presensi[{{ $anggota->id }}]" id="hadir{{ $anggota->id }}" value="hadir" {{ $status === 'hadir' ? 'checked' : '' }}>
                         <label class="btn btn-outline-success px-2" for="hadir{{ $anggota->id }}" title="Hadir"><span aria-hidden="true">H</span><span class="visually-hidden">Hadir</span></label>
 

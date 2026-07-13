@@ -12,11 +12,11 @@
                 <input type="text" name="judul_dokumen" class="form-control" placeholder="Contoh: SK Pelantikan 2024" required>
             </div>
             <div class="row">
-                <div class="col-6 mb-3">
+                <div class="col-12 col-sm-6 mb-3">
                     <label class="form-label small fw-bold">Nomor Dokumen</label>
                     <input type="text" name="nomor_dokumen" class="form-control" placeholder="001/SK/..." required>
                 </div>
-                <div class="col-6 mb-3">
+                <div class="col-12 col-sm-6 mb-3">
                     <label class="form-label small fw-bold">Kategori</label>
                     <select name="kategori_arsip" class="form-select" required>
                         <option value="surat_keputusan">SK</option>

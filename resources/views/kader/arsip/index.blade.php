@@ -30,7 +30,7 @@
                 @enderror
             </div>
             <div class="row">
-                <div class="col-6 mb-3">
+                <div class="col-12 col-sm-6 mb-3">
                     <label class="form-label small fw-bold">Kategori</label>
                     <select name="kategori_arsip" class="form-select bg-light border-0 @error('kategori_arsip') is-invalid @enderror" required>
                         <option value="laporan" {{ old('kategori_arsip') === 'laporan' ? 'selected' : '' }}>Laporan</option>
@@ -42,7 +42,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-                <div class="col-6 mb-3">
+                <div class="col-12 col-sm-6 mb-3">
                     <label class="form-label small fw-bold">No. Dokumen</label>
                     <input type="text" name="nomor_dokumen" class="form-control bg-light border-0 @error('nomor_dokumen') is-invalid @enderror" placeholder="Opsional" value="{{ old('nomor_dokumen') }}">
                     @error('nomor_dokumen')

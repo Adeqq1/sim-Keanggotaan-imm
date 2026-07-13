@@ -3,9 +3,9 @@
         Manajemen Anggota
     </x-slot>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-4">
         <h6 class="fw-bold mb-0">Daftar Anggota</h6>
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-column flex-sm-row gap-2">
             <form action="{{ route('admin.anggota.generate-nia-bulk') }}" method="POST">
                 @csrf
                 <button type="submit" class="btn btn-outline-secondary btn-ui btn-ui-sm" title="Generate NIA untuk anggota yang belum memiliki NIA" onclick="return confirm('Generate NIA untuk semua anggota yang belum memiliki NIA?')">
@@ -40,7 +40,7 @@
 
     @forelse($anggotas as $anggota)
         <div class="card mb-3 p-3">
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center gap-2">
                 <div class="me-3">
                     @if($anggota->foto_profil)
                         <img src="{{ Storage::url($anggota->foto_profil) }}" class="rounded-circle shadow-sm" width="50" height="50" style="object-fit: cover;">
@@ -50,9 +50,9 @@
                         </div>
                     @endif
                 </div>
-                <div class="flex-grow-1">
-                    <div class="d-flex align-items-center gap-2 mb-1">
-                        <h6 class="fw-bold mb-0">{{ $anggota->nama_lengkap }}</h6>
+                <div class="flex-grow-1 min-w-0">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                        <h6 class="fw-bold mb-0 text-break">{{ $anggota->nama_lengkap }}</h6>
                         @if($anggota->user)
                             <span class="badge {{ $anggota->user->role_color }}" style="font-size: 0.7rem;">
                                 {{ ucfirst($anggota->user->role) }}

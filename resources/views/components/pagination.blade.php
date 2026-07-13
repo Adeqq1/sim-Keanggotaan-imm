@@ -1,5 +1,5 @@
 @if ($paginator->hasPages())
-    <nav class="d-flex justify-content-center mt-4 mb-2">
+    <nav class="pagination-wrapper d-flex justify-content-start justify-content-sm-center mt-4 mb-2" aria-label="Navigasi halaman">
         <ul class="pagination pagination-sm shadow-sm" style="border-radius: 10px; overflow: hidden; border: none;">
             {{-- Previous Page Link --}}
             @if ($paginator->onFirstPage())

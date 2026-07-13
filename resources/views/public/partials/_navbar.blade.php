@@ -1,7 +1,7 @@
 <nav class="navbar navbar-imm navbar-expand-lg sticky-top shadow-sm" x-data="{ open: false }">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('landing') }}">
-                <img src="{{ asset('images/logo.png') }}" alt="IMM Logo" class="navbar-logo-img" style="max-height:3.6rem;">
+        <a class="navbar-brand d-flex align-items-center gap-2 min-w-0" href="{{ route('landing') }}">
+                <img src="{{ asset('images/logo.png') }}" alt="IMM Logo" class="navbar-logo-img" style="max-height:3.6rem; max-width: 100%;">
             <span class="navbar-brand-text d-none d-sm-inline">Ikatan Mahasiswa Muhammadiyah</span>
             <span class="navbar-brand-text d-inline d-sm-none">IMM</span>
         </a>

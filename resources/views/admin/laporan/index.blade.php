@@ -17,11 +17,11 @@
         </div>
 
         <div class="row">
-            <div class="col-6 mb-3">
+            <div class="col-12 col-sm-6 mb-3">
                 <label class="form-label small fw-bold">Tanggal Mulai</label>
                 <input type="date" id="tanggal_mulai" class="form-control" value="{{ date('Y-m-01') }}" required>
             </div>
-            <div class="col-6 mb-3">
+            <div class="col-12 col-sm-6 mb-3">
                 <label class="form-label small fw-bold">Tanggal Selesai</label>
                 <input type="date" id="tanggal_selesai" class="form-control" value="{{ date('Y-m-d') }}" required>
             </div>

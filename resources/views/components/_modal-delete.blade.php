@@ -1,7 +1,7 @@
 @props(['id', 'action', 'message' => 'Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.'])
 
 <div class="modal fade" id="{{ $id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered mx-3">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable mx-3">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
             <div class="modal-body text-center p-4">
                 <div class="mb-3">

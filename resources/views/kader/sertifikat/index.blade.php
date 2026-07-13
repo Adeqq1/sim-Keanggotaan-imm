@@ -10,14 +10,14 @@
 
     @forelse($sertifikats as $cert)
         <div class="card mb-3 p-3 border-0 shadow-sm" style="border-radius: 15px;">
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center gap-2">
                 <div class="me-3">
                     <div class="rounded-3 bg-success bg-opacity-10 d-flex align-items-center justify-content-center text-success shadow-sm" style="width: 55px; height: 55px;">
                         <i class="bi bi-award-fill fs-2"></i>
                     </div>
                 </div>
-                <div class="flex-grow-1 overflow-hidden">
-                    <h6 class="fw-bold mb-1 text-truncate">{{ $cert->kegiatan->nama_kegiatan }}</h6>
+                <div class="flex-grow-1 min-w-0">
+                    <h6 class="fw-bold mb-1 text-break">{{ $cert->kegiatan->nama_kegiatan }}</h6>
                     <small class="text-muted d-block" style="font-size: 0.75rem;">Diterbitkan: {{ $cert->created_at->format('d M Y') }}</small>
                     <small class="text-primary fw-bold d-block" style="font-size: 0.65rem;">No: {{ $cert->nomor_sertifikat }}</small>
                 </div>

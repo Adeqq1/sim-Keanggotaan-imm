@@ -49,6 +49,17 @@ body {
     padding-bottom: 80px; /* ruang bottom nav */
 }
 
+img,
+svg,
+video,
+canvas {
+    max-width: 100%;
+}
+
+.min-w-0 {
+    min-width: 0;
+}
+
 .card {
     border: none;
     border-radius: 12px;
@@ -231,6 +242,7 @@ body {
    ============================================ */
 .app-wrapper {
     min-height: 100vh;
+    min-width: 0;
 }
 
 /* Desktop header (topbar di area konten) */
@@ -251,6 +263,8 @@ body {
     font-weight: 700;
     color: #1a1a2e;
     margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 .desktop-topbar .user-menu-btn {
     display: flex;
@@ -288,6 +302,118 @@ body {
 /* Main content area */
 .app-main-content {
     padding: 1.5rem;
+    min-width: 0;
+}
+
+.navbar-header h1 {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.navbar-header > div {
+    gap: 1rem;
+}
+
+.bottom-nav-items {
+    width: 100%;
+}
+
+.bottom-nav-items .nav-link {
+    flex: 1 1 0;
+    min-width: 0;
+    line-height: 1.1;
+}
+
+.bottom-nav-items small {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.pagination-wrapper {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.pagination-wrapper .pagination {
+    width: max-content;
+}
+
+.modal-dialog {
+    max-width: calc(100% - 2rem);
+}
+
+.modal-content {
+    max-height: calc(100vh - 2rem);
+}
+
+.modal-body {
+    overflow-y: auto;
+}
+
+.responsive-input-group {
+    flex-wrap: wrap;
+}
+
+.responsive-input-group > .form-control {
+    flex: 1 1 100%;
+    width: 100%;
+    border-radius: var(--bs-border-radius);
+}
+
+.responsive-input-group > .btn,
+.responsive-input-group > .input-group-text {
+    margin-top: -1px;
+}
+
+.responsive-input-group > .btn {
+    width: 100%;
+    border-radius: var(--bs-border-radius);
+}
+
+.responsive-input-group > .input-group-text {
+    width: 100%;
+    justify-content: center;
+    border-radius: var(--bs-border-radius);
+}
+
+@media (min-width: 576px) {
+    .responsive-input-group {
+        flex-wrap: nowrap;
+    }
+
+    .responsive-input-group > .form-control {
+        flex: 1 1 auto;
+        width: 1%;
+        border-radius: var(--bs-border-radius) 0 0 var(--bs-border-radius);
+    }
+
+    .responsive-input-group > .btn,
+    .responsive-input-group > .input-group-text {
+        width: auto;
+        margin-top: 0;
+        border-radius: 0 var(--bs-border-radius) var(--bs-border-radius) 0;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .app-main-content {
+        padding: 1rem;
+    }
+
+    .app-main-content > .card > .card-body,
+    .app-main-content > .card.p-4,
+    .app-main-content > .card.p-5 {
+        padding: 1rem !important;
+    }
+
+    .auth-split-right {
+        padding: 1rem;
+    }
+
+    .auth-card {
+        padding: 1.5rem;
+    }
 }
 
 /* ============================================
