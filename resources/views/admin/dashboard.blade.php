@@ -6,7 +6,7 @@
     {{-- Area Statistik Grafik: hanya di desktop --}}
     <div class="d-none d-lg-block mb-4">
         <div class="d-flex justify-content-end mb-3">
-            <button class="btn btn-primary btn-sm shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#chartCollapse" aria-expanded="false" aria-controls="chartCollapse">
+            <button class="btn btn-primary btn-ui btn-ui-sm shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#chartCollapse" aria-expanded="false" aria-controls="chartCollapse">
                 <i class="bi bi-graph-up me-1"></i> Tampilkan Grafik Statistik
             </button>
         </div>

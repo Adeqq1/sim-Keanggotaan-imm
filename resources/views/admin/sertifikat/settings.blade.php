@@ -5,7 +5,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h6 class="fw-bold mb-0">Atur Background E-Sertifikat</h6>
-        <a href="{{ route('admin.sertifikat.index') }}" class="btn btn-outline-secondary btn-sm">
+        <a href="{{ route('admin.sertifikat.index') }}" class="btn btn-outline-secondary btn-ui btn-ui-sm">
             <i class="bi bi-arrow-left"></i> Kembali
         </a>
     </div>
@@ -50,7 +50,7 @@
                     </div>
 
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary py-3 fw-bold">
+                        <button type="submit" class="btn btn-primary btn-ui py-3">
                             <i class="bi bi-save me-2"></i> Simpan Perubahan
                         </button>
                     </div>

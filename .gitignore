@@ -30,9 +30,9 @@ GEMINI.md
 CRUD_ANGGOTA_RESOLVED.md
 DEVELOPER_GUIDE.md
 ANALISIS_ERROR.md
-AGENTS.md
 /docs
 /.kiro
 issue.md
 /database/seeders/StressTestSeeder.php
 CLAUDE.md
+AGENTS.md

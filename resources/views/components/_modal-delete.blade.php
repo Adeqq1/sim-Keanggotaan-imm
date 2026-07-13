@@ -14,9 +14,9 @@
                     <form action="{{ $action }}" method="POST">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-danger w-100 py-2 fw-bold" style="border-radius: 10px;">Ya, Hapus Data</button>
+                        <button type="submit" class="btn btn-danger btn-ui w-100 py-2">Ya, Hapus Data</button>
                     </form>
-                    <button type="button" class="btn btn-light w-100 py-2 fw-bold" data-bs-dismiss="modal" style="border-radius: 10px;">Batal</button>
+                    <button type="button" class="btn btn-outline-secondary btn-ui w-100 py-2" data-bs-dismiss="modal">Batal</button>
                 </div>
             </div>
         </div>

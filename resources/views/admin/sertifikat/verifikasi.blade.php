@@ -27,17 +27,17 @@
                 </div>
             </div>
             
-            <div class="d-flex justify-content-end gap-2 border-top pt-2">
+            <div class="action-group border-top pt-2">
                 <form action="{{ route('admin.sertifikat.verifikasi.tolak', $claim) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menolak klaim sertifikat ini?')">
                     @csrf
-                    <button type="submit" class="btn btn-sm btn-outline-danger px-3" style="border-radius: 8px; font-size: 0.75rem;">
+                    <button type="submit" class="btn btn-sm btn-outline-danger btn-ui btn-ui-sm px-3">
                         <i class="bi bi-x-circle me-1"></i> Tolak
                     </button>
                 </form>
                 
                 <form action="{{ route('admin.sertifikat.verifikasi.setuju', $claim) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menyetujui klaim ini?')">
                     @csrf
-                    <button type="submit" class="btn btn-sm btn-success px-3" style="border-radius: 8px; font-size: 0.75rem;">
+                    <button type="submit" class="btn btn-sm btn-success btn-ui btn-ui-sm px-3">
                         <i class="bi bi-check-circle me-1"></i> Setujui
                     </button>
                 </form>
@@ -58,7 +58,7 @@
                             <div class="mt-2 text-muted small">Kegiatan: {{ $claim->kegiatan->nama_kegiatan }}</div>
                         </div>
                         <div class="modal-footer border-0 pt-0">
-                            <button type="button" class="btn btn-light btn-sm fw-semibold" data-bs-dismiss="modal" style="border-radius: 8px;">Tutup</button>
+                            <button type="button" class="btn btn-outline-secondary btn-ui btn-ui-sm" data-bs-dismiss="modal">Tutup</button>
                         </div>
                     </div>
                 </div>

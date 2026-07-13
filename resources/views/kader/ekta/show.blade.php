@@ -46,10 +46,10 @@
     </div>
 
     <div class="d-grid gap-3">
-        <a href="{{ route('kader.ekta.download') }}" class="btn btn-primary py-3 fw-bold">
+        <a href="{{ route('kader.ekta.download') }}" class="btn btn-primary btn-ui py-3">
             <i class="bi bi-download me-2"></i> Download KTA (PDF)
         </a>
-        <button onclick="window.print()" class="btn btn-outline-secondary py-3 fw-bold">
+        <button onclick="window.print()" class="btn btn-outline-secondary btn-ui py-3">
             <i class="bi bi-printer me-2"></i> Cetak Kartu
         </button>
     </div>

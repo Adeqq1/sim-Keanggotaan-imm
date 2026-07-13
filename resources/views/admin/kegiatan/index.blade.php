@@ -5,7 +5,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h6 class="fw-bold mb-0">Daftar Kegiatan</h6>
-        <a href="{{ route('admin.kegiatan.create') }}" class="btn btn-primary btn-sm">
+        <a href="{{ route('admin.kegiatan.create') }}" class="btn btn-primary btn-ui btn-ui-sm">
             <i class="bi bi-plus-lg"></i> Tambah
         </a>
     </div>
@@ -25,7 +25,7 @@
                     <small class="text-muted d-block"><i class="bi bi-geo-alt me-1"></i> {{ $kegiatan->lokasi }}</small>
                 </div>
                 <div class="dropdown">
-                    <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                    <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown" aria-label="Aksi untuk {{ $kegiatan->nama_kegiatan }}">
                         <i class="bi bi-three-dots-vertical fs-5"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">

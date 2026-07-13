@@ -6,10 +6,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h6 class="fw-bold mb-0">Riwayat Sertifikat</h6>
         <div class="d-flex gap-2">
-            <a href="{{ route('admin.sertifikat.settings') }}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">
+            <a href="{{ route('admin.sertifikat.settings') }}" class="btn btn-outline-secondary btn-ui btn-ui-sm btn-icon" aria-label="Pengaturan latar sertifikat" title="Pengaturan latar sertifikat">
                 <i class="bi bi-image"></i> 
             </a>
-            <a href="{{ route('admin.sertifikat.create') }}" class="btn btn-primary btn-sm">
+            <a href="{{ route('admin.sertifikat.create') }}" class="btn btn-primary btn-ui btn-ui-sm">
                 <i class="bi bi-plus-lg"></i> Tambah
             </a>
         </div>
@@ -28,7 +28,7 @@
                     <small class="text-muted d-block text-truncate">{{ $cert->kegiatan->nama_kegiatan }}</small>
                     <small class="text-primary d-block" style="font-size: 0.7rem;">No: {{ $cert->nomor_sertifikat }}</small>
                 </div>
-                <a href="{{ route('admin.sertifikat.download', $cert) }}" class="btn btn-link text-success p-0">
+                <a href="{{ route('admin.sertifikat.download', $cert) }}" class="btn btn-outline-success btn-ui btn-ui-sm btn-icon" aria-label="Unduh sertifikat {{ $cert->anggota->nama_lengkap }}" title="Unduh sertifikat">
                     <i class="bi bi-download fs-4"></i>
                 </a>
             </div>

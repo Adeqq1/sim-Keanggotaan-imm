@@ -21,7 +21,7 @@
                     <small class="text-muted d-block" style="font-size: 0.75rem;">Diterbitkan: {{ $cert->created_at->format('d M Y') }}</small>
                     <small class="text-primary fw-bold d-block" style="font-size: 0.65rem;">No: {{ $cert->nomor_sertifikat }}</small>
                 </div>
-                <a href="{{ route('kader.sertifikat.download', $cert) }}" class="btn btn-outline-success border-2 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                <a href="{{ route('kader.sertifikat.download', $cert) }}" class="btn btn-outline-success btn-ui btn-ui-sm btn-icon btn-icon-circle border-2" aria-label="Unduh sertifikat {{ $cert->kegiatan->nama_kegiatan }}" title="Unduh sertifikat">
                     <i class="bi bi-download"></i>
                 </a>
             </div>

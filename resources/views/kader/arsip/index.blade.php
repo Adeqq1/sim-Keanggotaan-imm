@@ -6,14 +6,14 @@
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" style="border-radius: 15px;">
             <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup notifikasi"></button>
         </div>
     @endif
 
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" style="border-radius: 15px;">
             <i class="bi bi-exclamation-octagon me-2"></i>{{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup notifikasi"></button>
         </div>
     @endif
 
@@ -58,7 +58,7 @@
                 @enderror
                 <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Format yang didukung: PDF, XLS, XLSX, DOC, DOCX, JPG, PNG. Maksimal 10MB.</small>
             </div>
-            <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm">
+            <button type="submit" class="btn btn-primary btn-ui w-100 py-3 shadow-sm">
                 <i class="bi bi-cloud-upload me-2"></i> Unggah Sekarang
             </button>
         </form>
@@ -78,7 +78,7 @@
                     <small class="text-muted d-block text-truncate" style="font-size: 0.75rem;">No: {{ $arsip->nomor_dokumen ?? '-' }}</small>
                     <span class="badge bg-light text-dark fw-normal mt-1" style="font-size: 0.65rem;">{{ ucfirst(str_replace('_', ' ', $arsip->kategori_arsip)) }}</span>
                 </div>
-                <a href="{{ route('kader.arsip.download', $arsip) }}" class="btn btn-link text-primary p-0">
+                <a href="{{ route('kader.arsip.download', $arsip) }}" class="btn btn-outline-primary btn-ui btn-ui-sm btn-icon" aria-label="Unduh arsip {{ $arsip->judul_dokumen }}" title="Unduh arsip">
                     <i class="bi bi-download fs-4"></i>
                 </a>
             </div>

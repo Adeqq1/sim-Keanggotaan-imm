@@ -30,25 +30,25 @@
                         </div>
                     </div>
                     
-                    <div class="btn-group btn-group-sm" role="group">
+                    <div class="btn-group btn-group-sm presensi-control" role="group" aria-label="Status kehadiran {{ $anggota->nama_lengkap }}">
                         <input type="radio" class="btn-check" name="presensi[{{ $anggota->id }}]" id="hadir{{ $anggota->id }}" value="hadir" {{ $status === 'hadir' ? 'checked' : '' }}>
-                        <label class="btn btn-outline-success px-2" for="hadir{{ $anggota->id }}">H</label>
+                        <label class="btn btn-outline-success px-2" for="hadir{{ $anggota->id }}" title="Hadir"><span aria-hidden="true">H</span><span class="visually-hidden">Hadir</span></label>
 
                         <input type="radio" class="btn-check" name="presensi[{{ $anggota->id }}]" id="izin{{ $anggota->id }}" value="izin" {{ $status === 'izin' ? 'checked' : '' }}>
-                        <label class="btn btn-outline-warning px-2" for="izin{{ $anggota->id }}">I</label>
+                        <label class="btn btn-outline-warning px-2" for="izin{{ $anggota->id }}" title="Izin"><span aria-hidden="true">I</span><span class="visually-hidden">Izin</span></label>
 
                         <input type="radio" class="btn-check" name="presensi[{{ $anggota->id }}]" id="alfa{{ $anggota->id }}" value="alfa" {{ $status === 'alfa' ? 'checked' : '' }}>
-                        <label class="btn btn-outline-danger px-2" for="alfa{{ $anggota->id }}">A</label>
+                        <label class="btn btn-outline-danger px-2" for="alfa{{ $anggota->id }}" title="Alfa"><span aria-hidden="true">A</span><span class="visually-hidden">Alfa</span></label>
                     </div>
                 </div>
             </div>
         @endforeach
 
         <div class="d-grid gap-2 mt-4 mb-5">
-            <button type="submit" class="btn btn-primary py-3 fw-bold shadow-sm">
+            <button type="submit" class="btn btn-primary btn-ui py-3 shadow-sm">
                 <i class="bi bi-save me-2"></i> Simpan Presensi
             </button>
-            <a href="{{ route('admin.kegiatan.index') }}" class="btn btn-link text-muted text-decoration-none">Kembali</a>
+            <a href="{{ route('admin.kegiatan.index') }}" class="btn btn-outline-secondary btn-ui">Kembali</a>
         </div>
     </form>
 </x-app-layout>

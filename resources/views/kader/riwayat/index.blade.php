@@ -61,11 +61,11 @@
                 </div>
                 <div>
                     @if($p->status_klaim === 'disetujui' && $sertifikat)
-                        <a href="{{ route('kader.sertifikat.download', $sertifikat) }}" class="btn btn-sm btn-outline-success px-3 py-1" style="font-size: 0.7rem; border-radius: 8px;">
+                        <a href="{{ route('kader.sertifikat.download', $sertifikat) }}" class="btn btn-sm btn-outline-success btn-ui btn-ui-sm px-3">
                             <i class="bi bi-download"></i> Unduh
                         </a>
                     @elseif($p->status_klaim === null || $p->status_klaim === 'ditolak')
-                        <button type="button" class="btn btn-sm btn-primary px-3 py-1" data-bs-toggle="modal" data-bs-target="#claimModal{{ $p->id }}" style="font-size: 0.7rem; border-radius: 8px;">
+                        <button type="button" class="btn btn-sm btn-primary btn-ui btn-ui-sm px-3" data-bs-toggle="modal" data-bs-target="#claimModal{{ $p->id }}">
                             <i class="bi bi-upload"></i> Klaim
                         </button>
                     @endif
@@ -93,8 +93,8 @@
                                 </div>
                             </div>
                             <div class="modal-footer border-0 pt-0">
-                                <button type="button" class="btn btn-light btn-sm fw-semibold" data-bs-dismiss="modal" style="border-radius: 8px;">Batal</button>
-                                <button type="submit" class="btn btn-primary btn-sm fw-semibold" style="border-radius: 8px;">Kirim Klaim</button>
+                                <button type="button" class="btn btn-outline-secondary btn-ui btn-ui-sm" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-primary btn-ui btn-ui-sm">Kirim Klaim</button>
                             </div>
                         </form>
                     </div>

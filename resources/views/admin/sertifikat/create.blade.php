@@ -38,10 +38,10 @@
             </div>
 
             <div class="d-grid">
-                <button type="submit" class="btn btn-primary py-3 fw-bold">
+                <button type="submit" class="btn btn-primary btn-ui py-3">
                     <i class="bi bi-gear-wide-connected me-2"></i> Generate Sekarang
                 </button>
-                <a href="{{ route('admin.sertifikat.index') }}" class="btn btn-link text-muted small mt-2">Batal</a>
+                <a href="{{ route('admin.sertifikat.index') }}" class="btn btn-outline-secondary btn-ui btn-ui-sm mt-2">Batal</a>
             </div>
         </form>
     </div>

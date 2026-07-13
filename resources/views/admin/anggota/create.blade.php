@@ -4,7 +4,7 @@
     </x-slot>
 
     <div class="mb-4">
-        <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-secondary btn-sm">
+        <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-secondary btn-ui btn-ui-sm">
             <i class="bi bi-arrow-left"></i> Kembali
         </a>
     </div>
@@ -29,7 +29,7 @@
                         <input type="text" name="nia" class="form-control @error('nia') is-invalid @enderror" value="{{ old('nia') }}" required>
                         @error('nia')
                             <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror>
+                        @enderror
                     </div>
 
                     <div class="col-md-6">
@@ -37,7 +37,7 @@
                         <input type="text" name="nama_lengkap" class="form-control @error('nama_lengkap') is-invalid @enderror" value="{{ old('nama_lengkap') }}" required>
                         @error('nama_lengkap')
                             <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror>
+                        @enderror
                     </div>
 
                     <div class="col-md-6">
@@ -45,7 +45,7 @@
                         <input type="text" name="tempat_lahir" class="form-control @error('tempat_lahir') is-invalid @enderror" value="{{ old('tempat_lahir') }}" required>
                         @error('tempat_lahir')
                             <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror>
+                        @enderror
                     </div>
 
                     <div class="col-md-6">
@@ -53,7 +53,7 @@
                         <input type="date" name="tanggal_lahir" class="form-control @error('tanggal_lahir') is-invalid @enderror" value="{{ old('tanggal_lahir') }}" required>
                         @error('tanggal_lahir')
                             <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror>
+                        @enderror
                     </div>
 
                     <div class="col-12">
@@ -61,7 +61,7 @@
                         <textarea name="alamat" rows="3" class="form-control @error('alamat') is-invalid @enderror" required>{{ old('alamat') }}</textarea>
                         @error('alamat')
                             <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror>
+                        @enderror
                     </div>
 
                     <div class="col-md-6">
@@ -69,7 +69,7 @@
                         <input type="text" name="no_telp" class="form-control @error('no_telp') is-invalid @enderror" value="{{ old('no_telp') }}" required>
                         @error('no_telp')
                             <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror>
+                        @enderror
                     </div>
 
                     <div class="col-md-6">
@@ -80,17 +80,17 @@
                         </select>
                         @error('status_aktif')
                             <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror>
+                        @enderror
                     </div>
                 </div>
 
                 <hr class="my-4">
 
                 <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary btn-ui">
                         <i class="bi bi-save"></i> Simpan
                     </button>
-                    <a href="{{ route('admin.anggota.index') }}" class="btn btn-danger">
+                    <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-secondary btn-ui">
                         Batal
                     </a>
                 </div>

@@ -8,11 +8,11 @@
         <div class="d-flex gap-2">
             <form action="{{ route('admin.anggota.generate-nia-bulk') }}" method="POST">
                 @csrf
-                <button type="submit" class="btn btn-outline-secondary btn-sm" title="Generate NIA untuk anggota yang belum memiliki NIA" onclick="return confirm('Generate NIA untuk semua anggota yang belum memiliki NIA?')">
+                <button type="submit" class="btn btn-outline-secondary btn-ui btn-ui-sm" title="Generate NIA untuk anggota yang belum memiliki NIA" onclick="return confirm('Generate NIA untuk semua anggota yang belum memiliki NIA?')">
                     <i class="bi bi-magic"></i> Generate NIA Kosong
                 </button>
             </form>
-            <a href="{{ route('admin.anggota.create') }}" class="btn btn-primary btn-sm">
+            <a href="{{ route('admin.anggota.create') }}" class="btn btn-primary btn-ui btn-ui-sm">
                 <i class="bi bi-plus-lg"></i> Tambah
             </a>
         </div>
@@ -21,20 +21,20 @@
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup notifikasi"></button>
         </div>
     @endif
     @if(session('warning'))
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
             <i class="bi bi-exclamation-triangle me-2"></i>{{ session('warning') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup notifikasi"></button>
         </div>
     @endif
 
     <form action="{{ route('admin.anggota.index') }}" method="GET" class="mb-4">
         <div class="input-group shadow-sm">
             <input type="text" name="search" class="form-control border-0" placeholder="Cari nama atau NIA..." value="{{ request('search') }}">
-            <button class="btn btn-white border-0" type="submit"><i class="bi bi-search text-primary"></i></button>
+            <button class="btn btn-white border-0" type="submit" aria-label="Cari anggota"><i class="bi bi-search text-primary"></i></button>
         </div>
     </form>
 
@@ -62,7 +62,7 @@
                     <small class="text-muted">NIA: {{ $anggota->nia ?? '-' }}</small>
                 </div>
                 <div class="dropdown">
-                    <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                    <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown" aria-label="Aksi untuk {{ $anggota->nama_lengkap }}">
                         <i class="bi bi-three-dots-vertical fs-5"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">
@@ -89,7 +89,7 @@
             @if(request('search'))
                 <i class="bi bi-search display-4 text-muted opacity-50"></i>
                 <p class="text-muted mt-2">Anggota dengan kata kunci "{{ request('search') }}" tidak ditemukan.</p>
-                <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-primary btn-sm mt-2">Bersihkan Pencarian</a>
+                <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-primary btn-ui btn-ui-sm mt-2">Bersihkan Pencarian</a>
             @else
                 <i class="bi bi-people display-4 text-muted"></i>
                 <p class="text-muted mt-2">Belum ada data anggota.</p>

@@ -31,7 +31,7 @@
                 <label class="form-label small fw-bold">File (PDF/JPG/PNG)</label>
                 <input type="file" name="file_arsip" class="form-control" required>
             </div>
-            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Unggah Dokumen</button>
+            <button type="submit" class="btn btn-primary btn-ui w-100 py-2">Unggah Dokumen</button>
         </form>
     </div>
 
@@ -48,7 +48,7 @@
                     <span class="badge bg-light text-dark fw-normal" style="font-size: 0.7rem;">{{ ucfirst(str_replace('_', ' ', $arsip->kategori_arsip)) }}</span>
                 </div>
                 <div class="dropdown">
-                    <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                    <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown" aria-label="Aksi untuk {{ $arsip->judul_dokumen }}">
                         <i class="bi bi-three-dots-vertical fs-5"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">

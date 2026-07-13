@@ -66,7 +66,7 @@
         </div>
 
         <div class="d-flex align-items-center gap-3">
-            <button type="submit" class="btn btn-primary px-4 fw-bold">Simpan Perubahan</button>
+            <button type="submit" class="btn btn-primary btn-ui px-4">Simpan Perubahan</button>
 
             @if (session('status') === 'profile-updated')
                 <p class="text-success small mb-0 animated fadeIn"><i class="bi bi-check-circle me-1"></i> Tersimpan.</p>

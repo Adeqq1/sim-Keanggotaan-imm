@@ -4,7 +4,7 @@
     </x-slot>
 
     <div class="mb-4">
-        <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-secondary btn-sm">
+        <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-secondary btn-ui btn-ui-sm">
             <i class="bi bi-arrow-left"></i> Kembali
         </a>
     </div>
@@ -62,10 +62,10 @@
             <hr class="my-4">
 
                 <div class="d-flex gap-2">
-                <a href="{{ route('admin.anggota.edit', $anggota->id) }}" class="btn btn-primary">
+                <a href="{{ route('admin.anggota.edit', $anggota->id) }}" class="btn btn-primary btn-ui">
                     <i class="bi bi-pencil"></i> Edit
                 </a>
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <button type="button" class="btn btn-danger btn-ui" data-bs-toggle="modal" data-bs-target="#deleteModal">
                     <i class="bi bi-trash"></i> Hapus
                 </button>
             </div>

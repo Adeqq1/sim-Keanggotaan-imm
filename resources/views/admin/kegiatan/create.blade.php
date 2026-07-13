@@ -4,7 +4,7 @@
     </x-slot>
 
     <div class="mb-4">
-        <a href="{{ route('admin.kegiatan.index') }}" class="btn btn-outline-secondary btn-sm">
+        <a href="{{ route('admin.kegiatan.index') }}" class="btn btn-outline-secondary btn-ui btn-ui-sm">
             <i class="bi bi-arrow-left"></i> Kembali
         </a>
     </div>
@@ -56,10 +56,10 @@
                 </div>
 
                 <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary btn-ui">
                         <i class="bi bi-save"></i> Simpan
                     </button>
-                    <a href="{{ route('admin.kegiatan.index') }}" class="btn btn-danger">
+                    <a href="{{ route('admin.kegiatan.index') }}" class="btn btn-outline-secondary btn-ui">
                         Batal
                     </a>
                 </div>

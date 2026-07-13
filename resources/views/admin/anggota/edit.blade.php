@@ -4,7 +4,7 @@
     </x-slot>
 
     <div class="mb-4">
-        <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-secondary btn-sm">
+        <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-secondary btn-ui btn-ui-sm">
             <i class="bi bi-arrow-left"></i> Kembali
         </a>
     </div>
@@ -24,13 +24,13 @@
             @if(session('warning'))
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
                     <i class="bi bi-exclamation-triangle me-2"></i>{{ session('warning') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup notifikasi"></button>
                 </div>
             @endif
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup notifikasi"></button>
                 </div>
             @endif
             <form action="{{ route('admin.anggota.update', $anggota->id) }}" method="POST" enctype="multipart/form-data">
@@ -62,7 +62,7 @@
                                 {{-- form="form-generate-nia" mengaitkan button ini ke form di luar, menghindari nested form --}}
                                 <button type="submit"
                                         form="form-generate-nia"
-                                        class="btn btn-outline-primary"
+                                        class="btn btn-outline-primary btn-ui"
                                         title="Generate NIA otomatis">
                                     <i class="bi bi-magic"></i> Generate NIA
                                 </button>
@@ -83,7 +83,7 @@
                         <input type="text" name="nama_lengkap" class="form-control @error('nama_lengkap') is-invalid @enderror" value="{{ old('nama_lengkap', $anggota->nama_lengkap) }}" required>
                         @error('nama_lengkap')
                             <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror>
+                        @enderror
                     </div>
 
                     <div class="col-md-6">
@@ -91,7 +91,7 @@
                         <input type="text" name="tempat_lahir" class="form-control @error('tempat_lahir') is-invalid @enderror" value="{{ old('tempat_lahir', $anggota->tempat_lahir) }}" required>
                         @error('tempat_lahir')
                             <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror>
+                        @enderror
                     </div>
 
                     <div class="col-md-6">
@@ -99,7 +99,7 @@
                         <input type="date" name="tanggal_lahir" class="form-control @error('tanggal_lahir') is-invalid @enderror" value="{{ old('tanggal_lahir', $anggota->tanggal_lahir?->format('Y-m-d')) }}" required>
                         @error('tanggal_lahir')
                             <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror>
+                        @enderror
                     </div>
 
                     <div class="col-12">
@@ -107,7 +107,7 @@
                         <textarea name="alamat" rows="3" class="form-control @error('alamat') is-invalid @enderror" required>{{ old('alamat', $anggota->alamat) }}</textarea>
                         @error('alamat')
                             <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror>
+                        @enderror
                     </div>
 
                     <div class="col-md-6">
@@ -115,7 +115,7 @@
                         <input type="text" name="no_telp" class="form-control @error('no_telp') is-invalid @enderror" value="{{ old('no_telp', $anggota->no_telp) }}" required>
                         @error('no_telp')
                             <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror>
+                        @enderror
                     </div>
 
                     <div class="col-md-6">
@@ -126,7 +126,7 @@
                         </select>
                         @error('status_aktif')
                             <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror>
+                        @enderror
                     </div>
 
                     <div class="col-md-6">
@@ -150,10 +150,10 @@
                 <hr class="my-4">
 
                 <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary btn-ui">
                         <i class="bi bi-save"></i> Update
                     </button>
-                    <a href="{{ route('admin.anggota.index') }}" class="btn btn-danger">
+                    <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-secondary btn-ui">
                         Batal
                     </a>
                 </div>
