@@ -705,6 +705,20 @@ canvas {
     width: 100%;
 }
 
+.app-main-content .anggota-index-actions {
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.app-main-content .anggota-index-actions form {
+    min-width: 0;
+}
+
+.app-main-content .anggota-index-actions form .btn-ui {
+    max-width: 100%;
+    white-space: nowrap;
+}
+
 .app-main-content .btn-icon {
     width: 44px;
     min-width: 44px;
@@ -770,6 +784,16 @@ canvas {
 @media (max-width: 575.98px) {
     .app-main-content .btn-ui-sm {
         min-height: 44px;
+    }
+
+    .app-main-content .anggota-index-actions .btn-ui {
+        padding-inline: 0.625rem;
+    }
+
+    .app-main-content .anggota-index-add {
+        width: 44px;
+        min-width: 44px;
+        padding: 0.5rem;
     }
 }
 

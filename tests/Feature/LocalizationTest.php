@@ -81,5 +81,7 @@ test('admin member list renders Indonesian member actions', function () {
     $this->actingAs($admin)
         ->get(route('admin.anggota.index'))
         ->assertOk()
-        ->assertSee('Buat NIA Kosong');
+        ->assertSee('Isi NIA Kosong')
+        ->assertSee('anggota-index-actions', false)
+        ->assertSee('aria-label="Tambah anggota"', false);
 });

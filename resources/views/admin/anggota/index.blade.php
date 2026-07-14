@@ -5,16 +5,15 @@
 
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-4">
         <h6 class="fw-bold mb-0">Daftar Anggota</h6>
-        <div class="d-flex flex-column flex-sm-row gap-2">
+        <div class="anggota-index-actions d-flex flex-nowrap gap-2">
             <form action="{{ route('admin.anggota.generate-nia-bulk') }}" method="POST">
                 @csrf
-                <button type="submit" class="btn btn-outline-secondary btn-ui btn-ui-sm" title="Buat NIA untuk anggota yang belum memiliki NIA" onclick="return confirm('Buat NIA untuk semua anggota yang belum memiliki NIA?')">
-                    <i class="bi bi-magic"></i> Buat NIA Kosong
-                </button>
+                <button type="submit" class="btn btn-outline-secondary btn-ui btn-ui-sm" title="Isi NIA untuk anggota yang belum memiliki NIA" onclick="return confirm('Isi NIA untuk semua anggota yang belum memiliki NIA?')">
+                    <i class="bi bi-magic"></i> Isi NIA Kosong
                 </button>
             </form>
-            <a href="{{ route('admin.anggota.create') }}" class="btn btn-primary btn-ui btn-ui-sm">
-                <i class="bi bi-plus-lg"></i> Tambah
+            <a href="{{ route('admin.anggota.create') }}" class="btn btn-primary btn-ui btn-ui-sm anggota-index-add" aria-label="Tambah anggota" title="Tambah anggota">
+                <i class="bi bi-plus-lg"></i><span class="d-none d-sm-inline"> Tambah</span>
             </a>
         </div>
     </div>
