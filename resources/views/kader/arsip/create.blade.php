@@ -48,11 +48,11 @@
 
             <div class="mb-3">
                 <label class="form-label small fw-bold">Pilih File</label>
-                <input type="file" name="file_arsip" class="form-control bg-light border-0 @error('file_arsip') is-invalid @enderror" required>
+                <input type="file" name="file_arsip" class="form-control bg-light border-0 @error('file_arsip') is-invalid @enderror" accept=".pdf,.doc,.docx,.xls,.xlsx" required>
                 @error('file_arsip')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
-                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Format yang didukung: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG. Maksimal 10MB.</small>
+                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Format yang didukung: PDF, DOC, DOCX, XLS, XLSX. Maksimal 5MB.</small>
             </div>
 
             <div class="d-flex gap-2">

@@ -27,7 +27,7 @@ class KaderArsipRequest extends FormRequest
             'nomor_dokumen' => ['nullable', 'string', 'max:255'],
             'judul_dokumen' => ['required', 'string', 'max:255'],
             'kategori_arsip' => ['required', 'string', 'in:'.implode(',', array_keys(Arsip::KATEGORI))],
-            'file_arsip' => ['required', 'file', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png', 'max:10240'],
+            'file_arsip' => ['required', 'file', 'mimes:pdf,doc,docx,xls,xlsx', 'max:5120'],
         ];
     }
 
@@ -44,8 +44,8 @@ class KaderArsipRequest extends FormRequest
             'kategori_arsip.in' => 'Kategori tidak valid.',
             'file_arsip.required' => 'File arsip wajib diunggah.',
             'file_arsip.file' => 'File arsip harus berupa berkas yang valid.',
-            'file_arsip.mimes' => 'Format file harus: PDF, DOC, DOCX, XLS, XLSX, JPG, atau PNG.',
-            'file_arsip.max' => 'Ukuran file maksimal adalah 10MB.',
+            'file_arsip.mimes' => 'Format file harus: PDF, DOC, DOCX, XLS, atau XLSX.',
+            'file_arsip.max' => 'Ukuran file maksimal adalah 5MB.',
         ];
     }
 }

@@ -31,14 +31,13 @@ test('guest is redirected to login when accessing protected pages', function () 
 });
 
 test('upload with disallowed file extension is rejected', function () {
-    $admin = User::factory()->admin()->create();
-    $anggota = Anggota::factory()->create();
+    $user = User::factory()->kader()->create();
+    $anggota = Anggota::factory()->create(['user_id' => $user->id]);
 
     $file = UploadedFile::fake()->create('malware.exe', 100);
 
-    $response = $this->actingAs($admin)
-        ->post(route('admin.arsip.store'), [
-            'anggota_id' => $anggota->id,
+    $response = $this->actingAs($user)
+        ->post(route('kader.arsip.store'), [
             'judul_dokumen' => 'Bad File',
             'kategori_arsip' => 'surat_masuk',
             'file_arsip' => $file,

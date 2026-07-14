@@ -38,9 +38,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::resource('anggota', AnggotaController::class)->parameters(['anggota' => 'anggota']);
         Route::post('/anggota/{anggota}/generate-nia', [AnggotaController::class, 'generateNia'])->name('anggota.generate-nia');
 
-        // Modul Arsip
-        Route::get('/arsip/create', [ArsipController::class, 'create'])->name('arsip.create');
-        Route::resource('arsip', ArsipController::class)->only(['index', 'store', 'destroy']);
+        // Modul Arsip (admin hanya bisa lihat, unduh, dan hapus; upload hanya oleh kader)
+        Route::resource('arsip', ArsipController::class)->only(['index', 'destroy']);
         Route::get('/arsip/{arsip}/download', [ArsipController::class, 'download'])->name('arsip.download');
 
         // Modul Sertifikat

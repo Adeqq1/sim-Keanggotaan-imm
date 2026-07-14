@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ArsipRequest;
 use App\Http\Requests\KaderArsipRequest;
-use App\Models\Anggota;
 use App\Models\Arsip;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -29,14 +27,6 @@ class ArsipController extends Controller
 
         return view('admin.arsip.index', [
             'arsips' => $query->paginate(10)->withQueryString(),
-            'kategori' => Arsip::KATEGORI,
-        ]);
-    }
-
-    public function create()
-    {
-        return view('admin.arsip.create', [
-            'anggotas' => Anggota::orderBy('nama_lengkap')->get(),
             'kategori' => Arsip::KATEGORI,
         ]);
     }
@@ -80,22 +70,6 @@ class ArsipController extends Controller
         return view('kader.arsip.create', [
             'kategori' => Arsip::KATEGORI,
         ]);
-    }
-
-    public function store(ArsipRequest $request)
-    {
-        $validated = $request->validated();
-
-        if ($request->hasFile('file_arsip')) {
-            $path = $request->file('file_arsip')->store('arsip', 'local');
-            $validated['file_arsip'] = $path;
-        }
-
-        $validated['tanggal_unggah'] = now()->toDateString();
-
-        Arsip::create($validated);
-
-        return redirect()->route('admin.arsip.index')->with('success', 'Arsip berhasil diunggah.');
     }
 
     public function kaderStore(KaderArsipRequest $request)

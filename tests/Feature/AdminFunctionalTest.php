@@ -248,7 +248,17 @@ test('admin can store presensi data', function () {
     ]);
 });
 
-test('admin can upload arsip', function () {
+test('admin cannot access arsip upload page (upload only by kader)', function () {
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin)->get('/admin/arsip/create');
+
+    // Route arsip create tidak terdaftar; request ke /admin/arsip/create
+    // akan match pola {arsip} untuk method yang tidak didukung (405 Method Not Allowed)
+    $response->assertStatus(405);
+});
+
+test('admin cannot upload arsip via POST (upload only by kader)', function () {
     Storage::fake('local');
 
     $admin = User::factory()->admin()->create();
@@ -257,37 +267,18 @@ test('admin can upload arsip', function () {
     $file = UploadedFile::fake()->create('document.pdf', 100, 'application/pdf');
 
     $response = $this->actingAs($admin)
-        ->post(route('admin.arsip.store'), [
+        ->post('/admin/arsip', [
             'anggota_id' => $anggota->id,
             'judul_dokumen' => 'Surat Keterangan',
             'kategori_arsip' => 'surat_masuk',
             'file_arsip' => $file,
         ]);
 
-    $response->assertRedirect(route('admin.arsip.index'));
+    $response->assertStatus(405);
 
-    $this->assertDatabaseHas('arsip', [
-        'anggota_id' => $anggota->id,
+    $this->assertDatabaseMissing('arsip', [
         'judul_dokumen' => 'Surat Keterangan',
-        'kategori_arsip' => 'surat_masuk',
     ]);
-
-    expect(Arsip::where('anggota_id', $anggota->id)->first()->tanggal_unggah->toDateString())
-        ->toBe(now()->toDateString());
-
-    Storage::disk('local')->assertExists(Arsip::where('anggota_id', $anggota->id)->first()->file_arsip);
-});
-
-test('admin can access separate arsip upload page', function () {
-    $admin = User::factory()->admin()->create();
-    $anggota = Anggota::factory()->create(['nama_lengkap' => 'Ahmad Arsip']);
-
-    $response = $this->actingAs($admin)->get(route('admin.arsip.create'));
-
-    $response->assertSuccessful();
-    $response->assertViewIs('admin.arsip.create');
-    $response->assertSee('Ahmad Arsip');
-    $response->assertSee('Surat Keluar');
 });
 
 test('admin can search and filter arsip', function () {

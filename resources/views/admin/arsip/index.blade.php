@@ -3,13 +3,7 @@
         Arsip Dokumen
     </x-slot>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h6 class="fw-bold mb-0">Daftar Arsip</h6>
-        <a href="{{ route('admin.arsip.create') }}" class="btn btn-primary btn-sm fw-bold">
-            <i class="bi bi-plus-lg me-1"></i> Unggah Arsip
-        </a>
-    </div>
-    </div>
+    <h6 class="fw-bold mb-3">Daftar Arsip</h6>
 
     <form method="GET" action="{{ route('admin.arsip.index') }}" class="row g-2 mb-4">
         <div class="col-12 col-md-6">

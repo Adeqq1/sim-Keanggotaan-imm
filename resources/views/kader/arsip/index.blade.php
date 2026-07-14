@@ -3,26 +3,11 @@
         Arsip Dokumen
     </x-slot>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" style="border-radius: 15px;">
-            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup notifikasi"></button>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" style="border-radius: 15px;">
-            <i class="bi bi-exclamation-octagon me-2"></i>{{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup notifikasi"></button>
-        </div>
-    @endif
-
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h6 class="fw-bold mb-0">Daftar Arsip</h6>
         <a href="{{ route('kader.arsip.create') }}" class="btn btn-primary btn-sm fw-bold">
             <i class="bi bi-plus-lg me-1"></i> Unggah Dokumen
         </a>
-    </div>
     </div>
 
     <form method="GET" action="{{ route('kader.arsip.index') }}" class="row g-2 mb-4">
