@@ -41,7 +41,7 @@
         @else
             <a href="{{ route('kader.dashboard') }}" class="nav-link text-center py-2 {{ request()->routeIs('kader.dashboard') ? 'text-primary font-weight-bold' : 'text-muted' }}">
                 <i class="bi bi-house fs-4 d-block"></i>
-                <small style="font-size: 0.7rem;">Home</small>
+                <small style="font-size: 0.7rem;">Beranda</small>
             </a>
             <a href="{{ route('kader.ekta') }}" class="nav-link text-center py-2 {{ request()->routeIs('kader.ekta') ? 'text-primary font-weight-bold' : 'text-muted' }}">
                 <i class="bi bi-card-text fs-4 d-block"></i>

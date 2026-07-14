@@ -4,7 +4,7 @@
     </x-slot>
 
     <div class="mb-4">
-        <h6 class="fw-bold mb-1">Daftar Klaim Pending</h6>
+        <h6 class="fw-bold mb-1">Daftar Klaim Menunggu Verifikasi</h6>
         <p class="text-muted small">Tinjau bukti kehadiran yang diunggah oleh Kader untuk menyetujui klaim sertifikat.</p>
     </div>
 
@@ -23,7 +23,7 @@
                 <div class="flex-grow-1 overflow-hidden">
                     <h6 class="fw-bold mb-1 text-truncate">{{ $claim->anggota->nama_lengkap }}</h6>
                     <small class="text-muted d-block text-truncate"><i class="bi bi-calendar-event me-1"></i> {{ $claim->kegiatan->nama_kegiatan }}</small>
-                    <small class="text-muted d-block" style="font-size: 0.75rem;"><i class="bi bi-clock me-1"></i> Diklaim pada: {{ $claim->updated_at->format('d M Y H:i') }}</small>
+                    <small class="text-muted d-block" style="font-size: 0.75rem;"><i class="bi bi-clock me-1"></i> Diklaim pada: {{ $claim->updated_at->translatedFormat('d M Y H:i') }}</small>
                 </div>
             </div>
             
@@ -51,7 +51,7 @@
                     <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
                         <div class="modal-header border-0 pb-0">
                             <h5 class="fw-bold mb-0">Bukti Kehadiran - {{ $claim->anggota->nama_lengkap }}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                         </div>
                         <div class="modal-body text-center p-3">
                             <img src="{{ asset('storage/' . $claim->bukti_kehadiran) }}" alt="Bukti Kehadiran Lengkap" class="img-fluid rounded border shadow-sm" style="max-height: 70vh; object-fit: contain;">

@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        Edit Anggota
+        Ubah Anggota
     </x-slot>
 
     <div class="mb-4">
@@ -63,8 +63,8 @@
                                 <button type="submit"
                                         form="form-generate-nia"
                                         class="btn btn-outline-primary btn-ui"
-                                        title="Generate NIA otomatis">
-                                    <i class="bi bi-magic"></i> Generate NIA
+                                        title="Buat NIA otomatis">
+                                    <i class="bi bi-magic"></i> Buat NIA
                                 </button>
                             @else
                                 <span class="input-group-text bg-light text-muted" title="NIA sudah terisi">
@@ -151,7 +151,7 @@
 
                 <div class="d-flex flex-column flex-sm-row gap-2">
                     <button type="submit" class="btn btn-primary btn-ui">
-                        <i class="bi bi-save"></i> Update
+                        <i class="bi bi-save"></i> Perbarui
                     </button>
                     <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-secondary btn-ui">
                         Batal

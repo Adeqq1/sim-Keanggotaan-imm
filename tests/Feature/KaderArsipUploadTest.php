@@ -102,7 +102,7 @@ describe('Kader Arsip Index', function () {
         $response->assertSuccessful();
         $response->assertSee('Proposal Musyawarah');
         $response->assertDontSee('Surat Undangan');
-        $response->assertSee('Reset filter');
+        $response->assertSee('Atur ulang filter');
     });
 });
 

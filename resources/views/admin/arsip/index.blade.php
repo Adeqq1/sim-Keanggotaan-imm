@@ -28,7 +28,7 @@
         </div>
         @if(request()->filled('q') || request()->filled('kategori'))
             <div class="col-12">
-                <a href="{{ route('admin.arsip.index') }}" class="small text-decoration-none">Reset filter</a>
+                <a href="{{ route('admin.arsip.index') }}" class="small text-decoration-none">Atur ulang filter</a>
             </div>
         @endif
     </form>
@@ -50,7 +50,7 @@
                         <i class="bi bi-three-dots-vertical fs-5"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                        <li><a class="dropdown-item py-2" href="{{ route('admin.arsip.download', $arsip) }}"><i class="bi bi-download me-2 text-success"></i> Download</a></li>
+                        <li><a class="dropdown-item py-2" href="{{ route('admin.arsip.download', $arsip) }}"><i class="bi bi-download me-2 text-success"></i> Unduh</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <button type="button" class="dropdown-item py-2 text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $arsip->id }}">

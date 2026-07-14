@@ -3,7 +3,7 @@
 @section('content')
     <div class="mb-4 text-center">
         <h4 class="fw-bold">Reset Password</h4>
-        <p class="text-muted small">Masukkan password baru kamu</p>
+        <p class="text-muted small">Masukkan password baru Anda</p>
     </div>
 
     <form method="POST" action="{{ route('password.store') }}">

@@ -35,7 +35,7 @@
                     </div>
                     <div class="min-w-0">
                         <h6 class="mb-0 fw-bold text-break" style="font-size: 0.85rem;">{{ $p->kegiatan->nama_kegiatan }}</h6>
-                        <small class="text-muted d-block" style="font-size: 0.7rem;">{{ $p->kegiatan->tanggal_waktu->format('d M Y') }}</small>
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">{{ $p->kegiatan->tanggal_waktu->translatedFormat('d M Y') }}</small>
                     </div>
                 </div>
                 <span class="badge {{ $p->status_kehadiran === 'hadir' ? 'bg-success' : ($p->status_kehadiran === 'izin' ? 'bg-warning' : 'bg-danger') }} rounded-pill px-3" style="font-size: 0.65rem;">
@@ -82,7 +82,7 @@
                             @csrf
                             <div class="modal-header border-0 pb-0">
                                 <h5 class="fw-bold mb-0">Klaim Sertifikat</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                             </div>
                             <div class="modal-body py-3">
                                 <p class="text-muted small mb-3">Silakan unggah foto bukti kehadiran Anda pada kegiatan <strong>{{ $p->kegiatan->nama_kegiatan }}</strong>.</p>

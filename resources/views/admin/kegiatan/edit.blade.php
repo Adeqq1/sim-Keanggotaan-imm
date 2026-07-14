@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        Edit Kegiatan
+        Ubah Kegiatan
     </x-slot>
 
     <div class="mb-4">
@@ -51,7 +51,7 @@
                     <label class="form-label fw-bold">Thumbnail Kegiatan</label>
                     @if($kegiatan->thumbnail)
                         <div class="mb-2">
-                            <img src="{{ asset('storage/' . $kegiatan->thumbnail) }}" alt="Thumbnail" class="img-thumbnail" style="max-height: 150px;">
+                            <img src="{{ asset('storage/' . $kegiatan->thumbnail) }}" alt="Gambar mini kegiatan" class="img-thumbnail" style="max-height: 150px;">
                         </div>
                     @endif
                     <input type="file" name="thumbnail" class="form-control @error('thumbnail') is-invalid @enderror" accept="image/*">
@@ -63,7 +63,7 @@
 
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary btn-ui">
-                        <i class="bi bi-save"></i> Update
+                        <i class="bi bi-save"></i> Perbarui
                     </button>
                     <a href="{{ route('admin.kegiatan.index') }}" class="btn btn-outline-secondary btn-ui">
                         Batal

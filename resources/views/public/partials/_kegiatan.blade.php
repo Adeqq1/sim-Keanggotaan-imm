@@ -22,7 +22,7 @@
                     <div class="card-body p-4 d-flex flex-column">
                         <div class="d-flex align-items-center mb-2 text-muted small">
                             <i class="bi bi-calendar-event me-2 text-primary"></i>
-                            <span>{{ $item->tanggal_waktu->format('d M Y') }}</span>
+                            <span>{{ $item->tanggal_waktu->translatedFormat('d M Y') }}</span>
                             <span class="mx-2">•</span>
                             <i class="bi bi-geo-alt me-1 text-danger"></i>
                             <span class="text-truncate" style="max-width: 150px;">{{ $item->lokasi }}</span>

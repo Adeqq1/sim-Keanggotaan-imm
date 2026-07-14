@@ -67,7 +67,7 @@ class SertifikatController extends Controller
             GenerateCertificateJob::dispatch(null, $kegiatan, $anggota, $instruktur);
         }
 
-        return redirect()->route('admin.sertifikat.index')->with('success', 'Sertifikat sedang di-generate di latar belakang.');
+        return redirect()->route('admin.sertifikat.index')->with('success', 'Sertifikat sedang dibuat di latar belakang.');
     }
 
     public function mySertifikat()
@@ -192,7 +192,7 @@ class SertifikatController extends Controller
     public function setuju(Presensi $presensi)
     {
         if ($presensi->status_klaim !== 'pending') {
-            return redirect()->back()->with('error', 'Klaim sertifikat tidak sedang pending.');
+            return redirect()->back()->with('error', 'Klaim sertifikat tidak sedang menunggu verifikasi.');
         }
 
         $presensi->setujuiKlaim();
@@ -205,7 +205,7 @@ class SertifikatController extends Controller
     public function tolak(Presensi $presensi)
     {
         if ($presensi->status_klaim !== 'pending') {
-            return redirect()->back()->with('error', 'Klaim sertifikat tidak sedang pending.');
+            return redirect()->back()->with('error', 'Klaim sertifikat tidak sedang menunggu verifikasi.');
         }
 
         $presensi->tolakKlaim();
@@ -271,7 +271,7 @@ class SertifikatController extends Controller
                         'trace' => $e->getTraceAsString(),
                     ]);
 
-                    return redirect()->back()->with('error', 'Gagal memproses gambar background: '.$e->getMessage());
+                    return redirect()->back()->with('error', 'Gagal memproses gambar latar belakang: '.$e->getMessage());
                 }
             } else {
                 // Fallback: Save directly if GD / imagejpeg is not available
@@ -283,7 +283,7 @@ class SertifikatController extends Controller
                         'trace' => $e->getTraceAsString(),
                     ]);
 
-                    return redirect()->back()->with('error', 'Gagal menyimpan gambar background: '.$e->getMessage());
+                    return redirect()->back()->with('error', 'Gagal menyimpan gambar latar belakang: '.$e->getMessage());
                 }
             }
         }

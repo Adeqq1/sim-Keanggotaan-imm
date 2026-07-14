@@ -1,15 +1,14 @@
 <?php
 
-use App\Mail\PendaftaranDisetujuiMail;
 use App\Models\Anggota;
 use App\Models\Arsip;
 use App\Models\Kegiatan;
 use App\Models\Pendaftaran;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Hash;
 
 test('admin can approve pendaftaran and create kader account', function () {
     Mail::fake();
@@ -44,12 +43,7 @@ test('admin can approve pendaftaran and create kader account', function () {
         'nama_lengkap' => $pendaftaran->nama_lengkap,
     ]);
 
-    Mail::assertQueued(PendaftaranDisetujuiMail::class, function ($mail) use ($newUser, $password, $pendaftaran) {
-        return $mail->user->id === $newUser->id
-            && $mail->password === null
-            && ! str_contains($mail->render(), $password)
-            && ! str_contains($mail->render(), $pendaftaran->password);
-    });
+    Mail::assertNothingQueued();
 });
 
 test('admin can approve a legacy pendaftaran with a temporary password', function () {
@@ -66,12 +60,8 @@ test('admin can approve a legacy pendaftaran with a temporary password', functio
 
     $user = User::where('email', $pendaftaran->email)->firstOrFail();
 
-    Mail::assertQueued(PendaftaranDisetujuiMail::class, function ($mail) use ($user) {
-        return $mail->user->is($user)
-            && is_string($mail->password)
-            && strlen($mail->password) === 8
-            && Hash::check($mail->password, $user->password);
-    });
+    expect($user->password)->not->toBeNull();
+    Mail::assertNothingQueued();
 });
 
 test('admin pendaftaran detail page posts explicit status for approval action', function () {
@@ -323,7 +313,7 @@ test('admin can search and filter arsip', function () {
     $response->assertSuccessful();
     $response->assertSee('Proposal Rapat Kerja');
     $response->assertDontSee('Surat Keluar Cabang');
-    $response->assertSee('Reset filter');
+    $response->assertSee('Atur ulang filter');
 });
 
 test('admin can download arsip', function () {

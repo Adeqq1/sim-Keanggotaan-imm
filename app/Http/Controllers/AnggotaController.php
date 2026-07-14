@@ -116,7 +116,7 @@ class AnggotaController extends Controller
             $generator->generateForAnggota($anggota);
 
             return redirect()->route('admin.anggota.edit', $anggota)
-                ->with('success', 'NIA berhasil di-generate: '.$anggota->fresh()->nia);
+                ->with('success', 'NIA berhasil dibuat: '.$anggota->fresh()->nia);
         } catch (\RuntimeException $e) {
             return redirect()->route('admin.anggota.edit', $anggota)
                 ->with('warning', $e->getMessage());
@@ -150,7 +150,7 @@ class AnggotaController extends Controller
         }
 
         if ($jumlahDiproses > 0) {
-            $pesan = "Berhasil generate NIA untuk {$jumlahDiproses} anggota.";
+            $pesan = "Berhasil membuat NIA untuk {$jumlahDiproses} anggota.";
             if ($jumlahGagal > 0) {
                 $pesan .= " Namun, {$jumlahGagal} anggota gagal diproses.";
             }
@@ -160,10 +160,10 @@ class AnggotaController extends Controller
 
         if ($jumlahGagal > 0) {
             return redirect()->route('admin.anggota.index')
-                ->with('warning', "Gagal generate NIA untuk {$jumlahGagal} anggota. Silakan periksa log sistem.");
+                ->with('warning', "Gagal membuat NIA untuk {$jumlahGagal} anggota. Silakan periksa log sistem.");
         }
 
         return redirect()->route('admin.anggota.index')
-            ->with('success', 'Tidak ada anggota yang perlu di-generate NIA-nya.');
+            ->with('success', 'Tidak ada anggota yang perlu dibuatkan NIA.');
     }
 }

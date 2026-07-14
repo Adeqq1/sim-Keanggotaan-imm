@@ -78,7 +78,7 @@ test('admin bulk certificate generation dispatches GenerateCertificateJob', func
         ]);
 
     $response->assertRedirect(route('admin.sertifikat.index'));
-    $response->assertSessionHas('success', 'Sertifikat sedang di-generate di latar belakang.');
+    $response->assertSessionHas('success', 'Sertifikat sedang dibuat di latar belakang.');
 
     Queue::assertPushed(GenerateCertificateJob::class, 2);
     Queue::assertPushed(GenerateCertificateJob::class, function ($job) use ($kegiatan, $anggota1) {

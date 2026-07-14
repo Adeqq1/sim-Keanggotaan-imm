@@ -3,13 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ValidasiPendaftaranRequest;
-use App\Mail\PendaftaranDisetujuiMail;
 use App\Models\Anggota;
 use App\Models\Pendaftaran;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ValidasiPendaftaranController extends Controller
@@ -64,8 +62,6 @@ class ValidasiPendaftaranController extends Controller
                     'catatan_admin' => 'Pendaftaran disetujui.',
                 ]);
             });
-
-            Mail::to($user->email)->send(new PendaftaranDisetujuiMail($user, $temporaryPassword));
 
             return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftaran disetujui.');
         }

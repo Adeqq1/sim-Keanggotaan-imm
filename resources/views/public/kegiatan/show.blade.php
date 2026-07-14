@@ -4,7 +4,7 @@
 <main class="py-5 bg-light" style="min-height: 80vh;">
     <div class="container my-4">
         <!-- Breadcrumb & Back button -->
-        <nav aria-label="breadcrumb" class="mb-4">
+        <nav aria-label="Jejak navigasi" class="mb-4">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('landing') }}" class="text-decoration-none text-muted">Beranda</a></li>
                 <li class="breadcrumb-item"><a href="{{ route('landing') }}#kegiatan" class="text-decoration-none text-muted">Kegiatan</a></li>
@@ -32,7 +32,7 @@
                                 <i class="bi bi-calendar-check-fill text-primary me-2 fs-5"></i>
                                 <div>
                                     <span class="d-block fw-semibold text-dark">Tanggal Pelaksanaan</span>
-                                    <span>{{ $kegiatan->tanggal_waktu->format('d F Y, H:i') }} WIB</span>
+                                    <span>{{ $kegiatan->tanggal_waktu->translatedFormat('d F Y, H:i') }} WIB</span>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center">
@@ -63,10 +63,10 @@
                             </a>
                             <div class="d-flex align-items-center gap-2">
                                 <span class="small text-muted me-1">Bagikan:</span>
-                                <a href="https://api.whatsapp.com/send?text={{ rawurlencode($kegiatan->nama_kegiatan . ' - ' . route('kegiatan.show', $kegiatan->id)) }}" target="_blank" rel="noopener" class="btn btn-light btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 38px; height: 38px;" title="Share WhatsApp">
+                                <a href="https://api.whatsapp.com/send?text={{ rawurlencode($kegiatan->nama_kegiatan . ' - ' . route('kegiatan.show', $kegiatan->id)) }}" target="_blank" rel="noopener" class="btn btn-light btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 38px; height: 38px;" title="Bagikan via WhatsApp">
                                     <i class="bi bi-whatsapp text-success fs-5"></i>
                                 </a>
-                                <a href="https://twitter.com/intent/tweet?text={{ rawurlencode($kegiatan->nama_kegiatan) }}&url={{ rawurlencode(route('kegiatan.show', $kegiatan->id)) }}" target="_blank" rel="noopener" class="btn btn-light btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 38px; height: 38px;" title="Share Twitter">
+                                <a href="https://twitter.com/intent/tweet?text={{ rawurlencode($kegiatan->nama_kegiatan) }}&url={{ rawurlencode(route('kegiatan.show', $kegiatan->id)) }}" target="_blank" rel="noopener" class="btn btn-light btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 38px; height: 38px;" title="Bagikan via Twitter">
                                     <i class="bi bi-twitter-x text-dark fs-5"></i>
                                 </a>
                             </div>
@@ -101,7 +101,7 @@
                                         <div class="card-body p-3 d-flex flex-column h-100 justify-content-between">
                                             <div>
                                                 <small class="text-primary d-block mb-1" style="font-size: 0.75rem;">
-                                                    <i class="bi bi-calendar-event me-1"></i>{{ $rek->tanggal_waktu->format('d M Y') }}
+                                                    <i class="bi bi-calendar-event me-1"></i>{{ $rek->tanggal_waktu->translatedFormat('d M Y') }}
                                                 </small>
                                                 <h3 class="h6 fw-bold mb-0 text-dark" style="line-height: 1.4;">
                                                     <a href="{{ route('kegiatan.show', $rek->id) }}" class="text-decoration-none text-dark stretched-link">

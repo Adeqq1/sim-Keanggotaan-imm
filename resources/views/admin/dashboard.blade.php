@@ -116,7 +116,7 @@
                     <div class="d-flex align-items-center">
                         <div class="bg-light rounded p-2 me-3 text-center" style="min-width: 50px;">
                             <span class="d-block fw-bold text-primary">{{ $kegiatan->tanggal_waktu->format('d') }}</span>
-                            <span class="small text-muted text-uppercase" style="font-size: 0.6rem;">{{ $kegiatan->tanggal_waktu->format('M') }}</span>
+                            <span class="small text-muted text-uppercase" style="font-size: 0.6rem;">{{ $kegiatan->tanggal_waktu->translatedFormat('M') }}</span>
                         </div>
                         <div class="overflow-hidden">
                             <h6 class="mb-0 fw-bold text-truncate">{{ $kegiatan->nama_kegiatan }}</h6>

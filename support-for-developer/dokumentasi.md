@@ -291,7 +291,8 @@ Referensi:
 ### Hal yang perlu diingat saat mengubah fitur
 - Fitur ini adalah **jembatan utama** antara calon anggota dan akun kader.
 - Jika struktur data `Pendaftaran`, `User`, atau `Anggota` berubah, fitur approve harus ikut dicek.
-- Email approval adalah bagian penting dari onboarding akun.
+- Setelah approval, admin memberi tahu pendaftar melalui kanal operasional. Pendaftar
+  dapat memakai fitur `Lupa Password` untuk menetapkan password pertama.
 
 ### Test terkait
 - `tests/Feature/AdminFunctionalTest.php:13`
@@ -1019,16 +1020,17 @@ Referensi:
 
 ### Yang memakai queue atau proses async
 - generate sertifikat: `GenerateCertificateJob`
-- email approval pendaftaran: `PendaftaranDisetujuiMail`
 - composer dev stack sudah menjalankan queue listener
 
 Referensi:
 - `app/Jobs/GenerateCertificateJob.php:12`
-- `app/Mail/PendaftaranDisetujuiMail.php:14`
 - `composer.json:52`
 
 ### Dampak perubahan
-Jika ada bug pada fitur sertifikat atau approval pendaftaran, cek apakah queue worker berjalan.
+Jika ada bug pada fitur sertifikat, cek apakah queue worker berjalan. Persetujuan pendaftaran
+membuat akun dan profil anggota tanpa mengirim email onboarding otomatis. Admin perlu
+memberi tahu pendaftar melalui kanal operasional, lalu pendaftar dapat memakai fitur
+`Lupa Password` untuk menetapkan password pertama.
 
 Perintah dev lokal yang sudah menyalakan queue:
 - `composer run dev`

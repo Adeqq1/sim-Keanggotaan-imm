@@ -3,7 +3,7 @@
 @section('content')
     <div class="mb-4 text-center">
         <h4 class="fw-bold">Konfirmasi Password</h4>
-        <p class="text-muted small">Ini adalah area aman. Harap konfirmasi password kamu sebelum melanjutkan.</p>
+        <p class="text-muted small">Ini adalah area aman. Harap konfirmasi password Anda sebelum melanjutkan.</p>
     </div>
 
     <form method="POST" action="{{ route('password.confirm') }}">

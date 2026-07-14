@@ -73,6 +73,9 @@
             <label class="form-label small fw-bold">File Persyaratan (PDF/JPG)</label>
             <input type="file" name="file_persyaratan" class="form-control @error('file_persyaratan') is-invalid @enderror">
             <div class="form-text small">Opsional: KTP/Kartu Mahasiswa</div>
+            @error('file_persyaratan')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="d-grid gap-2">

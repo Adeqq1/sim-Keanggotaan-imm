@@ -42,7 +42,7 @@
         </div>
         @if(request()->filled('q') || request()->filled('kategori'))
             <div class="col-12">
-                <a href="{{ route('kader.arsip.index') }}" class="small text-decoration-none">Reset filter</a>
+                <a href="{{ route('kader.arsip.index') }}" class="small text-decoration-none">Atur ulang filter</a>
             </div>
         @endif
     </form>

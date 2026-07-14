@@ -8,8 +8,8 @@
         <div class="d-flex flex-column flex-sm-row gap-2">
             <form action="{{ route('admin.anggota.generate-nia-bulk') }}" method="POST">
                 @csrf
-                <button type="submit" class="btn btn-outline-secondary btn-ui btn-ui-sm" title="Generate NIA untuk anggota yang belum memiliki NIA" onclick="return confirm('Generate NIA untuk semua anggota yang belum memiliki NIA?')">
-                    <i class="bi bi-magic"></i> Generate NIA Kosong
+                <button type="submit" class="btn btn-outline-secondary btn-ui btn-ui-sm" title="Buat NIA untuk anggota yang belum memiliki NIA" onclick="return confirm('Buat NIA untuk semua anggota yang belum memiliki NIA?')">
+                    <i class="bi bi-magic"></i> Buat NIA Kosong
                 </button>
                 </button>
             </form>
@@ -68,7 +68,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">
                         <li><a class="dropdown-item py-2" href="{{ route('admin.anggota.show', $anggota->id) }}"><i class="bi bi-eye me-2 text-primary"></i> Detail</a></li>
-                        <li><a class="dropdown-item py-2" href="{{ route('admin.anggota.edit', $anggota->id) }}"><i class="bi bi-pencil me-2 text-info"></i> Edit</a></li>
+                        <li><a class="dropdown-item py-2" href="{{ route('admin.anggota.edit', $anggota->id) }}"><i class="bi bi-pencil me-2 text-info"></i> Ubah</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <button type="button" class="dropdown-item py-2 text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $anggota->id }}">

@@ -101,7 +101,7 @@
                     <div class="d-flex align-items-center min-w-0">
                         <div class="bg-light rounded p-2 me-3 text-center" style="min-width: 55px; border-radius: 12px !important;">
                             <span class="d-block fw-bold text-primary fs-5">{{ $kegiatan->tanggal_waktu->format('d') }}</span>
-                            <span class="small text-muted text-uppercase fw-bold" style="font-size: 0.6rem;">{{ $kegiatan->tanggal_waktu->format('M Y') }}</span>
+                            <span class="small text-muted text-uppercase fw-bold" style="font-size: 0.6rem;">{{ $kegiatan->tanggal_waktu->translatedFormat('M Y') }}</span>
                         </div>
                         <div class="min-w-0">
                             <h6 class="mb-0 fw-bold text-break">{{ $kegiatan->nama_kegiatan }}</h6>
