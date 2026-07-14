@@ -41,7 +41,7 @@
         @if($pendaftaran->file_persyaratan)
             <div class="mt-4">
                 <h6 class="fw-bold border-bottom pb-2 mb-3">Lampiran</h6>
-                <a href="{{ Storage::url($pendaftaran->file_persyaratan) }}" target="_blank" class="btn btn-outline-primary btn-ui w-100 py-3">
+                <a href="{{ Storage::url($pendaftaran->file_persyaratan) }}" target="_blank" class="btn btn-outline-primary btn-ui btn-ui-sm pendaftaran-detail-control w-100 w-sm-auto py-2">
                     <i class="bi bi-file-earmark-pdf me-2"></i> Lihat File Persyaratan
                 </a>
             </div>
@@ -72,7 +72,7 @@
                     <div class="invalid-feedback d-block mb-3">{{ $message }}</div>
                 @enderror
 
-                <button type="submit" class="btn btn-success btn-ui w-100 py-3">
+                <button type="submit" class="btn btn-success btn-ui btn-ui-sm pendaftaran-detail-control w-100 w-sm-auto py-2">
                     <i class="bi bi-check-circle me-2"></i> Setujui & Buat Akun
                 </button>
             </form>
@@ -87,7 +87,7 @@
                     <div class="invalid-feedback d-block">{{ $message }}</div>
                 @enderror
 
-                <button type="submit" class="btn btn-danger btn-ui w-100 py-3 mt-3">
+                <button type="submit" class="btn btn-danger btn-ui btn-ui-sm pendaftaran-detail-control w-100 w-sm-auto py-2 mt-3">
                     <i class="bi bi-x-circle me-2"></i> Tolak Pendaftaran
                 </button>
             </form>
@@ -102,7 +102,7 @@
     @endif
 
     <div class="text-center mt-4 mb-3">
-        <a href="{{ route('admin.pendaftaran.index') }}" class="btn btn-outline-secondary btn-ui">
+        <a href="{{ route('admin.pendaftaran.index') }}" class="btn btn-outline-secondary btn-ui btn-ui-sm">
             <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar
         </a>
     </div>

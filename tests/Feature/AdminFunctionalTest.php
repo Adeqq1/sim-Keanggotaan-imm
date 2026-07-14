@@ -74,10 +74,14 @@ test('admin pendaftaran detail page posts explicit status for approval action', 
     $response->assertOk()
         ->assertSee('name="status" value="disetujui"', false)
         ->assertSee('name="role"', false)
+        ->assertSee('w-100 w-sm-auto', false)
+        ->assertSee('btn-ui-sm', false)
         ->assertSeeText('Daftar Sebagai')
         ->assertSeeText('Role Akun')
         ->assertSeeText('Instruktur')
-        ->assertSeeText('Setujui & Buat Akun');
+        ->assertSeeText('Setujui & Buat Akun')
+        ->assertSeeText('Tolak Pendaftaran')
+        ->assertSeeText('Kembali ke Daftar');
 });
 
 test('admin pendaftaran index shows selected role', function () {

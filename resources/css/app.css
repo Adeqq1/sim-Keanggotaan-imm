@@ -701,6 +701,10 @@ canvas {
     min-height: 38px;
 }
 
+.app-main-content .pendaftaran-detail-control {
+    width: 100%;
+}
+
 .app-main-content .btn-icon {
     width: 44px;
     min-width: 44px;
@@ -746,6 +750,10 @@ canvas {
 }
 
 @media (min-width: 576px) {
+    .app-main-content .pendaftaran-detail-control.w-sm-auto {
+        width: auto !important;
+    }
+
     .app-main-content .action-group {
         display: flex;
         flex-wrap: wrap;
