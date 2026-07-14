@@ -8,8 +8,10 @@
         <p class="text-muted small">Tinjau bukti kehadiran yang diunggah oleh Kader untuk menyetujui klaim sertifikat.</p>
     </div>
 
+    <div class="row g-3 index-card-grid">
     @forelse($pendingClaims as $claim)
-        <div class="card mb-3 p-3 border-0 shadow-sm" style="border-radius: 12px;">
+        <div class="col-12 col-sm-6">
+        <div class="card h-100 p-3 border-0 shadow-sm index-card d-flex flex-column" style="border-radius: 12px;">
             <div class="d-flex align-items-center mb-3">
                 <div class="me-3">
                     @if($claim->bukti_kehadiran)
@@ -27,7 +29,7 @@
                 </div>
             </div>
             
-            <div class="action-group border-top pt-2">
+            <div class="action-group border-top pt-2 mt-auto index-card__actions">
                 <form action="{{ route('admin.sertifikat.verifikasi.tolak', $claim) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menolak klaim sertifikat ini?')">
                     @csrf
                     <button type="submit" class="btn btn-sm btn-outline-danger btn-ui btn-ui-sm px-3">
@@ -43,9 +45,18 @@
                 </form>
             </div>
         </div>
+        </div>
+    @empty
+        <div class="col-12"><div class="card p-5 text-center border-0 shadow-sm bg-light" style="border-radius: 20px;">
+            <i class="bi bi-check-circle display-1 text-success opacity-25 mb-3 text-opacity-50"></i>
+            <h6 class="fw-bold text-muted">Semua Bersih!</h6>
+            <p class="text-muted small mb-0 px-4">Tidak ada klaim sertifikat yang menunggu verifikasi saat ini.</p>
+        </div></div>
+    @endforelse
+    </div>
 
+    @foreach($pendingClaims as $claim)
         @if($claim->bukti_kehadiran)
-            <!-- Modal Detail Bukti -->
             <div class="modal fade" id="proofModal{{ $claim->id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg mx-3">
                     <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
@@ -64,13 +75,7 @@
                 </div>
             </div>
         @endif
-    @empty
-        <div class="card p-5 text-center border-0 shadow-sm bg-light" style="border-radius: 20px;">
-            <i class="bi bi-check-circle display-1 text-success opacity-25 mb-3 text-opacity-50"></i>
-            <h6 class="fw-bold text-muted">Semua Bersih!</h6>
-            <p class="text-muted small mb-0 px-4">Tidak ada klaim sertifikat yang menunggu verifikasi saat ini.</p>
-        </div>
-    @endforelse
+    @endforeach
 
     {{ $pendingClaims->links('components.pagination') }}
 </x-app-layout>

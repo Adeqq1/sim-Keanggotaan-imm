@@ -27,8 +27,10 @@
         @endif
     </form>
 
+    <div class="row g-3 index-card-grid">
     @forelse($arsips as $arsip)
-        <div class="card mb-3 p-3">
+        <div class="col-12 col-sm-6">
+        <div class="card h-100 p-3 index-card d-flex flex-column">
             <div class="d-flex align-items-center">
                 <div class="bg-light rounded p-2 me-3 text-center" style="min-width: 45px;">
                     <i class="bi bi-file-earmark-text fs-3 text-primary"></i>
@@ -55,18 +57,22 @@
                 </div>
             </div>
         </div>
+        </div>
+    @empty
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-folder-x display-4 text-muted"></i>
+            <p class="text-muted mt-2">Belum ada arsip yang diunggah.</p>
+        </div>
+    @endforelse
+    </div>
 
+    @foreach($arsips as $arsip)
         <x-_modal-delete
             id="deleteModal{{ $arsip->id }}"
             :action="route('admin.arsip.destroy', $arsip)"
             message="Data arsip yang dihapus tidak dapat dikembalikan."
         />
-    @empty
-        <div class="text-center py-5">
-            <i class="bi bi-folder-x display-4 text-muted"></i>
-            <p class="text-muted mt-2">Belum ada arsip yang diunggah.</p>
-        </div>
-    @endforelse
+    @endforeach
 
     {{ $arsips->links('components.pagination') }}
 </x-app-layout>

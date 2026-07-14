@@ -14,7 +14,7 @@ class ValidasiPendaftaranController extends Controller
 {
     public function index()
     {
-        $pendaftarans = Pendaftaran::where('status_validasi', 'pending')->latest()->paginate(10);
+        $pendaftarans = Pendaftaran::where('status_validasi', 'pending')->latest()->paginate(6);
 
         return view('admin.pendaftaran.index', compact('pendaftarans'));
     }

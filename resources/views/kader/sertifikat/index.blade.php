@@ -8,9 +8,11 @@
         <p class="text-muted small">Daftar sertifikat kegiatan yang telah Anda ikuti.</p>
     </div>
 
+    <div class="row g-3 index-card-grid">
     @forelse($sertifikats as $cert)
-        <div class="card mb-3 p-3 border-0 shadow-sm" style="border-radius: 15px;">
-            <div class="d-flex align-items-center gap-2">
+        <div class="col-12 col-sm-6">
+        <div class="card h-100 p-3 border-0 shadow-sm index-card d-flex flex-column" style="border-radius: 15px;">
+            <div class="d-flex align-items-center gap-2 index-card__content">
                 <div class="me-3">
                     <div class="rounded-3 bg-success bg-opacity-10 d-flex align-items-center justify-content-center text-success shadow-sm" style="width: 55px; height: 55px;">
                         <i class="bi bi-award-fill fs-2"></i>
@@ -21,18 +23,24 @@
                     <small class="text-muted d-block" style="font-size: 0.75rem;">Diterbitkan: {{ $cert->created_at->translatedFormat('d M Y') }}</small>
                     <small class="text-primary fw-bold d-block" style="font-size: 0.65rem;">No: {{ $cert->nomor_sertifikat }}</small>
                 </div>
-                <a href="{{ route('kader.sertifikat.download', $cert) }}" class="btn btn-outline-success btn-ui btn-ui-sm btn-icon btn-icon-circle border-2" aria-label="Unduh sertifikat {{ $cert->kegiatan->nama_kegiatan }}" title="Unduh sertifikat">
+            </div>
+            <div class="pt-3 mt-auto border-top index-card__actions">
+                <a href="{{ route('kader.sertifikat.download', $cert) }}" class="btn btn-outline-success btn-ui btn-ui-sm" aria-label="Unduh sertifikat {{ $cert->kegiatan->nama_kegiatan }}" title="Unduh sertifikat">
                     <i class="bi bi-download"></i>
                 </a>
             </div>
         </div>
+        </div>
     @empty
-        <div class="card p-5 text-center border-0 shadow-sm bg-light" style="border-radius: 20px;">
+        <div class="col-12"><div class="card p-5 text-center border-0 shadow-sm bg-light" style="border-radius: 20px;">
             <i class="bi bi-patch-minus display-1 text-muted opacity-25 mb-3"></i>
             <h6 class="fw-bold text-muted">Belum Ada Sertifikat</h6>
             <p class="text-muted small mb-0 px-4">Sertifikat akan muncul di sini setelah Anda mengikuti kegiatan dan diverifikasi oleh Admin.</p>
-        </div>
+        </div></div>
     @endforelse
+    </div>
+
+    {{ $sertifikats->links('components.pagination') }}
 
     <div class="mt-5 p-3 glass-card text-center text-white" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-radius: 15px;">
         <i class="bi bi-lightbulb fs-3 mb-2 d-block"></i>

@@ -24,7 +24,7 @@ class AnggotaController extends Controller
             });
         }
 
-        $anggotas = $query->latest()->paginate(10)->withQueryString();
+        $anggotas = $query->latest()->paginate(12)->withQueryString();
 
         return view('admin.anggota.index', compact('anggotas'));
     }

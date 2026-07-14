@@ -26,8 +26,10 @@
     </div>
 
     <h6 class="fw-bold mb-3">Daftar Kehadiran</h6>
+    <div class="row g-3 index-card-grid">
     @forelse($presensis as $p)
-        <div class="card mb-2 p-3 border-0 shadow-sm" style="border-radius: 15px;">
+        <div class="col-12 col-sm-6">
+        <div class="card h-100 p-3 border-0 shadow-sm index-card d-flex flex-column" style="border-radius: 15px;">
             <div class="d-flex align-items-center justify-content-between gap-2">
                 <div class="d-flex align-items-center min-w-0">
                     <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; min-width: 40px;">
@@ -46,7 +48,7 @@
             @php
                 $sertifikat = $sertifikats->get($p->kegiatan_id);
             @endphp
-            <div class="mt-3 pt-2 border-top d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+            <div class="mt-3 pt-2 border-top d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 index-card__actions">
                 <div class="small text-muted" style="font-size: 0.75rem;">
                     Sertifikat: 
                     @if($p->status_klaim === 'pending')
@@ -72,9 +74,18 @@
                 </div>
             </div>
         </div>
+        </div>
 
+    @empty
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-clock-history display-4 text-muted opacity-25"></i>
+            <p class="text-muted mt-2 small">Belum ada riwayat kegiatan.</p>
+        </div>
+    @endforelse
+    </div>
+
+    @foreach($presensis as $p)
         @if($p->status_klaim === null || $p->status_klaim === 'ditolak')
-            <!-- Modal Klaim -->
             <div class="modal fade" id="claimModal{{ $p->id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable mx-3">
                     <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
@@ -86,7 +97,6 @@
                             </div>
                             <div class="modal-body py-3">
                                 <p class="text-muted small mb-3">Silakan unggah foto bukti kehadiran Anda pada kegiatan <strong>{{ $p->kegiatan->nama_kegiatan }}</strong>.</p>
-                                
                                 <div class="mb-3 text-start">
                                     <label for="bukti_kehadiran_{{ $p->id }}" class="form-label fw-semibold small">Foto Bukti Kehadiran (Format: JPG, PNG, max 2MB)</label>
                                     <input type="file" class="form-control" id="bukti_kehadiran_{{ $p->id }}" name="bukti_kehadiran" accept="image/png, image/jpeg, image/jpg" required style="border-radius: 8px;">
@@ -101,12 +111,9 @@
                 </div>
             </div>
         @endif
-    @empty
-        <div class="text-center py-5">
-            <i class="bi bi-clock-history display-4 text-muted opacity-25"></i>
-            <p class="text-muted mt-2 small">Belum ada riwayat kegiatan.</p>
-        </div>
-    @endforelse
+    @endforeach
+
+    {{ $presensis->links('components.pagination') }}
 
     <div class="pb-3"></div>
 

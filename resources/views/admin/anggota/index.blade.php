@@ -38,8 +38,10 @@
         </div>
     </form>
 
+    <div class="row g-3 index-card-grid">
     @forelse($anggotas as $anggota)
-        <div class="card mb-3 p-3">
+        <div class="col-12 col-sm-6">
+        <div class="card h-100 p-3 index-card d-flex flex-column">
             <div class="d-flex align-items-center gap-2">
                 <div class="me-3">
                     @if($anggota->foto_profil)
@@ -78,14 +80,9 @@
                 </div>
             </div>
         </div>
-
-        <x-_modal-delete 
-            id="deleteModal{{ $anggota->id }}" 
-            :action="route('admin.anggota.destroy', $anggota->id)" 
-            message="Menghapus anggota ini akan menghapus semua riwayat presensi dan sertifikat terkait."
-        />
+        </div>
     @empty
-        <div class="text-center py-5">
+        <div class="col-12 text-center py-5">
             @if(request('search'))
                 <i class="bi bi-search display-4 text-muted opacity-50"></i>
                 <p class="text-muted mt-2">Anggota dengan kata kunci "{{ request('search') }}" tidak ditemukan.</p>
@@ -96,6 +93,15 @@
             @endif
         </div>
     @endforelse
+    </div>
+
+    @foreach($anggotas as $anggota)
+        <x-_modal-delete
+            id="deleteModal{{ $anggota->id }}"
+            :action="route('admin.anggota.destroy', $anggota->id)"
+            message="Menghapus anggota ini akan menghapus semua riwayat presensi dan sertifikat terkait."
+        />
+    @endforeach
 
     {{ $anggotas->links('components.pagination') }}
 </x-app-layout>

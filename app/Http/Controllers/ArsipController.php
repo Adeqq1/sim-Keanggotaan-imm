@@ -26,7 +26,7 @@ class ArsipController extends Controller
         }
 
         return view('admin.arsip.index', [
-            'arsips' => $query->paginate(10)->withQueryString(),
+            'arsips' => $query->paginate(6)->withQueryString(),
             'kategori' => Arsip::KATEGORI,
         ]);
     }
@@ -54,7 +54,7 @@ class ArsipController extends Controller
         }
 
         return view('kader.arsip.index', [
-            'arsips' => $query->paginate(10)->withQueryString(),
+            'arsips' => $query->paginate(6)->withQueryString(),
             'kategori' => Arsip::KATEGORI,
         ]);
     }

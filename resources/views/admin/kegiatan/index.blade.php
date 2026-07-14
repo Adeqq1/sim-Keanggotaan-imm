@@ -10,8 +10,10 @@
         </a>
     </div>
 
+    <div class="row g-3 index-card-grid">
     @forelse($kegiatans as $kegiatan)
-        <div class="card mb-3 p-3">
+        <div class="col-12 col-sm-6">
+        <div class="card h-100 p-3 index-card d-flex flex-column">
             <div class="d-flex align-items-center">
                 <div class="bg-light rounded p-2 me-3 text-center" style="min-width: 55px;">
                     <span class="d-block fw-bold text-primary fs-5">{{ $kegiatan->tanggal_waktu->format('d') }}</span>
@@ -20,9 +22,9 @@
                 @if($kegiatan->thumbnail)
                     <img src="{{ asset('storage/' . $kegiatan->thumbnail) }}" alt="Gambar mini kegiatan" class="rounded me-3" style="width: 55px; height: 55px; object-fit: cover;">
                 @endif
-                <div class="flex-grow-1">
-                    <h6 class="fw-bold mb-1">{{ $kegiatan->nama_kegiatan }}</h6>
-                    <small class="text-muted d-block"><i class="bi bi-geo-alt me-1"></i> {{ $kegiatan->lokasi }}</small>
+                <div class="flex-grow-1 min-w-0">
+                    <h6 class="fw-bold mb-1 text-break">{{ $kegiatan->nama_kegiatan }}</h6>
+                    <small class="text-muted d-block text-break"><i class="bi bi-geo-alt me-1"></i> {{ $kegiatan->lokasi }}</small>
                 </div>
                 <div class="dropdown">
                     <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown" aria-label="Aksi untuk {{ $kegiatan->nama_kegiatan }}">
@@ -41,18 +43,22 @@
                 </div>
             </div>
         </div>
-
-        <x-_modal-delete 
-            id="deleteModal{{ $kegiatan->id }}" 
-            :action="route('admin.kegiatan.destroy', $kegiatan)" 
-            message="Menghapus kegiatan ini akan menghapus semua data presensi dan sertifikat yang terkait."
-        />
+        </div>
     @empty
-        <div class="text-center py-5">
+        <div class="col-12 text-center py-5">
             <i class="bi bi-calendar-x display-4 text-muted"></i>
             <p class="text-muted mt-2">Belum ada kegiatan.</p>
         </div>
     @endforelse
+    </div>
+
+    @foreach($kegiatans as $kegiatan)
+        <x-_modal-delete
+            id="deleteModal{{ $kegiatan->id }}"
+            :action="route('admin.kegiatan.destroy', $kegiatan)"
+            message="Menghapus kegiatan ini akan menghapus semua data presensi dan sertifikat yang terkait."
+        />
+    @endforeach
 
     {{ $kegiatans->links('components.pagination') }}
 </x-app-layout>

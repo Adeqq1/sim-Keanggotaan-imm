@@ -705,6 +705,18 @@ canvas {
     width: 100%;
 }
 
+.app-main-content .index-card {
+    min-width: 0;
+}
+
+.app-main-content .index-card__content {
+    min-width: 0;
+}
+
+.app-main-content .index-card__actions {
+    margin-top: auto;
+}
+
 .app-main-content .anggota-index-actions {
     align-items: center;
     justify-content: flex-end;

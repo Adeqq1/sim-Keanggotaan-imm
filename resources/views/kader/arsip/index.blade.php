@@ -32,8 +32,10 @@
         @endif
     </form>
 
+    <div class="row g-3 index-card-grid">
     @forelse($arsips as $arsip)
-        <div class="card mb-3 p-3 border-0 shadow-sm" style="border-radius: 15px;">
+        <div class="col-12 col-sm-6">
+        <div class="card h-100 p-3 border-0 shadow-sm index-card d-flex flex-column" style="border-radius: 15px;">
             <div class="d-flex align-items-center">
                 <div class="me-3">
                     <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-primary" style="width: 45px; height: 45px;">
@@ -50,12 +52,14 @@
                 </a>
             </div>
         </div>
+        </div>
     @empty
-        <div class="text-center py-5">
+        <div class="col-12 text-center py-5">
             <i class="bi bi-folder-x display-4 text-muted opacity-25"></i>
             <p class="text-muted mt-2 small">Belum ada arsip dokumen.</p>
         </div>
     @endforelse
+    </div>
 
     {{ $arsips->links('components.pagination') }}
     <div class="pb-3"></div>
