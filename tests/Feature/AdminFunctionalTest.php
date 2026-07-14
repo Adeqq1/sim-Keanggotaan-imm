@@ -9,12 +9,16 @@ use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 test('admin can approve pendaftaran and create kader account', function () {
     Mail::fake();
 
     $admin = User::factory()->admin()->create();
-    $pendaftaran = Pendaftaran::factory()->create();
+    $password = 'Pendaftaran-Password-2026';
+    $pendaftaran = Pendaftaran::factory()->create([
+        'password' => Hash::make($password),
+    ]);
 
     $response = $this->actingAs($admin)
         ->post(route('admin.pendaftaran.validate', $pendaftaran->id), [
@@ -33,13 +37,40 @@ test('admin can approve pendaftaran and create kader account', function () {
     ]);
 
     $newUser = User::where('email', $pendaftaran->email)->first();
+    expect(Hash::check($password, $pendaftaran->password))->toBeTrue()
+        ->and(Hash::check($password, $newUser->password))->toBeTrue();
     $this->assertDatabaseHas('anggota', [
         'user_id' => $newUser->id,
         'nama_lengkap' => $pendaftaran->nama_lengkap,
     ]);
 
-    Mail::assertQueued(PendaftaranDisetujuiMail::class, function ($mail) use ($newUser) {
-        return $mail->user->id === $newUser->id && strlen($mail->password) === 8;
+    Mail::assertQueued(PendaftaranDisetujuiMail::class, function ($mail) use ($newUser, $password, $pendaftaran) {
+        return $mail->user->id === $newUser->id
+            && $mail->password === null
+            && ! str_contains($mail->render(), $password)
+            && ! str_contains($mail->render(), $pendaftaran->password);
+    });
+});
+
+test('admin can approve a legacy pendaftaran with a temporary password', function () {
+    Mail::fake();
+
+    $admin = User::factory()->admin()->create();
+    $pendaftaran = Pendaftaran::factory()->legacyWithoutPassword()->create();
+
+    $this->actingAs($admin)
+        ->post(route('admin.pendaftaran.validate', $pendaftaran), [
+            'status' => 'disetujui',
+            'role' => 'kader',
+        ])->assertRedirect(route('admin.pendaftaran.index'));
+
+    $user = User::where('email', $pendaftaran->email)->firstOrFail();
+
+    Mail::assertQueued(PendaftaranDisetujuiMail::class, function ($mail) use ($user) {
+        return $mail->user->is($user)
+            && is_string($mail->password)
+            && strlen($mail->password) === 8
+            && Hash::check($mail->password, $user->password);
     });
 });
 
@@ -180,6 +211,7 @@ test('admin can reject pendaftaran', function () {
     $pendaftaran->refresh();
     expect($pendaftaran->status_validasi)->toBe('ditolak');
     expect($pendaftaran->catatan_admin)->toBe('Data tidak lengkap.');
+    expect($pendaftaran->password)->toBeNull();
 });
 
 test('admin must provide catatan admin when rejecting pendaftaran', function () {

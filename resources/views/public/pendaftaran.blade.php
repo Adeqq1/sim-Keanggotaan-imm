@@ -6,6 +6,10 @@
         <p class="text-muted small">Silakan lengkapi data diri Anda</p>
     </div>
 
+    @if (session('error'))
+        <div class="alert alert-danger small" role="alert">{{ session('error') }}</div>
+    @endif
+
     <form method="POST" action="{{ route('pendaftaran.store') }}" enctype="multipart/form-data">
         @csrf
 
@@ -19,6 +23,18 @@
             <label class="form-label small fw-bold">Email</label>
             <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required>
             @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label small fw-bold">Password Akun</label>
+            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required autocomplete="new-password">
+            <div class="form-text small">Password ini akan digunakan untuk login setelah pendaftaran disetujui.</div>
+            @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label small fw-bold">Konfirmasi Password</label>
+            <input type="password" name="password_confirmation" class="form-control" required autocomplete="new-password">
         </div>
 
         <div class="mb-3">

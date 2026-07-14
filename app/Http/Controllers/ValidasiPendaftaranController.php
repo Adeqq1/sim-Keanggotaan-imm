@@ -36,14 +36,14 @@ class ValidasiPendaftaranController extends Controller
 
         if ($status === 'disetujui') {
             $role = $validated['role'];
-            $password = Str::password(8);
+            $temporaryPassword = $pendaftar->password === null ? Str::password(8) : null;
             $user = null;
 
-            DB::transaction(function () use ($pendaftar, $password, $role, &$user) {
+            DB::transaction(function () use ($pendaftar, $temporaryPassword, $role, &$user) {
                 $user = User::create([
                     'name' => $pendaftar->nama_lengkap,
                     'email' => $pendaftar->email,
-                    'password' => Hash::make($password),
+                    'password' => $pendaftar->password ?? Hash::make($temporaryPassword),
                     'role' => $role,
                 ]);
 
@@ -65,12 +65,13 @@ class ValidasiPendaftaranController extends Controller
                 ]);
             });
 
-            Mail::to($user->email)->send(new PendaftaranDisetujuiMail($user, $password));
+            Mail::to($user->email)->send(new PendaftaranDisetujuiMail($user, $temporaryPassword));
 
             return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftaran disetujui.');
         }
 
         $pendaftar->update([
+            'password' => null,
             'status_validasi' => 'ditolak',
             'catatan_admin' => $validated['catatan_admin'],
         ]);

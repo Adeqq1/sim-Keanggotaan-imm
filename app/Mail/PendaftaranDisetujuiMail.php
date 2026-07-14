@@ -20,7 +20,7 @@ class PendaftaranDisetujuiMail extends Mailable implements ShouldQueue
      */
     public function __construct(
         public User $user,
-        public string $password
+        public ?string $password = null
     ) {
         //
     }

@@ -6,6 +6,7 @@ use App\Enums\RoleEnum;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules;
 
 class PendaftaranRequest extends FormRequest
 {
@@ -34,6 +35,7 @@ class PendaftaranRequest extends FormRequest
                 Rule::unique('users', 'email'),
                 Rule::unique('pendaftaran', 'email')->where('status_validasi', 'pending'),
             ],
+            'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
             'role' => ['required', Rule::enum(RoleEnum::class)->except(RoleEnum::ADMIN)],
             'tempat_lahir' => ['required', 'string', 'max:255'],
             'tanggal_lahir' => ['required', 'date'],

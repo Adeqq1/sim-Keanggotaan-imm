@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Pendaftaran;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * @extends Factory<Pendaftaran>
@@ -22,6 +23,7 @@ class PendaftaranFactory extends Factory
         return [
             'nama_lengkap' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'password' => Hash::make('password'),
             'role' => 'kader',
             'tempat_lahir' => fake()->city(),
             'tanggal_lahir' => fake()->date('Y-m-d', '2005-01-01'),
@@ -50,6 +52,16 @@ class PendaftaranFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'role' => 'instruktur',
+        ]);
+    }
+
+    /**
+     * Indicate that the pendaftaran predates applicant-selected passwords.
+     */
+    public function legacyWithoutPassword(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'password' => null,
         ]);
     }
 
