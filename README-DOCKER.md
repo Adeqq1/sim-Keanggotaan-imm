@@ -29,8 +29,10 @@ docker compose up -d
 docker compose down
 docker compose logs -f app
 docker compose exec app php artisan migrate
+docker compose exec app php artisan migrate:fresh --seed
+docker compose exec app php artisan demo:seed-files  # Creates real dummy PDFs/images
 docker compose exec app composer install
 docker compose exec app bash
 ```
 
-The database is stored in Docker's `mariadb-data` volume. `docker compose down` keeps it; `docker compose down -v` permanently deletes it.
+The database is stored in Docker's `mariadb-data` volume. `docker compose down` keeps it; `docker compose down -v` permanently deletes it. See `support-for-developer/troubleshooting/SEED_DATA_DUMMY.md` for details on how `demo:seed-files` works.

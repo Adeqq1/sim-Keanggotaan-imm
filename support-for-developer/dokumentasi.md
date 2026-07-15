@@ -1044,13 +1044,15 @@ Folder penting yang dipakai fitur:
 - `storage/app/public/pendaftaran`
 - `storage/app/public/foto_profil`
 - `storage/app/public/kegiatan_thumbnails`
-- `storage/app/public/arsip`
 - `storage/app/public/bukti_kehadiran`
 - `storage/app/public/sertifikat`
+- `storage/app/private/arsip` (file arsip bersifat privat dan diakses melalui route, bukan URL publik)
 - `storage/app/sertifikat_settings.json`
 - `public/images/sertificate-asset/bg-sertificate.jpg`
 
 Saat mengubah fitur upload atau deployment, cek semua path ini.
+
+**Penting:** Jika Anda membutuhkan dummy data (terutama PDF dan gambar) yang dapat diunduh tanpa rusak/broken saat pengembangan, jalankan `php artisan demo:seed-files`. Rincian penggunaannya dijelaskan pada dokumen `support-for-developer/troubleshooting/SEED_DATA_DUMMY.md`.
 
 ---
 
