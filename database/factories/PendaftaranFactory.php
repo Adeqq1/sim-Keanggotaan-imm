@@ -20,15 +20,17 @@ class PendaftaranFactory extends Factory
      */
     public function definition(): array
     {
+        $faker = fake('id_ID');
+
         return [
-            'nama_lengkap' => fake()->name(),
+            'nama_lengkap' => $faker->name(),
             'email' => fake()->unique()->safeEmail(),
             'password' => Hash::make('password'),
             'role' => 'kader',
-            'tempat_lahir' => fake()->city(),
+            'tempat_lahir' => $faker->city(),
             'tanggal_lahir' => fake()->date('Y-m-d', '2005-01-01'),
-            'no_telp' => fake()->phoneNumber(),
-            'alamat' => fake()->address(),
+            'no_telp' => $faker->phoneNumber(),
+            'alamat' => $faker->address(),
             'tanggal_daftar' => now()->toDateString(),
             'status_validasi' => 'pending',
         ];
@@ -41,7 +43,7 @@ class PendaftaranFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status_validasi' => 'disetujui',
-            'catatan_admin' => 'Pendaftaran disetujui.',
+            'catatan_admin' => 'Pendaftaran disetujui setelah dokumen lengkap dan data valid.',
         ]);
     }
 
@@ -72,7 +74,7 @@ class PendaftaranFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status_validasi' => 'ditolak',
-            'catatan_admin' => 'Pendaftaran ditolak.',
+            'catatan_admin' => 'Pendaftaran ditolak karena data tidak lengkap atau tidak memenuhi syarat.',
         ]);
     }
 }

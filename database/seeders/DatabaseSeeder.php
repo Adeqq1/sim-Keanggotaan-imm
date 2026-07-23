@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
 
         $anggotas = $kaders->map(fn (User $kader) => Anggota::factory()->create([
             'user_id' => $kader->id,
+            'nama_lengkap' => $kader->name,
         ]));
 
         $kegiatans = Kegiatan::factory()->past()->count(3)->create();

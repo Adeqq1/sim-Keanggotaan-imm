@@ -1,5 +1,16 @@
 # Dokumentasi Fitur Fungsional Website SIM Keanggotaan IMM
 
+> **Baru di Laravel / kerja database?** Mulai dari dokumen dasar pemrograman:
+> - [support-for-developer/README.md](./README.md)
+> - [basics/00-laravel-map.md](./basics/00-laravel-map.md)
+> - [basics/01-database-tables-migrations.md](./basics/01-database-tables-migrations.md)
+> - [basics/02-models-and-relations.md](./basics/02-models-and-relations.md)
+> - [basics/03-routes-controllers-views.md](./basics/03-routes-controllers-views.md)
+> - [basics/04-create-new-feature-checklist.md](./basics/04-create-new-feature-checklist.md)
+> - [basics/05-seeder-dan-jalankan-script.md](./basics/05-seeder-dan-jalankan-script.md)
+
+---
+
 Dokumentasi ini dibuat sebagai pedoman kerja untuk programmer junior atau model AI yang lebih murah saat mengubah, memperbaiki, atau mengembangkan fitur di aplikasi ini. Fokus dokumen ini adalah **fitur fungsional yang benar-benar ada di source code**, bukan asumsi.
 
 ## 1. Gambaran singkat aplikasi
