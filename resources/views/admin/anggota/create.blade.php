@@ -73,12 +73,50 @@
                     </div>
 
                     <div class="col-md-6">
+                        <label class="form-label fw-bold">Email <span class="text-danger">*</span></label>
+                        <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required>
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Dipakai untuk login akun anggota.</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Password <span class="text-danger">*</span></label>
+                        <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Konfirmasi Password <span class="text-danger">*</span></label>
+                        <input type="password" name="password_confirmation" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-6">
                         <label class="form-label fw-bold">Status <span class="text-danger">*</span></label>
                         <select name="status_aktif" class="form-select @error('status_aktif') is-invalid @enderror" required>
-                            <option value="1" {{ old('status_aktif') == '1' ? 'selected' : '' }}>Aktif</option>
+                            <option value="1" {{ old('status_aktif', '1') == '1' ? 'selected' : '' }}>Aktif</option>
                             <option value="0" {{ old('status_aktif') == '0' ? 'selected' : '' }}>Tidak Aktif</option>
                         </select>
                         @error('status_aktif')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Peran <span class="text-danger">*</span></label>
+                        <select name="role" class="form-select @error('role') is-invalid @enderror" required>
+                            @foreach(App\Enums\RoleEnum::cases() as $role)
+                                @if($role !== App\Enums\RoleEnum::ADMIN)
+                                    <option value="{{ $role->value }}" {{ old('role', 'kader') == $role->value ? 'selected' : '' }}>
+                                        {{ ucfirst($role->value) }}
+                                    </option>
+                                @endif
+                            @endforeach
+                        </select>
+                        @error('role')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
