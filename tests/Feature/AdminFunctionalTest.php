@@ -190,6 +190,27 @@ test('admin cannot approve pendaftaran when email already belongs to a user', fu
     Mail::assertNothingQueued();
 });
 
+test('admin cannot re-approve already processed pendaftaran', function () {
+    Mail::fake();
+
+    $admin = User::factory()->admin()->create();
+    $pendaftaran = Pendaftaran::factory()->create([
+        'status_validasi' => 'disetujui',
+        'user_id' => User::factory()->kader()->create()->id,
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->from(route('admin.pendaftaran.show', $pendaftaran->id))
+        ->post(route('admin.pendaftaran.validate', $pendaftaran->id), [
+            'status' => 'disetujui',
+            'role' => 'kader',
+        ]);
+
+    $response->assertSessionHasErrors('status');
+    $this->assertDatabaseCount('users', 2);
+    Mail::assertNothingQueued();
+});
+
 test('admin can reject pendaftaran', function () {
     $admin = User::factory()->admin()->create();
     $pendaftaran = Pendaftaran::factory()->create();

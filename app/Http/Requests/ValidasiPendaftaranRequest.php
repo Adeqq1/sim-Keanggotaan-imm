@@ -40,13 +40,23 @@ class ValidasiPendaftaranRequest extends FormRequest
     {
         return [
             function ($validator): void {
+                $pendaftaran = $this->route('id') ? Pendaftaran::find($this->route('id')) : null;
+
+                if (! $pendaftaran) {
+                    return;
+                }
+
+                if ($pendaftaran->status_validasi !== 'pending') {
+                    $validator->errors()->add('status', 'Pendaftaran ini sudah diproses.');
+
+                    return;
+                }
+
                 if ($this->input('status') !== 'disetujui') {
                     return;
                 }
 
-                $pendaftaran = $this->route('id') ? Pendaftaran::find($this->route('id')) : null;
-
-                if ($pendaftaran && User::where('email', $pendaftaran->email)->exists()) {
+                if (User::where('email', $pendaftaran->email)->exists()) {
                     $validator->errors()->add('email', 'Email pendaftar sudah terdaftar sebagai pengguna.');
                 }
             },

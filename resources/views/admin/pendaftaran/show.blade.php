@@ -57,6 +57,11 @@
                     {{ $message }}
                 </div>
             @enderror
+            @error('status')
+                <div class="alert alert-warning">
+                    {{ $message }}
+                </div>
+            @enderror
 
             <form action="{{ route('admin.pendaftaran.validate', $pendaftaran) }}" method="POST" class="mb-3">
                 @csrf
