@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PendaftaranRequest;
 use App\Models\Pendaftaran;
+use Illuminate\Support\Facades\Hash;
 
 class PendaftaranController extends Controller
 {
@@ -15,6 +16,7 @@ class PendaftaranController extends Controller
     public function store(PendaftaranRequest $request)
     {
         $validated = $request->validated();
+        $validated['password'] = Hash::make($validated['password']);
 
         if ($request->hasFile('file_persyaratan')) {
             $path = $request->file('file_persyaratan')->store('pendaftaran', 'public');

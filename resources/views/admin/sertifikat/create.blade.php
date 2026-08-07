@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        Generate Sertifikat
+        Buat Sertifikat
     </x-slot>
 
     <div class="card p-4">
@@ -20,7 +20,7 @@
             </div>
 
             <div class="mb-4">
-                <label class="form-label small fw-bold d-block mb-3">Pilih Anggota (Multiple)</label>
+                <label class="form-label small fw-bold d-block mb-3">Pilih Beberapa Anggota</label>
                 <div class="list-group shadow-sm border-0" style="max-height: 300px; overflow-y: auto; border-radius: 10px;">
                     @foreach($anggotas as $anggota)
                         <label class="list-group-item d-flex align-items-center py-3">
@@ -38,10 +38,10 @@
             </div>
 
             <div class="d-grid">
-                <button type="submit" class="btn btn-primary py-3 fw-bold">
-                    <i class="bi bi-gear-wide-connected me-2"></i> Generate Sekarang
+                <button type="submit" class="btn btn-primary btn-ui py-3">
+                    <i class="bi bi-gear-wide-connected me-2"></i> Buat Sekarang
                 </button>
-                <a href="{{ route('admin.sertifikat.index') }}" class="btn btn-link text-muted small mt-2">Batal</a>
+                <a href="{{ route('admin.sertifikat.index') }}" class="btn btn-outline-secondary btn-ui btn-ui-sm mt-2">Batal</a>
             </div>
         </form>
     </div>

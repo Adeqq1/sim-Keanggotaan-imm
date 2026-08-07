@@ -6,7 +6,7 @@
             <div class="col-lg-4">
                 <div class="d-flex align-items-center gap-2 mb-3">
                     <div class="footer-logo-box" style="rgb(255, 255, 255);">
-                        <img src="{{ asset('images/logo.png') }}" alt="IMM Logo" class="navbar-logo-img" style="max-height:2.5rem;">
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo IMM" class="navbar-logo-img" style="max-height:2.5rem;">
                     </div>
                     <span style="color:#e2e8f0;font-weight:700;font-size:1rem;">Ikatan Mahasiswa Muhammadiyah</span>
                 </div>
@@ -42,7 +42,7 @@
                 <h2 class="h6 mb-3" style="color:#e2e8f0;font-weight:700;">Sistem</h2>
                 <ul class="list-unstyled mb-0">
                     <li class="mb-2"><a href="{{ route('pendaftaran') }}" class="footer-link small">Daftar Anggota</a></li>
-                    <li class="mb-2"><a href="{{ route('login') }}" class="footer-link small">Login Anggota</a></li>
+                    <li class="mb-2"><a href="{{ route('login') }}" class="footer-link small">Masuk Anggota</a></li>
                 </ul>
             </div>
 
@@ -74,8 +74,8 @@
 
         <hr style="border-color:rgba(255,255,255,0.1);">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
-            <p class="mb-0 small" style="color:#64748b;">&copy; {{ date('Y') }} Ikatan Mahasiswa Muhammadiyah. All rights reserved.</p>
-            <p class="mb-0 small" style="color:#64748b;">Powered by Adeqq &mdash; Teknologi Informasi 2022</p>
+            <p class="mb-0 small" style="color:#64748b;">&copy; {{ date('Y') }} Ikatan Mahasiswa Muhammadiyah. Seluruh hak cipta dilindungi.</p>
+            <p class="mb-0 small" style="color:#64748b;">Didukung oleh Adeqq &mdash; Teknologi Informasi 2022</p>
         </div>
     </div>
 </footer>

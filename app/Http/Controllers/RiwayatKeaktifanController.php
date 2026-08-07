@@ -15,19 +15,21 @@ class RiwayatKeaktifanController extends Controller
             return redirect()->route('kader.dashboard')->with('error', 'Data anggota tidak ditemukan.');
         }
 
-        $presensis = Presensi::where('anggota_id', $anggota->id)
+        $presensiQuery = Presensi::where('anggota_id', $anggota->id);
+
+        $presensis = (clone $presensiQuery)
             ->with('kegiatan')
             ->latest()
-            ->get();
+            ->paginate(6);
 
         $sertifikats = Sertifikat::where('anggota_id', $anggota->id)
             ->get()
             ->keyBy('kegiatan_id');
 
         $stats = [
-            'hadir' => $presensis->where('status_kehadiran', 'hadir')->count(),
-            'izin' => $presensis->where('status_kehadiran', 'izin')->count(),
-            'alfa' => $presensis->where('status_kehadiran', 'alfa')->count(),
+            'hadir' => (clone $presensiQuery)->where('status_kehadiran', 'hadir')->count(),
+            'izin' => (clone $presensiQuery)->where('status_kehadiran', 'izin')->count(),
+            'alfa' => (clone $presensiQuery)->where('status_kehadiran', 'alfa')->count(),
         ];
 
         return view('kader.riwayat.index', compact('presensis', 'sertifikats', 'stats'));

@@ -15,9 +15,26 @@ test('reset password link can be requested', function () {
 
     $user = User::factory()->create();
 
-    $this->post('/forgot-password', ['email' => $user->email]);
+    $response = $this->post('/forgot-password', ['email' => $user->email]);
 
+    $response->assertSessionHas('status', 'Kami telah mengirimkan tautan pengaturan ulang kata sandi ke email Anda.');
     Notification::assertSentTo($user, ResetPassword::class);
+});
+
+test('unknown reset email uses an Indonesian error message', function () {
+    Notification::fake();
+
+    $response = $this->from('/forgot-password')->post('/forgot-password', [
+        'email' => 'tidak.terdaftar@example.com',
+    ]);
+
+    $response
+        ->assertRedirect('/forgot-password')
+        ->assertSessionHas('errors', function ($errors) {
+            return $errors->get('email') === ['Kami tidak dapat menemukan pengguna dengan alamat email tersebut.'];
+        });
+
+    Notification::assertNothingSent();
 });
 
 test('reset password screen can be rendered', function () {
@@ -53,6 +70,7 @@ test('password can be reset with valid token', function () {
 
         $response
             ->assertSessionHasNoErrors()
+            ->assertSessionHas('status', 'Kata sandi Anda telah berhasil diatur ulang.')
             ->assertRedirect(route('login'));
 
         return true;

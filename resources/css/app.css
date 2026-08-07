@@ -49,6 +49,17 @@ body {
     padding-bottom: 80px; /* ruang bottom nav */
 }
 
+img,
+svg,
+video,
+canvas {
+    max-width: 100%;
+}
+
+.min-w-0 {
+    min-width: 0;
+}
+
 .card {
     border: none;
     border-radius: 12px;
@@ -231,6 +242,7 @@ body {
    ============================================ */
 .app-wrapper {
     min-height: 100vh;
+    min-width: 0;
 }
 
 /* Desktop header (topbar di area konten) */
@@ -251,6 +263,8 @@ body {
     font-weight: 700;
     color: #1a1a2e;
     margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 .desktop-topbar .user-menu-btn {
     display: flex;
@@ -288,6 +302,118 @@ body {
 /* Main content area */
 .app-main-content {
     padding: 1.5rem;
+    min-width: 0;
+}
+
+.navbar-header h1 {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.navbar-header > div {
+    gap: 1rem;
+}
+
+.bottom-nav-items {
+    width: 100%;
+}
+
+.bottom-nav-items .nav-link {
+    flex: 1 1 0;
+    min-width: 0;
+    line-height: 1.1;
+}
+
+.bottom-nav-items small {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.pagination-wrapper {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.pagination-wrapper .pagination {
+    width: max-content;
+}
+
+.modal-dialog {
+    max-width: calc(100% - 2rem);
+}
+
+.modal-content {
+    max-height: calc(100vh - 2rem);
+}
+
+.modal-body {
+    overflow-y: auto;
+}
+
+.responsive-input-group {
+    flex-wrap: wrap;
+}
+
+.responsive-input-group > .form-control {
+    flex: 1 1 100%;
+    width: 100%;
+    border-radius: var(--bs-border-radius);
+}
+
+.responsive-input-group > .btn,
+.responsive-input-group > .input-group-text {
+    margin-top: -1px;
+}
+
+.responsive-input-group > .btn {
+    width: 100%;
+    border-radius: var(--bs-border-radius);
+}
+
+.responsive-input-group > .input-group-text {
+    width: 100%;
+    justify-content: center;
+    border-radius: var(--bs-border-radius);
+}
+
+@media (min-width: 576px) {
+    .responsive-input-group {
+        flex-wrap: nowrap;
+    }
+
+    .responsive-input-group > .form-control {
+        flex: 1 1 auto;
+        width: 1%;
+        border-radius: var(--bs-border-radius) 0 0 var(--bs-border-radius);
+    }
+
+    .responsive-input-group > .btn,
+    .responsive-input-group > .input-group-text {
+        width: auto;
+        margin-top: 0;
+        border-radius: 0 var(--bs-border-radius) var(--bs-border-radius) 0;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .app-main-content {
+        padding: 1rem;
+    }
+
+    .app-main-content > .card > .card-body,
+    .app-main-content > .card.p-4,
+    .app-main-content > .card.p-5 {
+        padding: 1rem !important;
+    }
+
+    .auth-split-right {
+        padding: 1rem;
+    }
+
+    .auth-card {
+        padding: 1.5rem;
+    }
 }
 
 /* ============================================
@@ -531,3 +657,163 @@ body {
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1) !important;
 }
 
+/* Opt-in action controls for authenticated application views. */
+.app-main-content .btn-ui,
+.desktop-topbar .btn-ui,
+.sidebar-desktop .btn-ui {
+    min-height: 44px;
+    border-radius: 0.625rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    font-weight: 600;
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.app-main-content .btn-ui:hover,
+.desktop-topbar .btn-ui:hover,
+.sidebar-desktop .btn-ui:hover {
+    transform: translateY(-1px);
+}
+
+.app-main-content .btn-ui:active,
+.desktop-topbar .btn-ui:active,
+.sidebar-desktop .btn-ui:active {
+    transform: translateY(0);
+}
+
+.app-main-content .btn-ui:focus-visible,
+.desktop-topbar .btn-ui:focus-visible,
+.sidebar-desktop .btn-ui:focus-visible,
+.app-main-content .quick-action-card:focus-visible {
+    outline: 3px solid rgba(128, 0, 0, 0.35);
+    outline-offset: 2px;
+}
+
+.app-main-content .btn-ui:disabled,
+.app-main-content .btn-ui.disabled {
+    opacity: 0.6;
+    transform: none;
+}
+
+.app-main-content .btn-ui-sm {
+    min-height: 38px;
+}
+
+.app-main-content .pendaftaran-detail-control {
+    width: 100%;
+}
+
+.app-main-content .index-card {
+    min-width: 0;
+}
+
+.app-main-content .index-card__content {
+    min-width: 0;
+}
+
+.app-main-content .index-card__actions {
+    margin-top: auto;
+}
+
+.app-main-content .anggota-index-actions {
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.app-main-content .anggota-index-actions form {
+    min-width: 0;
+}
+
+.app-main-content .anggota-index-actions form .btn-ui {
+    max-width: 100%;
+    white-space: nowrap;
+}
+
+.app-main-content .btn-icon {
+    width: 44px;
+    min-width: 44px;
+    padding: 0.5rem;
+}
+
+.app-main-content .btn-icon-circle {
+    border-radius: 50%;
+}
+
+.app-main-content .action-group {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.app-main-content .action-group > form,
+.app-main-content .action-group > .btn-ui {
+    width: 100%;
+}
+
+.app-main-content .action-group > form .btn-ui {
+    width: 100%;
+}
+
+.app-main-content .presensi-control .btn {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.app-main-content .presensi-control .btn-outline-warning {
+    --bs-btn-color: #6b4f00;
+    --bs-btn-border-color: #997000;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #806000;
+    --bs-btn-hover-border-color: #806000;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #684e00;
+    --bs-btn-active-border-color: #684e00;
+}
+
+@media (min-width: 576px) {
+    .app-main-content .pendaftaran-detail-control.w-sm-auto {
+        width: auto !important;
+    }
+
+    .app-main-content .action-group {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .app-main-content .action-group > form,
+    .app-main-content .action-group > .btn-ui,
+    .app-main-content .action-group > form .btn-ui {
+        width: auto;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .app-main-content .btn-ui-sm {
+        min-height: 44px;
+    }
+
+    .app-main-content .anggota-index-actions .btn-ui {
+        padding-inline: 0.625rem;
+    }
+
+    .app-main-content .anggota-index-add {
+        width: 44px;
+        min-width: 44px;
+        padding: 0.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-main-content .btn-ui,
+    .app-main-content .quick-action-card,
+    .desktop-topbar .btn-ui,
+    .sidebar-desktop .btn-ui {
+        transition: none;
+    }
+}

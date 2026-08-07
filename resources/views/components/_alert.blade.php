@@ -5,7 +5,7 @@
                 <div class="toast-body">
                     <i class="bi bi-check-circle me-2"></i> {{ session('success') }}
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Tutup"></button>
             </div>
         </div>
     </div>
@@ -18,7 +18,7 @@
                 <div class="toast-body">
                     <i class="bi bi-exclamation-triangle me-2"></i> {{ session('error') }}
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Tutup"></button>
             </div>
         </div>
     </div>
@@ -27,7 +27,7 @@
 @if(session('info'))
     <div class="alert alert-info alert-dismissible fade show mb-4 border-0 shadow-sm" role="alert">
         {{ session('info') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
     </div>
 @endif
 

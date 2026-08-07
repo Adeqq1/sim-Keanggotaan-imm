@@ -123,6 +123,12 @@ Role: Admin
 
 ---
 
+## Data Dummy dan Pengujian Upload
+
+- Jika Anda membutuhkan file gambar dan PDF nyata untuk menguji fitur download/preview, baca [SEED_DATA_DUMMY.md](SEED_DATA_DUMMY.md). Seeder default hanya memasukkan path string ke database tanpa membuat fisik file, sehingga memicu error "file not found" jika diakses.
+
+---
+
 ## Next Steps
 
 1. ✅ All issues resolved

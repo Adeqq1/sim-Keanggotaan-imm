@@ -1,12 +1,14 @@
 <?php
 
-test('registration screen can be rendered', function () {
+use App\Models\Anggota;
+
+test('registration route redirects to public pendaftaran', function () {
     $response = $this->get('/register');
 
-    $response->assertStatus(200);
+    $response->assertRedirect(route('pendaftaran'));
 });
 
-test('new users can register', function () {
+test('registration post does not create an account outside the approval workflow', function () {
     $response = $this->post('/register', [
         'name' => 'Test User',
         'email' => 'test@example.com',
@@ -14,6 +16,10 @@ test('new users can register', function () {
         'password_confirmation' => 'password',
     ]);
 
-    $this->assertAuthenticated();
-    $response->assertRedirect(route('kader.dashboard', absolute: false));
+    $this->assertGuest();
+    $response->assertRedirect(route('pendaftaran'));
+    $response->assertSessionHas('error');
+    $this->assertDatabaseMissing('users', ['email' => 'test@example.com']);
+    $this->assertDatabaseMissing('pendaftaran', ['email' => 'test@example.com']);
+    $this->assertDatabaseCount(Anggota::class, 0);
 });

@@ -1,12 +1,12 @@
 <?php
 
-use App\Mail\PendaftaranDisetujuiMail;
 use App\Models\Anggota;
 use App\Models\Arsip;
 use App\Models\Kegiatan;
 use App\Models\Pendaftaran;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,7 +14,10 @@ test('admin can approve pendaftaran and create kader account', function () {
     Mail::fake();
 
     $admin = User::factory()->admin()->create();
-    $pendaftaran = Pendaftaran::factory()->create();
+    $password = 'Pendaftaran-Password-2026';
+    $pendaftaran = Pendaftaran::factory()->create([
+        'password' => Hash::make($password),
+    ]);
 
     $response = $this->actingAs($admin)
         ->post(route('admin.pendaftaran.validate', $pendaftaran->id), [
@@ -33,14 +36,32 @@ test('admin can approve pendaftaran and create kader account', function () {
     ]);
 
     $newUser = User::where('email', $pendaftaran->email)->first();
+    expect(Hash::check($password, $pendaftaran->password))->toBeTrue()
+        ->and(Hash::check($password, $newUser->password))->toBeTrue();
     $this->assertDatabaseHas('anggota', [
         'user_id' => $newUser->id,
         'nama_lengkap' => $pendaftaran->nama_lengkap,
     ]);
 
-    Mail::assertQueued(PendaftaranDisetujuiMail::class, function ($mail) use ($newUser) {
-        return $mail->user->id === $newUser->id && strlen($mail->password) === 8;
-    });
+    Mail::assertNothingQueued();
+});
+
+test('admin can approve a legacy pendaftaran with a temporary password', function () {
+    Mail::fake();
+
+    $admin = User::factory()->admin()->create();
+    $pendaftaran = Pendaftaran::factory()->legacyWithoutPassword()->create();
+
+    $this->actingAs($admin)
+        ->post(route('admin.pendaftaran.validate', $pendaftaran), [
+            'status' => 'disetujui',
+            'role' => 'kader',
+        ])->assertRedirect(route('admin.pendaftaran.index'));
+
+    $user = User::where('email', $pendaftaran->email)->firstOrFail();
+
+    expect($user->password)->not->toBeNull();
+    Mail::assertNothingQueued();
 });
 
 test('admin pendaftaran detail page posts explicit status for approval action', function () {
@@ -53,10 +74,14 @@ test('admin pendaftaran detail page posts explicit status for approval action', 
     $response->assertOk()
         ->assertSee('name="status" value="disetujui"', false)
         ->assertSee('name="role"', false)
+        ->assertSee('w-100 w-sm-auto', false)
+        ->assertSee('btn-ui-sm', false)
         ->assertSeeText('Daftar Sebagai')
         ->assertSeeText('Role Akun')
         ->assertSeeText('Instruktur')
-        ->assertSeeText('Setujui & Buat Akun');
+        ->assertSeeText('Setujui & Buat Akun')
+        ->assertSeeText('Tolak Pendaftaran')
+        ->assertSeeText('Kembali ke Daftar');
 });
 
 test('admin pendaftaran index shows selected role', function () {
@@ -165,6 +190,27 @@ test('admin cannot approve pendaftaran when email already belongs to a user', fu
     Mail::assertNothingQueued();
 });
 
+test('admin cannot re-approve already processed pendaftaran', function () {
+    Mail::fake();
+
+    $admin = User::factory()->admin()->create();
+    $pendaftaran = Pendaftaran::factory()->create([
+        'status_validasi' => 'disetujui',
+        'user_id' => User::factory()->kader()->create()->id,
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->from(route('admin.pendaftaran.show', $pendaftaran->id))
+        ->post(route('admin.pendaftaran.validate', $pendaftaran->id), [
+            'status' => 'disetujui',
+            'role' => 'kader',
+        ]);
+
+    $response->assertSessionHasErrors('status');
+    $this->assertDatabaseCount('users', 2);
+    Mail::assertNothingQueued();
+});
+
 test('admin can reject pendaftaran', function () {
     $admin = User::factory()->admin()->create();
     $pendaftaran = Pendaftaran::factory()->create();
@@ -180,6 +226,7 @@ test('admin can reject pendaftaran', function () {
     $pendaftaran->refresh();
     expect($pendaftaran->status_validasi)->toBe('ditolak');
     expect($pendaftaran->catatan_admin)->toBe('Data tidak lengkap.');
+    expect($pendaftaran->password)->toBeNull();
 });
 
 test('admin must provide catatan admin when rejecting pendaftaran', function () {
@@ -226,35 +273,70 @@ test('admin can store presensi data', function () {
     ]);
 });
 
-test('admin can upload arsip', function () {
+test('admin cannot access arsip upload page (upload only by kader)', function () {
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin)->get('/admin/arsip/create');
+
+    // Route arsip create tidak terdaftar; request ke /admin/arsip/create
+    // akan match pola {arsip} untuk method yang tidak didukung (405 Method Not Allowed)
+    $response->assertStatus(405);
+});
+
+test('admin cannot upload arsip via POST (upload only by kader)', function () {
+    Storage::fake('local');
+
     $admin = User::factory()->admin()->create();
     $anggota = Anggota::factory()->create();
 
     $file = UploadedFile::fake()->create('document.pdf', 100, 'application/pdf');
 
     $response = $this->actingAs($admin)
-        ->post(route('admin.arsip.store'), [
+        ->post('/admin/arsip', [
             'anggota_id' => $anggota->id,
             'judul_dokumen' => 'Surat Keterangan',
-            'kategori_arsip' => 'surat',
+            'kategori_arsip' => 'surat_masuk',
             'file_arsip' => $file,
-            'tanggal_unggah' => now()->toDateString(),
         ]);
 
-    $response->assertRedirect();
+    $response->assertStatus(405);
 
-    $this->assertDatabaseHas('arsip', [
-        'anggota_id' => $anggota->id,
+    $this->assertDatabaseMissing('arsip', [
         'judul_dokumen' => 'Surat Keterangan',
-        'kategori_arsip' => 'surat',
     ]);
+});
+
+test('admin can search and filter arsip', function () {
+    $admin = User::factory()->admin()->create();
+
+    Arsip::factory()->create([
+        'judul_dokumen' => 'Proposal Rapat Kerja',
+        'nomor_dokumen' => 'PROP-002',
+        'kategori_arsip' => 'proposal',
+    ]);
+
+    Arsip::factory()->create([
+        'judul_dokumen' => 'Surat Keluar Cabang',
+        'nomor_dokumen' => 'SK-002',
+        'kategori_arsip' => 'surat_keluar',
+    ]);
+
+    $response = $this->actingAs($admin)->get(route('admin.arsip.index', [
+        'q' => 'PROP',
+        'kategori' => 'proposal',
+    ]));
+
+    $response->assertSuccessful();
+    $response->assertSee('Proposal Rapat Kerja');
+    $response->assertDontSee('Surat Keluar Cabang');
+    $response->assertSee('Atur ulang filter');
 });
 
 test('admin can download arsip', function () {
     $admin = User::factory()->admin()->create();
 
-    Storage::fake('public');
-    Storage::disk('public')->put('arsip/test.pdf', 'dummy content');
+    Storage::fake('local');
+    Storage::disk('local')->put('arsip/test.pdf', 'dummy content');
 
     $arsip = Arsip::factory()->create([
         'file_arsip' => 'arsip/test.pdf',
@@ -270,8 +352,8 @@ test('admin can download arsip', function () {
 test('admin can delete arsip', function () {
     $admin = User::factory()->admin()->create();
 
-    Storage::fake('public');
-    Storage::disk('public')->put('arsip/test.pdf', 'dummy content');
+    Storage::fake('local');
+    Storage::disk('local')->put('arsip/test.pdf', 'dummy content');
 
     $arsip = Arsip::factory()->create([
         'file_arsip' => 'arsip/test.pdf',
@@ -283,5 +365,5 @@ test('admin can delete arsip', function () {
     $response->assertRedirect();
 
     $this->assertDatabaseMissing('arsip', ['id' => $arsip->id]);
-    Storage::disk('public')->assertMissing('arsip/test.pdf');
+    Storage::disk('local')->assertMissing('arsip/test.pdf');
 });

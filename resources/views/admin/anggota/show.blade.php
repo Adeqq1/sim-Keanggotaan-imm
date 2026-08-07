@@ -4,7 +4,7 @@
     </x-slot>
 
     <div class="mb-4">
-        <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-secondary btn-sm">
+        <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-secondary btn-ui btn-ui-sm">
             <i class="bi bi-arrow-left"></i> Kembali
         </a>
     </div>
@@ -35,7 +35,7 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label small text-muted fw-bold">Tanggal Lahir</label>
-                    <p class="mb-0">{{ $anggota->tanggal_lahir?->format('d F Y') ?? '-' }}</p>
+                    <p class="mb-0">{{ $anggota->tanggal_lahir?->translatedFormat('d F Y') ?? '-' }}</p>
                 </div>
                 <div class="col-12">
                     <label class="form-label small text-muted fw-bold">Alamat</label>
@@ -51,21 +51,21 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label small text-muted fw-bold">Terdaftar Sejak</label>
-                    <p class="mb-0">{{ $anggota->created_at?->format('d F Y') ?? '-' }}</p>
+                    <p class="mb-0">{{ $anggota->created_at?->translatedFormat('d F Y') ?? '-' }}</p>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label small text-muted fw-bold">Terakhir Diupdate</label>
-                    <p class="mb-0">{{ $anggota->updated_at?->format('d F Y H:i') ?? '-' }}</p>
+                    <p class="mb-0">{{ $anggota->updated_at?->translatedFormat('d F Y H:i') ?? '-' }}</p>
                 </div>
             </div>
 
             <hr class="my-4">
 
                 <div class="d-flex gap-2">
-                <a href="{{ route('admin.anggota.edit', $anggota->id) }}" class="btn btn-primary">
-                    <i class="bi bi-pencil"></i> Edit
+                <a href="{{ route('admin.anggota.edit', $anggota->id) }}" class="btn btn-primary btn-ui">
+                    <i class="bi bi-pencil"></i> Ubah
                 </a>
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <button type="button" class="btn btn-danger btn-ui" data-bs-toggle="modal" data-bs-target="#deleteModal">
                     <i class="bi bi-trash"></i> Hapus
                 </button>
             </div>

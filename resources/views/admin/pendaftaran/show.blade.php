@@ -20,11 +20,11 @@
                     {{ \App\Enums\RoleEnum::labelFor($pendaftaran->role) }}
                 </span>
             </div>
-            <div class="col-6">
+            <div class="col-12 col-sm-6">
                 <small class="text-muted d-block">Tempat Lahir</small>
                 <span class="fw-bold">{{ $pendaftaran->tempat_lahir }}</span>
             </div>
-            <div class="col-6">
+            <div class="col-12 col-sm-6">
                 <small class="text-muted d-block">Tanggal Lahir</small>
                 <span class="fw-bold">{{ $pendaftaran->tanggal_lahir->format('d/m/Y') }}</span>
             </div>
@@ -41,7 +41,7 @@
         @if($pendaftaran->file_persyaratan)
             <div class="mt-4">
                 <h6 class="fw-bold border-bottom pb-2 mb-3">Lampiran</h6>
-                <a href="{{ Storage::url($pendaftaran->file_persyaratan) }}" target="_blank" class="btn btn-outline-primary w-100 py-3">
+                <a href="{{ Storage::url($pendaftaran->file_persyaratan) }}" target="_blank" class="btn btn-outline-primary btn-ui btn-ui-sm pendaftaran-detail-control w-100 w-sm-auto py-2">
                     <i class="bi bi-file-earmark-pdf me-2"></i> Lihat File Persyaratan
                 </a>
             </div>
@@ -54,6 +54,11 @@
 
             @error('email')
                 <div class="alert alert-danger">
+                    {{ $message }}
+                </div>
+            @enderror
+            @error('status')
+                <div class="alert alert-warning">
                     {{ $message }}
                 </div>
             @enderror
@@ -72,7 +77,7 @@
                     <div class="invalid-feedback d-block mb-3">{{ $message }}</div>
                 @enderror
 
-                <button type="submit" class="btn btn-success w-100 py-3 fw-bold">
+                <button type="submit" class="btn btn-success btn-ui btn-ui-sm pendaftaran-detail-control w-100 w-sm-auto py-2">
                     <i class="bi bi-check-circle me-2"></i> Setujui & Buat Akun
                 </button>
             </form>
@@ -87,7 +92,7 @@
                     <div class="invalid-feedback d-block">{{ $message }}</div>
                 @enderror
 
-                <button type="submit" class="btn btn-danger w-100 py-3 fw-bold mt-3">
+                <button type="submit" class="btn btn-danger btn-ui btn-ui-sm pendaftaran-detail-control w-100 w-sm-auto py-2 mt-3">
                     <i class="bi bi-x-circle me-2"></i> Tolak Pendaftaran
                 </button>
             </form>
@@ -102,7 +107,7 @@
     @endif
 
     <div class="text-center mt-4 mb-3">
-        <a href="{{ route('admin.pendaftaran.index') }}" class="btn btn-link text-muted text-decoration-none">
+        <a href="{{ route('admin.pendaftaran.index') }}" class="btn btn-outline-secondary btn-ui btn-ui-sm">
             <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar
         </a>
     </div>

@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'nama_lengkap', 'email', 'role', 'tempat_lahir', 'tanggal_lahir', 'no_telp', 'alamat', 'tanggal_daftar', 'file_persyaratan', 'status_validasi', 'catatan_admin'])]
+#[Fillable(['user_id', 'nama_lengkap', 'email', 'password', 'role', 'tempat_lahir', 'tanggal_lahir', 'no_telp', 'alamat', 'tanggal_daftar', 'file_persyaratan', 'status_validasi', 'catatan_admin'])]
+#[Hidden(['password'])]
 class Pendaftaran extends Model
 {
     use HasFactory;

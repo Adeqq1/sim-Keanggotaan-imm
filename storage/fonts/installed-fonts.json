@@ -1,10 +1,10 @@
 {
     "alex brush": {
-        "normal": "alex_brush_normal_c920678a8f60200d0df96c7d4bf9dbfc"
+        "normal": "alex_brush_normal_1ce76785d80f1867a3e7d5ce1922098f"
     },
     "montserrat": {
-        "normal": "C:\\laragon\\www\\sim-Keanggotaan-imm\\storage\\fonts\/montserrat_normal_2f5bee822eda46d68d97bc3fab70d77f",
-        "500": "C:\\laragon\\www\\sim-Keanggotaan-imm\\storage\\fonts\/montserrat_500_110f1f7bd7c6cd7d6bc99882f837925b",
-        "bold": "montserrat_bold_79b48540e981b15581fc6a2fada12ace"
+        "normal": "\/var\/www\/html\/storage\/fonts\/montserrat_normal_3878702559639710aae6aadf88e2a87b",
+        "500": "\/var\/www\/html\/storage\/fonts\/montserrat_500_cb733a50c7c0578d69747bab4c61f391",
+        "bold": "montserrat_bold_341c2cd009f4e30d26830c8d0d929270"
     }
 }

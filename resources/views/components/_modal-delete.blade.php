@@ -1,7 +1,7 @@
 @props(['id', 'action', 'message' => 'Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.'])
 
 <div class="modal fade" id="{{ $id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered mx-3">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable mx-3">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
             <div class="modal-body text-center p-4">
                 <div class="mb-3">
@@ -14,9 +14,9 @@
                     <form action="{{ $action }}" method="POST">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-danger w-100 py-2 fw-bold" style="border-radius: 10px;">Ya, Hapus Data</button>
+                        <button type="submit" class="btn btn-danger btn-ui w-100 py-2">Ya, Hapus Data</button>
                     </form>
-                    <button type="button" class="btn btn-light w-100 py-2 fw-bold" data-bs-dismiss="modal" style="border-radius: 10px;">Batal</button>
+                    <button type="button" class="btn btn-outline-secondary btn-ui w-100 py-2" data-bs-dismiss="modal">Batal</button>
                 </div>
             </div>
         </div>

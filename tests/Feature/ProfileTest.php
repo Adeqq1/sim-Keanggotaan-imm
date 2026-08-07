@@ -98,6 +98,9 @@ test('correct password must be provided to delete account', function () {
 
     $response
         ->assertSessionHasErrorsIn('userDeletion', 'password')
+        ->assertSessionHas('errors', function ($errors) {
+            return $errors->getBag('userDeletion')->get('password') === ['Kata sandi saat ini tidak sesuai.'];
+        })
         ->assertRedirect('/profile');
 
     $this->assertNotNull($user->fresh());

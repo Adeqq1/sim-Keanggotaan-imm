@@ -20,14 +20,16 @@ class AnggotaFactory extends Factory
      */
     public function definition(): array
     {
+        $faker = fake('id_ID');
+
         return [
             'user_id' => User::factory()->kader(),
             'nia' => '24'.fake()->numerify('##').fake()->unique()->numerify('####'),
-            'nama_lengkap' => fake()->name(),
-            'tempat_lahir' => fake()->city(),
+            'nama_lengkap' => $faker->name(),
+            'tempat_lahir' => $faker->city(),
             'tanggal_lahir' => fake()->date('Y-m-d', '2005-01-01'),
-            'alamat' => fake()->address(),
-            'no_telp' => fake()->phoneNumber(),
+            'alamat' => $faker->address(),
+            'no_telp' => $faker->phoneNumber(),
             'status_aktif' => true,
         ];
     }

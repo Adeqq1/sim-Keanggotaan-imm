@@ -82,7 +82,7 @@
         </div>
         
         <div class="clear"></div>
-        <div class="footer">OFFICIAL MEMBERSHIP CARD</div>
+        <div class="footer">KARTU ANGGOTA RESMI</div>
     </div>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <nav class="navbar fixed-bottom bg-white shadow-lg border-top p-0 d-lg-none">
-    <div class="container-fluid d-flex justify-content-around">
+    <div class="container-fluid bottom-nav-items d-flex justify-content-around">
         @if(auth()->user()->role === 'admin')
             <a href="{{ route('admin.dashboard') }}" class="nav-link text-center py-2 {{ request()->routeIs('admin.dashboard') ? 'text-primary font-weight-bold' : 'text-muted' }}">
                 <i class="bi bi-speedometer2 fs-4 d-block"></i>
@@ -16,6 +16,10 @@
             <a href="{{ route('admin.kegiatan.index') }}" class="nav-link text-center py-2 {{ request()->routeIs('admin.kegiatan.*') ? 'text-primary font-weight-bold' : 'text-muted' }}">
                 <i class="bi bi-calendar-event fs-4 d-block"></i>
                 <small style="font-size: 0.7rem;">Kegiatan</small>
+            </a>
+            <a href="{{ route('admin.arsip.index') }}" class="nav-link text-center py-2 {{ request()->routeIs('admin.arsip.*') ? 'text-primary font-weight-bold' : 'text-muted' }}">
+                <i class="bi bi-folder2-open fs-4 d-block"></i>
+                <small style="font-size: 0.7rem;">Arsip</small>
             </a>
         @elseif(auth()->user()->role === 'instruktur')
             <a href="{{ route('admin.kegiatan.index') }}" class="nav-link text-center py-2 {{ request()->routeIs('admin.kegiatan.*') ? 'text-primary font-weight-bold' : 'text-muted' }}">
@@ -37,7 +41,7 @@
         @else
             <a href="{{ route('kader.dashboard') }}" class="nav-link text-center py-2 {{ request()->routeIs('kader.dashboard') ? 'text-primary font-weight-bold' : 'text-muted' }}">
                 <i class="bi bi-house fs-4 d-block"></i>
-                <small style="font-size: 0.7rem;">Home</small>
+                <small style="font-size: 0.7rem;">Beranda</small>
             </a>
             <a href="{{ route('kader.ekta') }}" class="nav-link text-center py-2 {{ request()->routeIs('kader.ekta') ? 'text-primary font-weight-bold' : 'text-muted' }}">
                 <i class="bi bi-card-text fs-4 d-block"></i>
@@ -50,6 +54,10 @@
             <a href="{{ route('kader.riwayat.index') }}" class="nav-link text-center py-2 {{ request()->routeIs('kader.riwayat.*') ? 'text-primary font-weight-bold' : 'text-muted' }}">
                 <i class="bi bi-clock-history fs-4 d-block"></i>
                 <small style="font-size: 0.7rem;">Riwayat</small>
+            </a>
+            <a href="{{ route('kader.arsip.index') }}" class="nav-link text-center py-2 {{ request()->routeIs('kader.arsip.*') ? 'text-primary font-weight-bold' : 'text-muted' }}">
+                <i class="bi bi-folder2-open fs-4 d-block"></i>
+                <small style="font-size: 0.7rem;">Arsip</small>
             </a>
         @endif
         <a href="{{ route('profile.edit') }}" class="nav-link text-center py-2 {{ request()->routeIs('profile.edit') ? 'text-primary font-weight-bold' : 'text-muted' }}">

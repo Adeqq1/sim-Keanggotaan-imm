@@ -20,9 +20,9 @@ class AnggotaSeeder extends Seeder
                 'user_id' => $kader->id,
                 'nia' => '1234567890',
                 'nama_lengkap' => $kader->name,
-                'tempat_lahir' => 'Jakarta',
+                'tempat_lahir' => 'Yogyakarta',
                 'tanggal_lahir' => '2000-01-01',
-                'alamat' => 'Jl. Merdeka No. 1, Jakarta',
+                'alamat' => 'Jl. Malioboro No. 1, Yogyakarta',
                 'no_telp' => '081234567890',
                 'status_aktif' => true,
             ]);

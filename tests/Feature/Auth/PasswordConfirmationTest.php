@@ -28,5 +28,7 @@ test('password is not confirmed with invalid password', function () {
         'password' => 'wrong-password',
     ]);
 
-    $response->assertSessionHasErrors();
+    $response->assertSessionHas('errors', function ($errors) {
+        return $errors->get('password') === ['Kata sandi yang dimasukkan salah.'];
+    });
 });

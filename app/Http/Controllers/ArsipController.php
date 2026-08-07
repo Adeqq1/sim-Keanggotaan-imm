@@ -2,21 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ArsipRequest;
 use App\Http\Requests\KaderArsipRequest;
 use App\Models\Arsip;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ArsipController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $arsips = Arsip::with('anggota')->latest()->paginate(10);
+        $query = Arsip::with('anggota')->latest();
 
-        return view('admin.arsip.index', compact('arsips'));
+        if ($request->filled('q')) {
+            $q = $request->input('q');
+            $query->where(function ($subQuery) use ($q) {
+                $subQuery->where('judul_dokumen', 'like', "%{$q}%")
+                    ->orWhere('nomor_dokumen', 'like', "%{$q}%");
+            });
+        }
+
+        if ($request->filled('kategori')) {
+            $query->where('kategori_arsip', $request->input('kategori'));
+        }
+
+        return view('admin.arsip.index', [
+            'arsips' => $query->paginate(6)->withQueryString(),
+            'kategori' => Arsip::KATEGORI,
+        ]);
     }
 
-    public function kaderIndex()
+    public function kaderIndex(Request $request)
     {
         $anggota = auth()->user()->anggota;
 
@@ -24,23 +39,37 @@ class ArsipController extends Controller
             return redirect()->route('kader.dashboard')->with('error', 'Profil anggota Anda belum dibuat. Silakan hubungi admin.');
         }
 
-        $arsips = Arsip::where('anggota_id', $anggota->id)->latest()->paginate(10);
+        $query = Arsip::where('anggota_id', $anggota->id)->latest();
 
-        return view('kader.arsip.index', compact('arsips'));
-    }
-
-    public function store(ArsipRequest $request)
-    {
-        $validated = $request->validated();
-
-        if ($request->hasFile('file_arsip')) {
-            $path = $request->file('file_arsip')->store('arsip', 'public');
-            $validated['file_arsip'] = $path;
+        if ($request->filled('q')) {
+            $q = $request->input('q');
+            $query->where(function ($subQuery) use ($q) {
+                $subQuery->where('judul_dokumen', 'like', "%{$q}%")
+                    ->orWhere('nomor_dokumen', 'like', "%{$q}%");
+            });
         }
 
-        Arsip::create($validated);
+        if ($request->filled('kategori')) {
+            $query->where('kategori_arsip', $request->input('kategori'));
+        }
 
-        return redirect()->back()->with('success', 'Arsip berhasil diunggah.');
+        return view('kader.arsip.index', [
+            'arsips' => $query->paginate(6)->withQueryString(),
+            'kategori' => Arsip::KATEGORI,
+        ]);
+    }
+
+    public function kaderCreate()
+    {
+        $anggota = auth()->user()->anggota;
+
+        if (! $anggota) {
+            return redirect()->route('kader.dashboard')->with('error', 'Profil anggota Anda belum dibuat. Silakan hubungi admin.');
+        }
+
+        return view('kader.arsip.create', [
+            'kategori' => Arsip::KATEGORI,
+        ]);
     }
 
     public function kaderStore(KaderArsipRequest $request)
@@ -54,7 +83,7 @@ class ArsipController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('file_arsip')) {
-            $path = $request->file('file_arsip')->store('arsip', 'public');
+            $path = $request->file('file_arsip')->store('arsip', 'local');
             $validated['file_arsip'] = $path;
         }
 
@@ -63,7 +92,7 @@ class ArsipController extends Controller
 
         Arsip::create($validated);
 
-        return redirect()->back()->with('success', 'Dokumen berhasil diunggah.');
+        return redirect()->route('kader.arsip.index')->with('success', 'Dokumen berhasil diunggah.');
     }
 
     public function download(Arsip $arsip)
@@ -71,7 +100,7 @@ class ArsipController extends Controller
         $extension = pathinfo($arsip->file_arsip, PATHINFO_EXTENSION);
         $filename = str_replace(' ', '_', $arsip->judul_dokumen).'.'.$extension;
 
-        return Storage::disk('public')->download($arsip->file_arsip, $filename);
+        return Storage::disk('local')->download($arsip->file_arsip, $filename);
     }
 
     public function kaderDownload(Arsip $arsip)
@@ -85,13 +114,13 @@ class ArsipController extends Controller
         $extension = pathinfo($arsip->file_arsip, PATHINFO_EXTENSION);
         $filename = str_replace(' ', '_', $arsip->judul_dokumen).'.'.$extension;
 
-        return Storage::disk('public')->download($arsip->file_arsip, $filename);
+        return Storage::disk('local')->download($arsip->file_arsip, $filename);
     }
 
     public function destroy(Arsip $arsip)
     {
         if ($arsip->file_arsip) {
-            Storage::disk('public')->delete($arsip->file_arsip);
+            Storage::disk('local')->delete($arsip->file_arsip);
         }
 
         $arsip->delete();

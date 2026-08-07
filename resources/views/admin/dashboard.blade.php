@@ -6,7 +6,7 @@
     {{-- Area Statistik Grafik: hanya di desktop --}}
     <div class="d-none d-lg-block mb-4">
         <div class="d-flex justify-content-end mb-3">
-            <button class="btn btn-primary btn-sm shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#chartCollapse" aria-expanded="false" aria-controls="chartCollapse">
+            <button class="btn btn-primary btn-ui btn-ui-sm shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#chartCollapse" aria-expanded="false" aria-controls="chartCollapse">
                 <i class="bi bi-graph-up me-1"></i> Tampilkan Grafik Statistik
             </button>
         </div>
@@ -116,7 +116,7 @@
                     <div class="d-flex align-items-center">
                         <div class="bg-light rounded p-2 me-3 text-center" style="min-width: 50px;">
                             <span class="d-block fw-bold text-primary">{{ $kegiatan->tanggal_waktu->format('d') }}</span>
-                            <span class="small text-muted text-uppercase" style="font-size: 0.6rem;">{{ $kegiatan->tanggal_waktu->format('M') }}</span>
+                            <span class="small text-muted text-uppercase" style="font-size: 0.6rem;">{{ $kegiatan->tanggal_waktu->translatedFormat('M') }}</span>
                         </div>
                         <div class="overflow-hidden">
                             <h6 class="mb-0 fw-bold text-truncate">{{ $kegiatan->nama_kegiatan }}</h6>

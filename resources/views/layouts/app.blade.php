@@ -73,6 +73,11 @@
                         <i class="bi bi-patch-plus"></i>
                         Sertifikat
                     </a>
+                    <a href="{{ route('admin.arsip.index') }}"
+                       class="sidebar-link {{ request()->routeIs('admin.arsip.*') ? 'active' : '' }}">
+                        <i class="bi bi-folder2-open"></i>
+                        E-Arsip
+                    </a>
                     @php
                         $sertifikatPending = \App\Models\Presensi::where('status_klaim', 'pending')->count();
                     @endphp
@@ -126,6 +131,11 @@
                         <i class="bi bi-award"></i>
                         E-Sertifikat
                     </a>
+                    <a href="{{ route('kader.arsip.index') }}"
+                       class="sidebar-link {{ request()->routeIs('kader.arsip.*') ? 'active' : '' }}">
+                        <i class="bi bi-folder2-open"></i>
+                        E-Arsip
+                    </a>
                     <a href="{{ route('kader.riwayat.index') }}"
                        class="sidebar-link {{ request()->routeIs('kader.riwayat.*') ? 'active' : '' }}">
                         <i class="bi bi-clock-history"></i>
@@ -154,7 +164,7 @@
                     <form method="POST" action="{{ route('logout') }}" class="ms-auto">
                         @csrf
                         <button type="submit" class="btn btn-link p-0 text-white opacity-50"
-                                title="Keluar" style="font-size: 1.1rem;">
+                                title="Keluar" aria-label="Keluar" style="font-size: 1.1rem;">
                             <i class="bi bi-box-arrow-right"></i>
                         </button>
                     </form>
@@ -172,7 +182,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h1 class="h5 mb-0 fw-bold">{{ $header ?? config('app.name') }}</h1>
                     <div class="dropdown">
-                        <button class="btn btn-link text-white p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="btn btn-link text-white p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Buka menu pengguna">
                             <i class="bi bi-three-dots-vertical fs-5"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">

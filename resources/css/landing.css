@@ -65,7 +65,7 @@ html {
     min-height: 100vh;
     background:
         linear-gradient(135deg, rgba(128, 0, 0, 0.92) 0%, rgba(160, 0, 0, 0.85) 100%),
-        url('/images/landing/hero.jpg') center / cover no-repeat;
+        url('/images/landing/bg-hero.jpeg') center / cover no-repeat;
     display: flex;
     align-items: center;
 }

@@ -6,6 +6,7 @@ use App\Enums\RoleEnum;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules;
 
 class AnggotaRequest extends FormRequest
 {
@@ -25,6 +26,7 @@ class AnggotaRequest extends FormRequest
     public function rules(): array
     {
         $anggotaId = $this->route('anggota')?->id;
+        $isCreate = $this->isMethod('post');
 
         return [
             'nia' => ['nullable', 'digits:8', 'unique:anggota,nia,'.$anggotaId],
@@ -35,7 +37,24 @@ class AnggotaRequest extends FormRequest
             'no_telp' => ['required', 'string', 'max:20'],
             'foto_profil' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'status_aktif' => ['nullable', 'boolean'],
-            'role' => ['sometimes', 'required', Rule::enum(RoleEnum::class)->except(RoleEnum::ADMIN)],
+            'email' => [
+                Rule::requiredIf($isCreate),
+                'nullable',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email'),
+            ],
+            'password' => [
+                Rule::requiredIf($isCreate),
+                'nullable',
+                'string',
+                'confirmed',
+                Rules\Password::defaults(),
+            ],
+            'role' => $isCreate
+                ? ['required', Rule::enum(RoleEnum::class)->except(RoleEnum::ADMIN)]
+                : ['sometimes', 'required', Rule::enum(RoleEnum::class)->except(RoleEnum::ADMIN)],
         ];
     }
 

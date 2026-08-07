@@ -14,16 +14,16 @@ class KegiatanSeeder extends Seeder
     {
         Kegiatan::create([
             'nama_kegiatan' => 'Darul Arqam Dasar (DAD)',
-            'deskripsi' => 'Perkaderan tingkat dasar IMM.',
+            'deskripsi' => 'Perkaderan tingkat dasar untuk memperkuat pemahaman keislaman dan keorganisasian kader IMM.',
             'tanggal_waktu' => now()->addDays(7),
-            'lokasi' => 'Aula Universitas',
+            'lokasi' => 'Aula Universitas, Yogyakarta',
         ]);
 
         Kegiatan::create([
             'nama_kegiatan' => 'Kajian Rutin Mingguan',
-            'deskripsi' => 'Kajian keislaman dan keorganisasian.',
+            'deskripsi' => 'Forum kajian keislaman, kemahasiswaan, dan keorganisasian bagi kader IMM.',
             'tanggal_waktu' => now()->subDays(2),
-            'lokasi' => 'Masjid Kampus',
+            'lokasi' => 'Masjid Kampus, Yogyakarta',
         ]);
     }
 }

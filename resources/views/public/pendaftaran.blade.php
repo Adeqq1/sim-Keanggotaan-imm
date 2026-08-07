@@ -6,6 +6,10 @@
         <p class="text-muted small">Silakan lengkapi data diri Anda</p>
     </div>
 
+    @if (session('error'))
+        <div class="alert alert-danger small" role="alert">{{ session('error') }}</div>
+    @endif
+
     <form method="POST" action="{{ route('pendaftaran.store') }}" enctype="multipart/form-data">
         @csrf
 
@@ -22,6 +26,18 @@
         </div>
 
         <div class="mb-3">
+            <label class="form-label small fw-bold">Password Akun</label>
+            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required autocomplete="new-password">
+            <div class="form-text small">Password ini akan digunakan untuk login setelah pendaftaran disetujui.</div>
+            @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label small fw-bold">Konfirmasi Password</label>
+            <input type="password" name="password_confirmation" class="form-control" required autocomplete="new-password">
+        </div>
+
+        <div class="mb-3">
             <label class="form-label small fw-bold">Daftar Sebagai</label>
             <select name="role" class="form-select @error('role') is-invalid @enderror" required>
                 <option value="">Pilih jenis pendaftaran</option>
@@ -33,11 +49,11 @@
         </div>
 
         <div class="row">
-            <div class="col-6 mb-3">
+            <div class="col-12 col-sm-6 mb-3">
                 <label class="form-label small fw-bold">Tempat Lahir</label>
                 <input type="text" name="tempat_lahir" class="form-control @error('tempat_lahir') is-invalid @enderror" value="{{ old('tempat_lahir') }}" required>
             </div>
-            <div class="col-6 mb-3">
+            <div class="col-12 col-sm-6 mb-3">
                 <label class="form-label small fw-bold">Tanggal Lahir</label>
                 <input type="date" name="tanggal_lahir" class="form-control @error('tanggal_lahir') is-invalid @enderror" value="{{ old('tanggal_lahir') }}" required>
             </div>
@@ -57,6 +73,9 @@
             <label class="form-label small fw-bold">File Persyaratan (PDF/JPG)</label>
             <input type="file" name="file_persyaratan" class="form-control @error('file_persyaratan') is-invalid @enderror">
             <div class="form-text small">Opsional: KTP/Kartu Mahasiswa</div>
+            @error('file_persyaratan')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="d-grid gap-2">

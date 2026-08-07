@@ -36,5 +36,10 @@ test('correct password must be provided to update password', function () {
 
     $response
         ->assertSessionHasErrorsIn('updatePassword', 'current_password')
+        ->assertSessionHas('errors', function ($errors) {
+            return $errors->getBag('updatePassword')->get('current_password') === ['Kata sandi saat ini tidak sesuai.'];
+        })
         ->assertRedirect('/profile');
+
+    $this->assertTrue(Hash::check('password', $user->refresh()->password));
 });

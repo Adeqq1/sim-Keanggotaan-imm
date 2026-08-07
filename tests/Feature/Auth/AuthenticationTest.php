@@ -23,10 +23,38 @@ test('users can authenticate using the login screen', function () {
 test('users can not authenticate with invalid password', function () {
     $user = User::factory()->create();
 
-    $this->post('/login', [
+    $response = $this->from('/login')->post('/login', [
         'email' => $user->email,
         'password' => 'wrong-password',
     ]);
+
+    $response
+        ->assertRedirect('/login')
+        ->assertSessionHas('errors', function ($errors) {
+            return $errors->get('email') === ['Email atau kata sandi yang Anda masukkan tidak sesuai.'];
+        });
+
+    $this->assertGuest();
+});
+
+test('login throttling uses an Indonesian error message', function () {
+    $user = User::factory()->create();
+
+    foreach (range(1, 5) as $_) {
+        $this->from('/login')->post('/login', [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ]);
+    }
+
+    $response = $this->from('/login')->post('/login', [
+        'email' => $user->email,
+        'password' => 'wrong-password',
+    ]);
+
+    $response->assertSessionHas('errors', function ($errors) {
+        return str_starts_with($errors->first('email'), 'Terlalu banyak percobaan masuk.');
+    });
 
     $this->assertGuest();
 });

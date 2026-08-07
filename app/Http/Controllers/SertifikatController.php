@@ -22,7 +22,7 @@ class SertifikatController extends Controller
 {
     public function index()
     {
-        $sertifikats = Sertifikat::with(['kegiatan', 'anggota'])->latest()->paginate(10);
+        $sertifikats = Sertifikat::with(['kegiatan', 'anggota'])->latest()->paginate(6);
 
         return view('admin.sertifikat.index', compact('sertifikats'));
     }
@@ -67,7 +67,7 @@ class SertifikatController extends Controller
             GenerateCertificateJob::dispatch(null, $kegiatan, $anggota, $instruktur);
         }
 
-        return redirect()->route('admin.sertifikat.index')->with('success', 'Sertifikat sedang di-generate di latar belakang.');
+        return redirect()->route('admin.sertifikat.index')->with('success', 'Sertifikat sedang dibuat di latar belakang.');
     }
 
     public function mySertifikat()
@@ -78,7 +78,7 @@ class SertifikatController extends Controller
             return redirect()->route('kader.dashboard')->with('error', 'Data anggota tidak ditemukan.');
         }
 
-        $sertifikats = Sertifikat::where('anggota_id', $anggota->id)->with('kegiatan')->latest()->get();
+        $sertifikats = Sertifikat::where('anggota_id', $anggota->id)->with('kegiatan')->latest()->paginate(6);
 
         return view('kader.sertifikat.index', compact('sertifikats'));
     }
@@ -184,7 +184,7 @@ class SertifikatController extends Controller
         $pendingClaims = Presensi::where('status_klaim', 'pending')
             ->with(['kegiatan', 'anggota'])
             ->latest()
-            ->paginate(10);
+            ->paginate(6);
 
         return view('admin.sertifikat.verifikasi', compact('pendingClaims'));
     }
@@ -192,7 +192,7 @@ class SertifikatController extends Controller
     public function setuju(Presensi $presensi)
     {
         if ($presensi->status_klaim !== 'pending') {
-            return redirect()->back()->with('error', 'Klaim sertifikat tidak sedang pending.');
+            return redirect()->back()->with('error', 'Klaim sertifikat tidak sedang menunggu verifikasi.');
         }
 
         $presensi->setujuiKlaim();
@@ -205,7 +205,7 @@ class SertifikatController extends Controller
     public function tolak(Presensi $presensi)
     {
         if ($presensi->status_klaim !== 'pending') {
-            return redirect()->back()->with('error', 'Klaim sertifikat tidak sedang pending.');
+            return redirect()->back()->with('error', 'Klaim sertifikat tidak sedang menunggu verifikasi.');
         }
 
         $presensi->tolakKlaim();
@@ -271,7 +271,7 @@ class SertifikatController extends Controller
                         'trace' => $e->getTraceAsString(),
                     ]);
 
-                    return redirect()->back()->with('error', 'Gagal memproses gambar background: '.$e->getMessage());
+                    return redirect()->back()->with('error', 'Gagal memproses gambar latar belakang: '.$e->getMessage());
                 }
             } else {
                 // Fallback: Save directly if GD / imagejpeg is not available
@@ -283,7 +283,7 @@ class SertifikatController extends Controller
                         'trace' => $e->getTraceAsString(),
                     ]);
 
-                    return redirect()->back()->with('error', 'Gagal menyimpan gambar background: '.$e->getMessage());
+                    return redirect()->back()->with('error', 'Gagal menyimpan gambar latar belakang: '.$e->getMessage());
                 }
             }
         }

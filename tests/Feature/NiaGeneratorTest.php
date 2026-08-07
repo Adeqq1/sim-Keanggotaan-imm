@@ -188,7 +188,7 @@ describe('POST admin/anggota/generate-nia-bulk', function () {
         $response = $this->actingAs($admin)
             ->post(route('admin.anggota.generate-nia-bulk'));
 
-        $response->assertSessionHas('success', 'Tidak ada anggota yang perlu di-generate NIA-nya.');
+        $response->assertSessionHas('success', 'Tidak ada anggota yang perlu dibuatkan NIA.');
     });
 
     test('non-admin tidak bisa bulk generate NIA', function () {

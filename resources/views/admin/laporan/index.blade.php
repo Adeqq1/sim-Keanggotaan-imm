@@ -17,11 +17,11 @@
         </div>
 
         <div class="row">
-            <div class="col-6 mb-3">
+            <div class="col-12 col-sm-6 mb-3">
                 <label class="form-label small fw-bold">Tanggal Mulai</label>
                 <input type="date" id="tanggal_mulai" class="form-control" value="{{ date('Y-m-01') }}" required>
             </div>
-            <div class="col-6 mb-3">
+            <div class="col-12 col-sm-6 mb-3">
                 <label class="form-label small fw-bold">Tanggal Selesai</label>
                 <input type="date" id="tanggal_selesai" class="form-control" value="{{ date('Y-m-d') }}" required>
             </div>
@@ -44,10 +44,10 @@
         </form>
 
         <div class="d-grid gap-3 mt-4">
-            <button type="button" onclick="submitForm('pdf')" class="btn btn-danger py-3 fw-bold">
+            <button type="button" onclick="submitForm('pdf')" class="btn btn-outline-primary btn-ui py-3">
                 <i class="bi bi-file-earmark-pdf me-2"></i> Export ke PDF
             </button>
-            <button type="button" onclick="submitForm('excel')" class="btn btn-success py-3 fw-bold">
+            <button type="button" onclick="submitForm('excel')" class="btn btn-outline-success btn-ui py-3">
                 <i class="bi bi-file-earmark-spreadsheet me-2"></i> Export ke Excel
             </button>
         </div>

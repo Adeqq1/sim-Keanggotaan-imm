@@ -1,5 +1,16 @@
 # Dokumentasi Fitur Fungsional Website SIM Keanggotaan IMM
 
+> **Baru di Laravel / kerja database?** Mulai dari dokumen dasar pemrograman:
+> - [support-for-developer/README.md](./README.md)
+> - [basics/00-laravel-map.md](./basics/00-laravel-map.md)
+> - [basics/01-database-tables-migrations.md](./basics/01-database-tables-migrations.md)
+> - [basics/02-models-and-relations.md](./basics/02-models-and-relations.md)
+> - [basics/03-routes-controllers-views.md](./basics/03-routes-controllers-views.md)
+> - [basics/04-create-new-feature-checklist.md](./basics/04-create-new-feature-checklist.md)
+> - [basics/05-seeder-dan-jalankan-script.md](./basics/05-seeder-dan-jalankan-script.md)
+
+---
+
 Dokumentasi ini dibuat sebagai pedoman kerja untuk programmer junior atau model AI yang lebih murah saat mengubah, memperbaiki, atau mengembangkan fitur di aplikasi ini. Fokus dokumen ini adalah **fitur fungsional yang benar-benar ada di source code**, bukan asumsi.
 
 ## 1. Gambaran singkat aplikasi
@@ -291,7 +302,8 @@ Referensi:
 ### Hal yang perlu diingat saat mengubah fitur
 - Fitur ini adalah **jembatan utama** antara calon anggota dan akun kader.
 - Jika struktur data `Pendaftaran`, `User`, atau `Anggota` berubah, fitur approve harus ikut dicek.
-- Email approval adalah bagian penting dari onboarding akun.
+- Setelah approval, admin memberi tahu pendaftar melalui kanal operasional. Pendaftar
+  dapat memakai fitur `Lupa Password` untuk menetapkan password pertama.
 
 ### Test terkait
 - `tests/Feature/AdminFunctionalTest.php:13`
@@ -1019,16 +1031,17 @@ Referensi:
 
 ### Yang memakai queue atau proses async
 - generate sertifikat: `GenerateCertificateJob`
-- email approval pendaftaran: `PendaftaranDisetujuiMail`
 - composer dev stack sudah menjalankan queue listener
 
 Referensi:
 - `app/Jobs/GenerateCertificateJob.php:12`
-- `app/Mail/PendaftaranDisetujuiMail.php:14`
 - `composer.json:52`
 
 ### Dampak perubahan
-Jika ada bug pada fitur sertifikat atau approval pendaftaran, cek apakah queue worker berjalan.
+Jika ada bug pada fitur sertifikat, cek apakah queue worker berjalan. Persetujuan pendaftaran
+membuat akun dan profil anggota tanpa mengirim email onboarding otomatis. Admin perlu
+memberi tahu pendaftar melalui kanal operasional, lalu pendaftar dapat memakai fitur
+`Lupa Password` untuk menetapkan password pertama.
 
 Perintah dev lokal yang sudah menyalakan queue:
 - `composer run dev`
@@ -1042,13 +1055,15 @@ Folder penting yang dipakai fitur:
 - `storage/app/public/pendaftaran`
 - `storage/app/public/foto_profil`
 - `storage/app/public/kegiatan_thumbnails`
-- `storage/app/public/arsip`
 - `storage/app/public/bukti_kehadiran`
 - `storage/app/public/sertifikat`
+- `storage/app/private/arsip` (file arsip bersifat privat dan diakses melalui route, bukan URL publik)
 - `storage/app/sertifikat_settings.json`
 - `public/images/sertificate-asset/bg-sertificate.jpg`
 
 Saat mengubah fitur upload atau deployment, cek semua path ini.
+
+**Penting:** Jika Anda membutuhkan dummy data (terutama PDF dan gambar) yang dapat diunduh tanpa rusak/broken saat pengembangan, jalankan `php artisan demo:seed-files`. Rincian penggunaannya dijelaskan pada dokumen `support-for-developer/troubleshooting/SEED_DATA_DUMMY.md`.
 
 ---
 

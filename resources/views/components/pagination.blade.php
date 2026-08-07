@@ -1,5 +1,5 @@
 @if ($paginator->hasPages())
-    <nav class="d-flex justify-content-center mt-4 mb-2">
+    <nav class="pagination-wrapper d-flex justify-content-start justify-content-sm-center mt-4 mb-2" aria-label="Navigasi halaman">
         <ul class="pagination pagination-sm shadow-sm" style="border-radius: 10px; overflow: hidden; border: none;">
             {{-- Previous Page Link --}}
             @if ($paginator->onFirstPage())
@@ -8,7 +8,7 @@
                 </li>
             @else
                 <li class="page-item">
-                    <a class="page-link border-0 py-2 px-3 bg-white text-primary" href="{{ $paginator->previousPageUrl() }}" rel="prev"><i class="bi bi-chevron-left"></i></a>
+                    <a class="page-link border-0 py-2 px-3 bg-white text-primary" href="{{ $paginator->previousPageUrl() }}" rel="prev" aria-label="Halaman sebelumnya"><i class="bi bi-chevron-left"></i></a>
                 </li>
             @endif
 
@@ -40,7 +40,7 @@
             {{-- Next Page Link --}}
             @if ($paginator->hasMorePages())
                 <li class="page-item">
-                    <a class="page-link border-0 py-2 px-3 bg-white text-primary" href="{{ $paginator->nextPageUrl() }}" rel="next"><i class="bi bi-chevron-right"></i></a>
+                    <a class="page-link border-0 py-2 px-3 bg-white text-primary" href="{{ $paginator->nextPageUrl() }}" rel="next" aria-label="Halaman berikutnya"><i class="bi bi-chevron-right"></i></a>
                 </li>
             @else
                 <li class="page-item disabled" aria-disabled="true">
