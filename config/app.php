@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'SIM-IMM'),
 
     'org_name' => env('APP_ORG_NAME', 'IMM Kabupaten Bungo'),
 
