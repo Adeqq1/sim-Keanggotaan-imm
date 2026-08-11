@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -26,6 +27,25 @@ class ValidasiPendaftaranController extends Controller
         $pendaftaran = Pendaftaran::findOrFail($id);
 
         return view('admin.pendaftaran.show', compact('pendaftaran'));
+    }
+
+    public function downloadDokumenIdentitas(Pendaftaran $pendaftaran)
+    {
+        $path = $pendaftaran->file_persyaratan;
+
+        if (! is_string($path) || $path === '' || ! Storage::disk('local')->exists($path)) {
+            abort(404);
+        }
+
+        $extension = preg_replace('/[^a-z0-9]/', '', strtolower(pathinfo($path, PATHINFO_EXTENSION))) ?? '';
+        $jenisDokumen = Pendaftaran::JENIS_DOKUMEN_IDENTITAS[$pendaftaran->jenis_dokumen_identitas] ?? 'Dokumen';
+        $filename = strtolower($jenisDokumen).'-pendaftaran-'.$pendaftaran->id.($extension === '' ? '' : '.'.$extension);
+
+        return Storage::disk('local')->download($path, $filename, [
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'Pragma' => 'no-cache',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     public function prosesValidasiPendaftaran(ValidasiPendaftaranRequest $request, $id)

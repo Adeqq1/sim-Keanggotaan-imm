@@ -2,7 +2,13 @@
 
 use App\Models\Pendaftaran;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+
+beforeEach(function () {
+    Storage::fake('local');
+});
 
 function validPendaftaranPayload(array $overrides = []): array
 {
@@ -12,10 +18,12 @@ function validPendaftaranPayload(array $overrides = []): array
         'password' => 'password',
         'password_confirmation' => 'password',
         'role' => 'instruktur',
+        'jenis_dokumen_identitas' => 'ktp',
         'tempat_lahir' => 'Yogyakarta',
         'tanggal_lahir' => '2000-01-01',
         'no_telp' => '08123456789',
         'alamat' => 'Jl. Contoh No. 1',
+        'file_persyaratan' => UploadedFile::fake()->create('identitas.pdf', 10, 'application/pdf'),
     ], $overrides);
 }
 

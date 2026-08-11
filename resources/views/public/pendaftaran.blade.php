@@ -69,10 +69,23 @@
             <textarea name="alamat" class="form-control @error('alamat') is-invalid @enderror" rows="3" required>{{ old('alamat') }}</textarea>
         </div>
 
+        <div class="mb-3">
+            <label for="jenis_dokumen_identitas" class="form-label small fw-bold">Jenis Dokumen Identitas</label>
+            <select id="jenis_dokumen_identitas" name="jenis_dokumen_identitas" class="form-select @error('jenis_dokumen_identitas') is-invalid @enderror" required>
+                <option value="">Pilih jenis dokumen</option>
+                @foreach (\App\Models\Pendaftaran::JENIS_DOKUMEN_IDENTITAS as $value => $label)
+                    <option value="{{ $value }}" @selected(old('jenis_dokumen_identitas') === $value)>{{ $label }}</option>
+                @endforeach
+            </select>
+            @error('jenis_dokumen_identitas')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
         <div class="mb-4">
-            <label class="form-label small fw-bold">File Persyaratan (PDF/JPG)</label>
-            <input type="file" name="file_persyaratan" class="form-control @error('file_persyaratan') is-invalid @enderror">
-            <div class="form-text small">Opsional: KTP/Kartu Mahasiswa</div>
+            <label for="file_persyaratan" class="form-label small fw-bold">Dokumen Identitas</label>
+            <input id="file_persyaratan" type="file" name="file_persyaratan" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" aria-describedby="file_persyaratan_help" class="form-control @error('file_persyaratan') is-invalid @enderror" required>
+            <div id="file_persyaratan_help" class="form-text small">Unggah satu file KTP atau KTM dalam format PDF, JPG, JPEG, atau PNG. Maksimum 2 MB.</div>
             @error('file_persyaratan')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror

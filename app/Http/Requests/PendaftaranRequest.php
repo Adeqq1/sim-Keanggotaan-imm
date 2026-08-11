@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\RoleEnum;
+use App\Models\Pendaftaran;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -37,11 +38,12 @@ class PendaftaranRequest extends FormRequest
             ],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
             'role' => ['required', Rule::enum(RoleEnum::class)->except(RoleEnum::ADMIN)],
+            'jenis_dokumen_identitas' => ['required', Rule::in(array_keys(Pendaftaran::JENIS_DOKUMEN_IDENTITAS))],
             'tempat_lahir' => ['required', 'string', 'max:255'],
             'tanggal_lahir' => ['required', 'date'],
             'no_telp' => ['required', 'string', 'max:20'],
             'alamat' => ['required', 'string'],
-            'file_persyaratan' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'file_persyaratan' => ['required', 'file', 'extensions:pdf,jpg,jpeg,png', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
         ];
     }
 }
