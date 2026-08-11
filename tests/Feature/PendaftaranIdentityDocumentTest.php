@@ -47,7 +47,7 @@ test('public registration form exposes required identity document fields and rol
         ->assertSee('value="instruktur"', false);
 
     expect($response->getContent())
-        ->toContain('Wajib diisi')
+        ->not->toContain('Wajib diisi')
         ->toContain('class="text-danger" aria-hidden="true">*</span>')
         ->toContain('id="jenis_dokumen_identitas"')
         ->toContain('id="file_persyaratan"')

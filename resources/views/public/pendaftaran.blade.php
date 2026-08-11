@@ -4,7 +4,6 @@
     <div class="mb-4 text-center">
         <h4 class="fw-bold">Form Pendaftaran</h4>
         <p class="text-muted small">Silakan lengkapi data diri Anda</p>
-        <p class="text-muted small mb-0"><span class="text-danger" aria-hidden="true">*</span> Wajib diisi</p>
     </div>
 
     @if (session('error'))
