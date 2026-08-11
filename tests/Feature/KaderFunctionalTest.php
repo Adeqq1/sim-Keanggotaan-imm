@@ -5,6 +5,7 @@ use App\Models\Kegiatan;
 use App\Models\Presensi;
 use App\Models\Sertifikat;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 
 test('kader can view profile edit page', function () {
@@ -80,6 +81,51 @@ test('kader can download ekta pdf', function () {
         ->toContain('attachment')
         ->toContain('E-KTA_24000001.pdf');
     expect($response->getContent())->toStartWith('%PDF');
+});
+
+test('ekta PDF keeps short and long cards on one page', function (string $name, bool $withPhoto) {
+    $user = User::factory()->kader()->create();
+    $anggota = Anggota::factory()->create([
+        'user_id' => $user->id,
+        'nama_lengkap' => $name,
+        'nia' => '24000001',
+    ]);
+
+    $photoSrc = null;
+    if ($withPhoto) {
+        Storage::fake('public');
+        $photoPath = 'foto_profil/test.png';
+        Storage::disk('public')->put($photoPath, base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='));
+        $anggota->update(['foto_profil' => $photoPath]);
+        $photoSrc = Storage::disk('public')->path($photoPath);
+    }
+
+    $pdf = Pdf::loadView('pdf.ekta', [
+        'anggota' => $anggota->fresh(),
+        'roleLabel' => 'Kader',
+        'photoSrc' => $photoSrc,
+    ])->setPaper([0, 0, 240, 152.25]);
+    $pdf->render();
+
+    expect($pdf->getDomPDF()->getCanvas()->get_page_count())->toBe(1);
+})->with([
+    'short fallback' => ['Aisyah Kader', false],
+    'long fallback' => ['Aisyah Kader Dengan Nama Sangat Panjang Untuk Kartu', false],
+    'short photo' => ['Aisyah Kader', true],
+    'long photo' => ['Aisyah Kader Dengan Nama Sangat Panjang Untuk Kartu', true],
+]);
+
+test('ekta print styles are limited to the ekta page', function () {
+    $user = User::factory()->kader()->create();
+    Anggota::factory()->create(['user_id' => $user->id]);
+
+    $ektaResponse = $this->actingAs($user)->get(route('kader.ekta'));
+    $profileResponse = $this->actingAs($user)->get(route('profile.edit'));
+
+    $ektaResponse->assertSee('data-testid="ekta-print-styles"', false)
+        ->assertSee('@media print', false);
+    $profileResponse->assertDontSee('data-testid="ekta-print-styles"', false)
+        ->assertDontSee('@media print', false);
 });
 
 test('kader only sees their own ekta data', function () {

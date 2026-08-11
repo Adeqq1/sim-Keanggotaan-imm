@@ -3,6 +3,50 @@
         E-KTA Digital
     </x-slot>
 
+    <style data-testid="ekta-print-styles">
+        @media print {
+            @page {
+                margin: 0;
+            }
+
+            body {
+                background: #ffffff !important;
+                padding-bottom: 0 !important;
+            }
+
+            .sidebar-desktop,
+            .desktop-topbar,
+            .navbar-header,
+            .app-wrapper > nav,
+            .app-wrapper > .toast-container,
+            .ekta-print-hide {
+                display: none !important;
+            }
+
+            .app-wrapper {
+                margin-left: 0 !important;
+            }
+
+            .app-main-content {
+                padding: 0 !important;
+            }
+
+            .ekta-page {
+                display: block !important;
+            }
+
+            .ekta-page > div {
+                margin: 0 auto !important;
+                max-width: 520px;
+                width: 100%;
+            }
+
+            .ekta-preview-frame {
+                margin-bottom: 0 !important;
+            }
+        }
+    </style>
+
     <div class="row justify-content-center ekta-page">
         <div class="col-12 col-md-8 col-lg-6 col-xl-5">
 
