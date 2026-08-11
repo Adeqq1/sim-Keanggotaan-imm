@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
+use Throwable;
 
 class ValidasiPendaftaranController extends Controller
 {
@@ -107,11 +109,32 @@ class ValidasiPendaftaranController extends Controller
             return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftaran disetujui.');
         }
 
+        $filePath = $pendaftar->file_persyaratan;
+
         $pendaftar->update([
             'password' => null,
             'status_validasi' => 'ditolak',
             'catatan_admin' => $validated['catatan_admin'],
+            'file_persyaratan' => null,
         ]);
+
+        if (is_string($filePath) && $filePath !== '') {
+            try {
+                if (! Storage::disk('local')->delete($filePath)) {
+                    report(new RuntimeException(sprintf(
+                        'Dokumen pendaftaran ID %d gagal dihapus setelah ditolak: %s',
+                        $pendaftar->id,
+                        $filePath,
+                    )));
+                }
+            } catch (Throwable $exception) {
+                report(new RuntimeException(sprintf(
+                    'Dokumen pendaftaran ID %d gagal dihapus setelah ditolak: %s',
+                    $pendaftar->id,
+                    $filePath,
+                ), 0, $exception));
+            }
+        }
 
         return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftaran ditolak.');
     }

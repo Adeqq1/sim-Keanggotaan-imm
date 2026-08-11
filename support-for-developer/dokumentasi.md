@@ -205,6 +205,8 @@ Dokumen identitas disimpan ke penyimpanan privat:
 - `storage/app/private/pendaftaran`
 
 Dokumen hanya dapat diunduh admin melalui route `admin.pendaftaran.document.download`.
+Dokumen identitas langsung dihapus dan path database dikosongkan ketika pendaftaran ditolak.
+Dokumen pada pendaftaran yang disetujui mengikuti umur record `pendaftaran`; belum ada retensi otomatis.
 
 Referensi:
 - `app/Http/Controllers/PendaftaranController.php:19`

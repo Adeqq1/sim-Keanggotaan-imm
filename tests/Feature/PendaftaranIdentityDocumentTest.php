@@ -67,6 +67,43 @@ test('public registration requires identity type and file', function () {
     $this->assertDatabaseMissing('pendaftaran', ['email' => 'missing.identity@example.com']);
 });
 
+test('public registration is limited to five requests per minute per IP', function () {
+    $ip = '203.0.113.10';
+
+    foreach (range(1, 5) as $attempt) {
+        $this->withServerVariables(['REMOTE_ADDR' => $ip])
+            ->post(route('pendaftaran.store'), identityDocumentPayload([
+                'email' => "throttle-{$attempt}@example.com",
+            ]))
+            ->assertRedirect(route('pendaftaran.success'));
+    }
+
+    $blocked = $this->withServerVariables(['REMOTE_ADDR' => $ip])
+        ->post(route('pendaftaran.store'), identityDocumentPayload([
+            'email' => 'throttle-blocked@example.com',
+        ]));
+
+    $blocked->assertTooManyRequests()
+        ->assertHeader('X-RateLimit-Limit', '5')
+        ->assertHeader('X-RateLimit-Remaining', '0')
+        ->assertHeader('Retry-After');
+
+    $this->assertDatabaseMissing('pendaftaran', [
+        'email' => 'throttle-blocked@example.com',
+    ]);
+    expect(Storage::disk('local')->allFiles('pendaftaran'))->toHaveCount(5);
+
+    $this->withServerVariables(['REMOTE_ADDR' => $ip])
+        ->get(route('pendaftaran'))
+        ->assertOk();
+
+    $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.10'])
+        ->post(route('pendaftaran.store'), identityDocumentPayload([
+            'email' => 'throttle-other-ip@example.com',
+        ]))
+        ->assertRedirect(route('pendaftaran.success'));
+});
+
 test('public registration rejects an unknown identity type', function () {
     $response = $this->from(route('pendaftaran'))
         ->post(route('pendaftaran.store'), identityDocumentPayload([

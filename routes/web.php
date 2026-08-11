@@ -19,7 +19,9 @@ Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/kegiatan/{kegiatan}', [LandingController::class, 'show'])->name('kegiatan.show');
 
 Route::get('/pendaftaran', [PendaftaranController::class, 'create'])->name('pendaftaran');
-Route::post('/pendaftaran', [PendaftaranController::class, 'store'])->name('pendaftaran.store');
+Route::post('/pendaftaran', [PendaftaranController::class, 'store'])
+    ->middleware('throttle:pendaftaran')
+    ->name('pendaftaran.store');
 Route::get('/pendaftaran/sukses', [PendaftaranController::class, 'success'])->name('pendaftaran.success');
 
 // Admin Routes

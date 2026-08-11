@@ -229,6 +229,30 @@ test('admin can reject pendaftaran', function () {
     expect($pendaftaran->password)->toBeNull();
 });
 
+test('admin rejection deletes the registration identity document', function () {
+    Storage::fake('local');
+
+    $admin = User::factory()->admin()->create();
+    $path = 'pendaftaran/rejected-identity.pdf';
+    Storage::disk('local')->put($path, '%PDF-1.4 rejected document');
+    $pendaftaran = Pendaftaran::factory()->create([
+        'file_persyaratan' => $path,
+        'jenis_dokumen_identitas' => 'ktp',
+    ]);
+
+    $this->actingAs($admin)
+        ->post(route('admin.pendaftaran.validate', $pendaftaran), [
+            'status' => 'ditolak',
+            'catatan_admin' => 'Data tidak lengkap.',
+        ])
+        ->assertRedirect(route('admin.pendaftaran.index'));
+
+    $pendaftaran->refresh();
+    expect($pendaftaran->status_validasi)->toBe('ditolak')
+        ->and($pendaftaran->file_persyaratan)->toBeNull();
+    Storage::disk('local')->assertMissing($path);
+});
+
 test('admin must provide catatan admin when rejecting pendaftaran', function () {
     $admin = User::factory()->admin()->create();
     $pendaftaran = Pendaftaran::factory()->create();
