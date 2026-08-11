@@ -26,7 +26,7 @@
                     <div class="mt-3 d-flex gap-2 index-card__actions">
                         <a href="{{ route('admin.pendaftaran.show', $item) }}" class="btn btn-primary btn-ui btn-ui-sm flex-grow-1">Detail & Validasi</a>
                         @if($item->file_persyaratan)
-                            <a href="{{ Storage::url($item->file_persyaratan) }}" target="_blank" class="btn btn-outline-secondary btn-ui btn-ui-sm btn-icon" aria-label="Lihat lampiran {{ $item->nama_lengkap }}" title="Lihat lampiran"><i class="bi bi-file-earmark-text"></i></a>
+                            <a href="{{ route('admin.pendaftaran.document.download', $item) }}" class="btn btn-outline-secondary btn-ui btn-ui-sm btn-icon" aria-label="Unduh dokumen identitas" title="Unduh dokumen identitas"><i class="bi bi-file-earmark-text"></i></a>
                         @endif
                     </div>
                 </div>

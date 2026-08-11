@@ -191,8 +191,9 @@ Form request yang dipakai: `PendaftaranRequest`.
 
 Validasi penting:
 - biodata utama wajib diisi
-- file persyaratan opsional
-- file persyaratan hanya boleh `pdf/jpg/jpeg/png`
+- jenis dokumen identitas wajib berupa `ktp` atau `ktm`
+- dokumen identitas wajib diunggah
+- dokumen identitas hanya boleh `pdf/jpg/jpeg/png`
 - ukuran maksimum 2 MB
 
 Referensi:
@@ -200,8 +201,12 @@ Referensi:
 - `app/Http/Requests/PendaftaranRequest.php:26`
 
 ### File upload
-Jika file persyaratan diunggah, file disimpan ke:
-- `storage/app/public/pendaftaran`
+Dokumen identitas disimpan ke penyimpanan privat:
+- `storage/app/private/pendaftaran`
+
+Dokumen hanya dapat diunduh admin melalui route `admin.pendaftaran.document.download`.
+Dokumen identitas langsung dihapus dan path database dikosongkan ketika pendaftaran ditolak.
+Dokumen pada pendaftaran yang disetujui mengikuti umur record `pendaftaran`; belum ada retensi otomatis.
 
 Referensi:
 - `app/Http/Controllers/PendaftaranController.php:19`
@@ -1052,7 +1057,7 @@ Perintah dev lokal yang sudah menyalakan queue:
 
 Folder penting yang dipakai fitur:
 
-- `storage/app/public/pendaftaran`
+- `storage/app/private/pendaftaran`
 - `storage/app/public/foto_profil`
 - `storage/app/public/kegiatan_thumbnails`
 - `storage/app/public/bukti_kehadiran`

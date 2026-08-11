@@ -24,8 +24,14 @@ test('landing page has correct route name', function () {
 });
 
 test('landing page displays 3 latest activities', function () {
-    // Seed 5 activities
-    $activities = Kegiatan::factory()->count(5)->create();
+    Cache::forget('kegiatan.terbaru');
+
+    // Seed uniquely named activities so the older-record assertion cannot collide.
+    $activities = collect(range(1, 5))->map(fn (int $index) => Kegiatan::factory()->create([
+        'nama_kegiatan' => 'Kegiatan Uji '.$index,
+        'created_at' => now()->addSeconds($index),
+        'updated_at' => now()->addSeconds($index),
+    ]));
     $latest = Kegiatan::latest()->take(3)->get();
 
     $response = $this->get('/');

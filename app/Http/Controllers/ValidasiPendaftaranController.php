@@ -9,8 +9,11 @@ use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
+use Throwable;
 
 class ValidasiPendaftaranController extends Controller
 {
@@ -26,6 +29,25 @@ class ValidasiPendaftaranController extends Controller
         $pendaftaran = Pendaftaran::findOrFail($id);
 
         return view('admin.pendaftaran.show', compact('pendaftaran'));
+    }
+
+    public function downloadDokumenIdentitas(Pendaftaran $pendaftaran)
+    {
+        $path = $pendaftaran->file_persyaratan;
+
+        if (! is_string($path) || $path === '' || ! Storage::disk('local')->exists($path)) {
+            abort(404);
+        }
+
+        $extension = preg_replace('/[^a-z0-9]/', '', strtolower(pathinfo($path, PATHINFO_EXTENSION))) ?? '';
+        $jenisDokumen = Pendaftaran::JENIS_DOKUMEN_IDENTITAS[$pendaftaran->jenis_dokumen_identitas] ?? 'Dokumen';
+        $filename = strtolower($jenisDokumen).'-pendaftaran-'.$pendaftaran->id.($extension === '' ? '' : '.'.$extension);
+
+        return Storage::disk('local')->download($path, $filename, [
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'Pragma' => 'no-cache',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     public function prosesValidasiPendaftaran(ValidasiPendaftaranRequest $request, $id)
@@ -87,11 +109,32 @@ class ValidasiPendaftaranController extends Controller
             return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftaran disetujui.');
         }
 
+        $filePath = $pendaftar->file_persyaratan;
+
         $pendaftar->update([
             'password' => null,
             'status_validasi' => 'ditolak',
             'catatan_admin' => $validated['catatan_admin'],
+            'file_persyaratan' => null,
         ]);
+
+        if (is_string($filePath) && $filePath !== '') {
+            try {
+                if (! Storage::disk('local')->delete($filePath)) {
+                    report(new RuntimeException(sprintf(
+                        'Dokumen pendaftaran ID %d gagal dihapus setelah ditolak: %s',
+                        $pendaftar->id,
+                        $filePath,
+                    )));
+                }
+            } catch (Throwable $exception) {
+                report(new RuntimeException(sprintf(
+                    'Dokumen pendaftaran ID %d gagal dihapus setelah ditolak: %s',
+                    $pendaftar->id,
+                    $filePath,
+                ), 0, $exception));
+            }
+        }
 
         return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftaran ditolak.');
     }

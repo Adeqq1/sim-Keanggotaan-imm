@@ -41,13 +41,13 @@ class SeedDemoFiles extends Command
             ['Artifacts Created', 'Count'],
             [
                 ['Public disk files (Photos, Proofs, Certs)', $stats['public_files']],
-                ['Private local files (Archives)', $stats['private_files']],
+                ['Private local files (Archives, registration documents)', $stats['private_files']],
                 ['Database records updated/linked', $stats['records_updated']],
             ]
         );
 
         $this->newLine();
-        $this->line('File links updated safely. Private archives are stored under <comment>storage/app/private/arsip</comment>.');
+        $this->line('File links updated safely. Private archives and registration documents are stored under <comment>storage/app/private/</comment>.');
         $this->line('Ensure you run <comment>php artisan storage:link</comment> to make public disk artifacts accessible via the browser.');
 
         return self::SUCCESS;

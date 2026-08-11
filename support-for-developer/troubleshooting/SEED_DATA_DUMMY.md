@@ -18,7 +18,7 @@ docker compose exec app php artisan demo:seed-files
 ```
 
 Data yang dibuat:
-- **Public disk (`storage/app/public/`)**: foto profil anggota, thumbnail kegiatan, dokumen persyaratan, dan bukti kehadiran presensi. Command ini juga meng-generate file sertifikat sungguhan memakai template PDF aplikasi.
-- **Private disk (`storage/app/private/arsip/`)**: arsip pribadi milik kader untuk pengujian hak akses download. Arsip *tidak* boleh berada di public disk.
+- **Public disk (`storage/app/public/`)**: foto profil anggota, thumbnail kegiatan, dan bukti kehadiran presensi. Command ini juga meng-generate file sertifikat sungguhan memakai template PDF aplikasi.
+- **Private disk (`storage/app/private/`)**: dokumen identitas pendaftaran pada `pendaftaran/` dan arsip pribadi milik kader pada `arsip/` untuk pengujian hak akses download. Keduanya *tidak* boleh berada di public disk.
 
 Command ini aman dijalankan ulang (idempoten) dan hanya membersihkan folder namespace `demo/` tanpa menyentuh file hasil upload manual developer. Untuk mengakses file public di browser lokal, pastikan Anda juga telah menjalankan `docker compose exec app php artisan storage:link`.

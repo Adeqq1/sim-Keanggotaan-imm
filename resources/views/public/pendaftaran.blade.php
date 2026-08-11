@@ -14,31 +14,31 @@
         @csrf
 
         <div class="mb-3">
-            <label class="form-label small fw-bold">Nama Lengkap</label>
+            <label class="form-label small fw-bold">Nama Lengkap <span class="text-danger" aria-hidden="true">*</span></label>
             <input type="text" name="nama_lengkap" class="form-control @error('nama_lengkap') is-invalid @enderror" value="{{ old('nama_lengkap') }}" required>
             @error('nama_lengkap') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
 
         <div class="mb-3">
-            <label class="form-label small fw-bold">Email</label>
+            <label class="form-label small fw-bold">Email <span class="text-danger" aria-hidden="true">*</span></label>
             <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required>
             @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
 
         <div class="mb-3">
-            <label class="form-label small fw-bold">Password Akun</label>
+            <label class="form-label small fw-bold">Password Akun <span class="text-danger" aria-hidden="true">*</span></label>
             <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required autocomplete="new-password">
             <div class="form-text small">Password ini akan digunakan untuk login setelah pendaftaran disetujui.</div>
             @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
 
         <div class="mb-3">
-            <label class="form-label small fw-bold">Konfirmasi Password</label>
+            <label class="form-label small fw-bold">Konfirmasi Password <span class="text-danger" aria-hidden="true">*</span></label>
             <input type="password" name="password_confirmation" class="form-control" required autocomplete="new-password">
         </div>
 
         <div class="mb-3">
-            <label class="form-label small fw-bold">Daftar Sebagai</label>
+            <label class="form-label small fw-bold">Daftar Sebagai <span class="text-danger" aria-hidden="true">*</span></label>
             <select name="role" class="form-select @error('role') is-invalid @enderror" required>
                 <option value="">Pilih jenis pendaftaran</option>
                 <option value="kader" @selected(old('role') === 'kader')>Kader</option>
@@ -50,29 +50,42 @@
 
         <div class="row">
             <div class="col-12 col-sm-6 mb-3">
-                <label class="form-label small fw-bold">Tempat Lahir</label>
+                <label class="form-label small fw-bold">Tempat Lahir <span class="text-danger" aria-hidden="true">*</span></label>
                 <input type="text" name="tempat_lahir" class="form-control @error('tempat_lahir') is-invalid @enderror" value="{{ old('tempat_lahir') }}" required>
             </div>
             <div class="col-12 col-sm-6 mb-3">
-                <label class="form-label small fw-bold">Tanggal Lahir</label>
+                <label class="form-label small fw-bold">Tanggal Lahir <span class="text-danger" aria-hidden="true">*</span></label>
                 <input type="date" name="tanggal_lahir" class="form-control @error('tanggal_lahir') is-invalid @enderror" value="{{ old('tanggal_lahir') }}" required>
             </div>
         </div>
 
         <div class="mb-3">
-            <label class="form-label small fw-bold">Nomor Telepon (WA)</label>
+            <label class="form-label small fw-bold">Nomor Telepon (WA) <span class="text-danger" aria-hidden="true">*</span></label>
             <input type="text" name="no_telp" class="form-control @error('no_telp') is-invalid @enderror" value="{{ old('no_telp') }}" placeholder="08..." required>
         </div>
 
         <div class="mb-3">
-            <label class="form-label small fw-bold">Alamat</label>
+            <label class="form-label small fw-bold">Alamat <span class="text-danger" aria-hidden="true">*</span></label>
             <textarea name="alamat" class="form-control @error('alamat') is-invalid @enderror" rows="3" required>{{ old('alamat') }}</textarea>
         </div>
 
+        <div class="mb-3">
+            <label for="jenis_dokumen_identitas" class="form-label small fw-bold">Jenis Dokumen Identitas <span class="text-danger" aria-hidden="true">*</span></label>
+            <select id="jenis_dokumen_identitas" name="jenis_dokumen_identitas" class="form-select @error('jenis_dokumen_identitas') is-invalid @enderror" required>
+                <option value="">Pilih jenis dokumen</option>
+                @foreach (\App\Models\Pendaftaran::JENIS_DOKUMEN_IDENTITAS as $value => $label)
+                    <option value="{{ $value }}" @selected(old('jenis_dokumen_identitas') === $value)>{{ $label }}</option>
+                @endforeach
+            </select>
+            @error('jenis_dokumen_identitas')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
         <div class="mb-4">
-            <label class="form-label small fw-bold">File Persyaratan (PDF/JPG)</label>
-            <input type="file" name="file_persyaratan" class="form-control @error('file_persyaratan') is-invalid @enderror">
-            <div class="form-text small">Opsional: KTP/Kartu Mahasiswa</div>
+            <label for="file_persyaratan" class="form-label small fw-bold">Dokumen Identitas <span class="text-danger" aria-hidden="true">*</span></label>
+            <input id="file_persyaratan" type="file" name="file_persyaratan" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" aria-describedby="file_persyaratan_help" class="form-control @error('file_persyaratan') is-invalid @enderror" required>
+            <div id="file_persyaratan_help" class="form-text small">Unggah satu file KTP atau KTM dalam format PDF, JPG, JPEG, atau PNG. Maksimum 2 MB.</div>
             @error('file_persyaratan')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror

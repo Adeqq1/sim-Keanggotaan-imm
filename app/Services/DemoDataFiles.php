@@ -53,9 +53,12 @@ class DemoDataFiles
         $pendaftaran = Pendaftaran::where('status_validasi', 'pending')->first();
         if ($pendaftaran) {
             $path = 'pendaftaran/demo/syarat-'.$pendaftaran->id.'.pdf';
-            $this->createSimplePdfToDisk('public', $path, 'Dokumen Persyaratan: '.$pendaftaran->nama_lengkap);
-            $pendaftaran->update(['file_persyaratan' => $path]);
-            $stats['public_files']++;
+            $this->createSimplePdfToDisk('local', $path, 'Dokumen Persyaratan: '.$pendaftaran->nama_lengkap);
+            $pendaftaran->update([
+                'file_persyaratan' => $path,
+                'jenis_dokumen_identitas' => 'ktp',
+            ]);
+            $stats['private_files']++;
             $stats['records_updated']++;
         }
 
@@ -140,7 +143,9 @@ class DemoDataFiles
             Storage::disk('public')->deleteDirectory($dir);
         }
 
-        Storage::disk('local')->deleteDirectory('arsip/demo');
+        foreach (['arsip/demo', 'pendaftaran/demo'] as $dir) {
+            Storage::disk('local')->deleteDirectory($dir);
+        }
     }
 
     private function copyImageToPublic(string $destinationPath): void

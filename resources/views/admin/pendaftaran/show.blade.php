@@ -38,14 +38,23 @@
             </div>
         </div>
 
-        @if($pendaftaran->file_persyaratan)
-            <div class="mt-4">
-                <h6 class="fw-bold border-bottom pb-2 mb-3">Lampiran</h6>
-                <a href="{{ Storage::url($pendaftaran->file_persyaratan) }}" target="_blank" class="btn btn-outline-primary btn-ui btn-ui-sm pendaftaran-detail-control w-100 w-sm-auto py-2">
-                    <i class="bi bi-file-earmark-pdf me-2"></i> Lihat File Persyaratan
-                </a>
+        <div class="mt-4">
+            <h6 class="fw-bold border-bottom pb-2 mb-3">Dokumen Identitas</h6>
+            <div class="mb-3">
+                <small class="text-muted d-block">Jenis Dokumen Identitas</small>
+                <span class="fw-bold">
+                    {{ $pendaftaran->jenis_dokumen_identitas ? (\App\Models\Pendaftaran::JENIS_DOKUMEN_IDENTITAS[$pendaftaran->jenis_dokumen_identitas] ?? 'Tidak dikenal') : 'Tidak tercatat (data lama)' }}
+                </span>
             </div>
-        @endif
+
+            @if($pendaftaran->file_persyaratan)
+                <a href="{{ route('admin.pendaftaran.document.download', $pendaftaran) }}" class="btn btn-outline-primary btn-ui btn-ui-sm pendaftaran-detail-control w-100 w-sm-auto py-2">
+                    <i class="bi bi-download me-2"></i> Unduh Dokumen Identitas
+                </a>
+            @else
+                <div class="text-muted small">Dokumen tidak tersedia pada data lama.</div>
+            @endif
+        </div>
     </div>
 
     @if($pendaftaran->status_validasi === 'pending')

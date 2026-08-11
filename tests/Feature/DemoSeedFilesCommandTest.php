@@ -94,8 +94,10 @@ test('command provisions files and updates database paths correctly', function (
     // 3. Pendaftaran PDF
     $pendaftaran = Pendaftaran::whereNotNull('file_persyaratan')->first();
     if ($pendaftaran) {
-        Storage::disk('public')->assertExists($pendaftaran->file_persyaratan);
-        $pdfBytes = Storage::disk('public')->get($pendaftaran->file_persyaratan);
+        Storage::disk('local')->assertExists($pendaftaran->file_persyaratan);
+        Storage::disk('public')->assertMissing($pendaftaran->file_persyaratan);
+        expect($pendaftaran->jenis_dokumen_identitas)->toBe('ktp');
+        $pdfBytes = Storage::disk('local')->get($pendaftaran->file_persyaratan);
         expect(str_starts_with($pdfBytes, '%PDF'))->toBeTrue();
     }
 
@@ -151,6 +153,7 @@ test('command is idempotent and handles cleanup', function () {
     // Add a sentinel non-demo file to ensure we don't nuke the entire feature directory
     Storage::disk('public')->put('foto_profil/user-uploaded.png', 'content');
     Storage::disk('local')->put('arsip/user-uploaded.pdf', 'content');
+    Storage::disk('local')->put('pendaftaran/user-uploaded.pdf', 'content');
 
     // Run again
     $this->artisan('demo:seed-files')->assertSuccessful();
@@ -158,6 +161,7 @@ test('command is idempotent and handles cleanup', function () {
     // Sentinel files must survive
     Storage::disk('public')->assertExists('foto_profil/user-uploaded.png');
     Storage::disk('local')->assertExists('arsip/user-uploaded.pdf');
+    Storage::disk('local')->assertExists('pendaftaran/user-uploaded.pdf');
 
     // Check we didn't duplicate archives
     // It creates 2 archives because the command takes 2 Anggota owners.

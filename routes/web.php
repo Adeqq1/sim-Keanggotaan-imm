@@ -19,7 +19,9 @@ Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/kegiatan/{kegiatan}', [LandingController::class, 'show'])->name('kegiatan.show');
 
 Route::get('/pendaftaran', [PendaftaranController::class, 'create'])->name('pendaftaran');
-Route::post('/pendaftaran', [PendaftaranController::class, 'store'])->name('pendaftaran.store');
+Route::post('/pendaftaran', [PendaftaranController::class, 'store'])
+    ->middleware('throttle:pendaftaran')
+    ->name('pendaftaran.store');
 Route::get('/pendaftaran/sukses', [PendaftaranController::class, 'success'])->name('pendaftaran.success');
 
 // Admin Routes
@@ -31,6 +33,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         // Modul Pendaftaran
         Route::get('/pendaftaran', [ValidasiPendaftaranController::class, 'index'])->name('pendaftaran.index');
         Route::get('/pendaftaran/{id}', [ValidasiPendaftaranController::class, 'show'])->name('pendaftaran.show');
+        Route::get('/pendaftaran/{pendaftaran}/dokumen-identitas', [ValidasiPendaftaranController::class, 'downloadDokumenIdentitas'])->name('pendaftaran.document.download');
         Route::post('/pendaftaran/{id}/validate', [ValidasiPendaftaranController::class, 'prosesValidasiPendaftaran'])->name('pendaftaran.validate');
 
         // Modul Anggota
