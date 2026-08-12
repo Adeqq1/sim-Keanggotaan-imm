@@ -351,6 +351,10 @@ test('admin can search and filter arsip', function () {
     ]));
 
     $response->assertSuccessful();
+    $response->assertViewHas('kategori', Arsip::KATEGORI);
+    $response->assertSee('Surat Masuk');
+    $response->assertSee('Surat Keluar');
+    $response->assertSee('Lain-lain');
     $response->assertSee('Proposal Rapat Kerja');
     $response->assertDontSee('Surat Keluar Cabang');
     $response->assertSee('Atur ulang filter');

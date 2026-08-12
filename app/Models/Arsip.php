@@ -27,6 +27,12 @@ class Arsip extends Model
         'lainnya' => 'Lain-lain',
     ];
 
+    public const KATEGORI_UNGGAH_KADER = [
+        'proposal',
+        'lpj',
+        'surat_keputusan',
+    ];
+
     public function getKategoriLabelAttribute(): string
     {
         return self::KATEGORI[$this->kategori_arsip] ?? ucfirst(str_replace('_', ' ', $this->kategori_arsip));
