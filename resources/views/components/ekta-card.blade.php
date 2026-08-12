@@ -82,11 +82,23 @@
         width: 22%;
     }
 
+    .ekta-card__logo-badge {
+        align-items: center;
+        background: #ffffff;
+        border: 3px solid #f2ce45;
+        border-radius: 50%;
+        box-shadow: 0 0 0 2px #600000;
+        display: flex;
+        height: 58px;
+        justify-content: center;
+        width: 58px;
+    }
+
     .ekta-card__logo {
         display: block;
-        height: 62px;
+        height: 48px;
         object-fit: contain;
-        width: 40px;
+        width: 42px;
     }
 
     .ekta-card__logo-fallback {
@@ -104,7 +116,7 @@
 
     .ekta-card__title {
         color: #ffffff;
-        font-size: 13px;
+        font-size: 16px;
         font-weight: 800;
         letter-spacing: 0.035em;
         line-height: 1.18;
@@ -113,7 +125,7 @@
 
     .ekta-card__organization {
         color: rgba(255, 255, 255, 0.74);
-        font-size: 6px;
+        font-size: 7px;
         letter-spacing: 0.08em;
         line-height: 1.35;
         margin-top: 5px;
@@ -129,7 +141,7 @@
     }
 
     .ekta-card__top-note-label {
-        font-size: 7px;
+        font-size: 8px;
         font-weight: 800;
         letter-spacing: 0.16em;
     }
@@ -143,7 +155,7 @@
 
     .ekta-card__top-note-value {
         color: #800000;
-        font-size: 7px;
+        font-size: 8px;
         font-weight: 700;
         letter-spacing: 0.14em;
     }
@@ -203,7 +215,7 @@
 
     .ekta-card__eyebrow {
         color: #a00000;
-        font-size: 7px;
+        font-size: 8px;
         font-weight: 800;
         letter-spacing: 0.17em;
         line-height: 1.2;
@@ -211,7 +223,7 @@
 
     .ekta-card__name {
         color: #600000;
-        font-size: 18px;
+        font-size: 21px;
         font-weight: 800;
         letter-spacing: 0.025em;
         line-height: 1.12;
@@ -229,7 +241,7 @@
 
     .ekta-card__meta td {
         border-top: 1px solid #e4dce7;
-        font-size: 9px;
+        font-size: 10px;
         line-height: 1.25;
         padding: 5px 0 3px;
         vertical-align: top;
@@ -320,9 +332,13 @@
     <div class="ekta-card__brand">
         <div class="ekta-card__logo-cell">
             @if($logoSrc)
-                <img src="{{ $logoSrc }}" alt="Logo IMM" class="ekta-card__logo">
+                <span class="ekta-card__logo-badge">
+                    <img src="{{ $logoSrc }}" alt="Logo IMM" class="ekta-card__logo">
+                </span>
             @else
-                <span class="ekta-card__logo-fallback" aria-label="Logo IMM">IMM</span>
+                <span class="ekta-card__logo-badge">
+                    <span class="ekta-card__logo-fallback" aria-label="Logo IMM">IMM</span>
+                </span>
             @endif
         </div>
         <div class="ekta-card__brand-copy">
