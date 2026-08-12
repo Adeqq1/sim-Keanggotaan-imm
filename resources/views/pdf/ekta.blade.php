@@ -82,12 +82,12 @@
         }
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__title {
-            font-size: 10pt !important;
+            font-size: 11.5pt !important;
             line-height: 1.1 !important;
         }
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__organization {
-            font-size: 4.8pt !important;
+            font-size: 5.5pt !important;
             margin-top: 2pt !important;
         }
 
@@ -98,7 +98,7 @@
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__top-note-label,
         .ekta-pdf-page .ekta-card--pdf .ekta-card__top-note-value {
-            font-size: 5.5pt !important;
+            font-size: 6.5pt !important;
         }
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__top-note-rule {
@@ -124,11 +124,11 @@
         }
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__eyebrow {
-            font-size: 5.8pt !important;
+            font-size: 6.8pt !important;
         }
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__name {
-            font-size: 11pt !important;
+            font-size: 13pt !important;
             line-height: 1.08 !important;
             margin-top: 2pt !important;
         }
@@ -138,7 +138,7 @@
         }
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__meta td {
-            font-size: 6.8pt !important;
+            font-size: 7.8pt !important;
             line-height: 1.15 !important;
             padding: 2.5pt 0 1pt !important;
         }

@@ -116,7 +116,7 @@
 
     .ekta-card__title {
         color: #ffffff;
-        font-size: 16px;
+        font-size: 18px;
         font-weight: 800;
         letter-spacing: 0.035em;
         line-height: 1.18;
@@ -125,7 +125,7 @@
 
     .ekta-card__organization {
         color: rgba(255, 255, 255, 0.74);
-        font-size: 7px;
+        font-size: 8px;
         letter-spacing: 0.08em;
         line-height: 1.35;
         margin-top: 5px;
@@ -141,7 +141,7 @@
     }
 
     .ekta-card__top-note-label {
-        font-size: 8px;
+        font-size: 9px;
         font-weight: 800;
         letter-spacing: 0.16em;
     }
@@ -155,7 +155,7 @@
 
     .ekta-card__top-note-value {
         color: #800000;
-        font-size: 8px;
+        font-size: 9px;
         font-weight: 700;
         letter-spacing: 0.14em;
     }
@@ -215,7 +215,7 @@
 
     .ekta-card__eyebrow {
         color: #a00000;
-        font-size: 8px;
+        font-size: 9px;
         font-weight: 800;
         letter-spacing: 0.17em;
         line-height: 1.2;
@@ -223,7 +223,7 @@
 
     .ekta-card__name {
         color: #600000;
-        font-size: 21px;
+        font-size: 24px;
         font-weight: 800;
         letter-spacing: 0.025em;
         line-height: 1.12;
@@ -241,7 +241,7 @@
 
     .ekta-card__meta td {
         border-top: 1px solid #e4dce7;
-        font-size: 10px;
+        font-size: 11px;
         line-height: 1.25;
         padding: 5px 0 3px;
         vertical-align: top;
@@ -305,7 +305,7 @@
         }
 
         .ekta-card__title {
-            font-size: 13px;
+            font-size: 15px;
         }
 
         .ekta-card__organization,
@@ -315,11 +315,11 @@
         }
 
         .ekta-card__name {
-            font-size: 17px;
+            font-size: 19px;
         }
 
         .ekta-card__meta td {
-            font-size: 8px;
+            font-size: 9px;
         }
     }
 </style>
