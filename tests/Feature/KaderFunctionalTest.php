@@ -58,11 +58,28 @@ test('kader can view ekta preview', function () {
         ->assertSeeText('AISYAH KADER LOGIN')
         ->assertSeeText('24000001')
         ->assertSeeText('2024')
+        ->assertSee('images/logo.png', false)
         ->assertSee(route('kader.ekta.download'), false)
-        ->assertDontSeeText('KADER IMM')
         ->assertDontSeeText('value');
 
     expect($anggota->fresh()->nama_lengkap)->toBe('Aisyah Kader Login');
+});
+
+test('ekta preview displays a stored profile photo', function () {
+    $user = User::factory()->kader()->create();
+    $anggota = Anggota::factory()->create(['user_id' => $user->id, 'nama_lengkap' => 'Foto Anggota']);
+    Storage::fake('public');
+
+    $photoPath = 'foto_profil/profile.png';
+    Storage::disk('public')->put($photoPath, base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='));
+    $anggota->update(['foto_profil' => $photoPath]);
+
+    $response = $this->actingAs($user)->get(route('kader.ekta'));
+
+    $response->assertSuccessful()
+        ->assertSee('data:image/png;base64,', false)
+        ->assertSee('images/logo.png', false)
+        ->assertDontSee('data-testid="ekta-photo-fallback"', false);
 });
 
 test('kader can download ekta pdf', function () {
@@ -104,6 +121,7 @@ test('ekta PDF keeps short and long cards on one page', function (string $name, 
         'anggota' => $anggota->fresh(),
         'roleLabel' => 'Kader',
         'photoSrc' => $photoSrc,
+        'logoSrc' => public_path('images/logo.png'),
     ])->setPaper([0, 0, 240, 152.25]);
     $pdf->render();
 

@@ -48,7 +48,7 @@
     </style>
 
     <div class="row justify-content-center ekta-page">
-        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-7">
 
             <div class="mb-4 text-center ekta-print-hide">
                 <p class="text-muted small">Kartu Tanda Anggota Digital Anda</p>
@@ -59,6 +59,7 @@
                     :anggota="$anggota"
                     :role-label="$roleLabel"
                     :photo-src="$photoSrc"
+                    :logo-src="$logoSrc"
                 />
             </div>
 
