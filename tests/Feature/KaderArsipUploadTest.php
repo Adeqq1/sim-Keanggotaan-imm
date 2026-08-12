@@ -171,6 +171,76 @@ describe('Kader Arsip Upload (Store)', function () {
         'surat keputusan' => 'surat_keputusan',
     ]);
 
+    test('kader bisa upload setiap format dokumen yang didukung', function (string $filename, string $mime, ?string $officeDirectory) {
+        $user = User::factory()->create(['role' => 'kader']);
+        $anggota = Anggota::factory()->create(['user_id' => $user->id]);
+        $extension = pathinfo($filename, PATHINFO_EXTENSION);
+
+        if ($officeDirectory === null) {
+            $file = UploadedFile::fake()->create($filename, 100, $mime);
+        } else {
+            $temporaryPath = tempnam(sys_get_temp_dir(), 'arsip-office-');
+
+            if ($temporaryPath === false) {
+                throw new RuntimeException('Gagal membuat fixture Office sementara.');
+            }
+
+            $zip = new ZipArchive;
+
+            if ($zip->open($temporaryPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+                unlink($temporaryPath);
+                throw new RuntimeException('Gagal membuat package Office sementara.');
+            }
+
+            $documentPath = $officeDirectory === 'word' ? 'word/document.xml' : 'xl/workbook.xml';
+            $documentContentType = $officeDirectory === 'word'
+                ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml'
+                : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml';
+            $documentContent = $officeDirectory === 'word'
+                ? '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p/></w:body></w:document>'
+                : '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheets/></workbook>';
+
+            $zip->addFromString('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/'.$documentPath.'" ContentType="'.$documentContentType.'"/></Types>');
+            $zip->addFromString('_rels/.rels', '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="/'.$documentPath.'"/></Relationships>');
+            $zip->addFromString($documentPath, $documentContent);
+            $zip->close();
+
+            $content = file_get_contents($temporaryPath);
+            unlink($temporaryPath);
+
+            if ($content === false) {
+                throw new RuntimeException('Gagal membaca fixture Office sementara.');
+            }
+
+            $file = UploadedFile::fake()->createWithContent($filename, $content)->mimeType($mime);
+        }
+
+        $judul = 'Dokumen Format '.strtoupper($extension);
+
+        $response = $this->actingAs($user)->post(route('kader.arsip.store'), [
+            'judul_dokumen' => $judul,
+            'kategori_arsip' => 'proposal',
+            'file_arsip' => $file,
+        ]);
+
+        $response->assertRedirect(route('kader.arsip.index'));
+        $response->assertSessionHas('success', 'Dokumen berhasil diunggah.');
+
+        $arsip = Arsip::where('anggota_id', $anggota->id)
+            ->where('judul_dokumen', $judul)
+            ->firstOrFail();
+
+        expect($arsip->kategori_arsip)->toBe('proposal')
+            ->and(pathinfo($arsip->file_arsip, PATHINFO_EXTENSION))->toBe($extension);
+        Storage::disk('local')->assertExists($arsip->file_arsip);
+    })->with([
+        'pdf' => ['dokumen.pdf', 'application/pdf', null],
+        'doc' => ['dokumen.doc', 'application/msword', null],
+        'docx' => ['dokumen.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'word'],
+        'xls' => ['dokumen.xls', 'application/vnd.ms-excel', null],
+        'xlsx' => ['dokumen.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'xl'],
+    ]);
+
     test('kader tidak bisa upload kategori di luar allow-list', function (string $kategori) {
         $user = User::factory()->create(['role' => 'kader']);
         $anggota = Anggota::factory()->create(['user_id' => $user->id]);
