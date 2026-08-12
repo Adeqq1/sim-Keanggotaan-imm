@@ -25,6 +25,16 @@
         </div>
     </div>
 
+    <div class="card border-0 shadow-sm p-3 mb-4" style="border-radius: 15px;">
+        <div class="d-flex align-items-center justify-content-between gap-2">
+            <div>
+                <h6 class="fw-bold mb-1">Kehadiran terkonfirmasi</h6>
+                <small class="text-muted">{{ $jumlahKegiatanHadir }} dari {{ $minimumKegiatanHadir }} kegiatan hadir</small>
+            </div>
+            <i class="bi bi-patch-check fs-3 text-success"></i>
+        </div>
+    </div>
+
     <h6 class="fw-bold mb-3">Daftar Kehadiran</h6>
     <div class="row g-3 index-card-grid">
     @forelse($presensis as $p)
@@ -58,10 +68,23 @@
                     @endif
                 </div>
                 <div>
-                    @if($sertifikat)
+                    @if($sertifikat && $canClaimSertifikat && $p->status_kehadiran === 'hadir')
                         <a href="{{ route('kader.sertifikat.download', $sertifikat) }}" class="btn btn-sm btn-outline-success btn-ui btn-ui-sm px-3">
                             <i class="bi bi-download"></i> Unduh
                         </a>
+                    @elseif(! $sertifikat && $canClaimSertifikat && $p->status_kehadiran === 'hadir')
+                        <form action="{{ route('kader.sertifikat.klaim', $p) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-outline-primary btn-ui btn-ui-sm px-3">
+                                <i class="bi bi-award"></i> Klaim Sertifikat
+                            </button>
+                        </form>
+                    @elseif(! $sertifikat && ! $canClaimSertifikat)
+                        <span class="small text-muted">Klaim tersedia setelah {{ $minimumKegiatanHadir }} kegiatan hadir</span>
+                    @elseif(! $sertifikat)
+                        <span class="small text-muted">Klaim tidak tersedia untuk status {{ ucfirst($p->status_kehadiran) }}</span>
+                    @elseif($sertifikat)
+                        <span class="small text-muted">Unduh terkunci</span>
                     @endif
                 </div>
             </div>

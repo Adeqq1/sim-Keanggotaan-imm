@@ -6,6 +6,7 @@
     <div class="mb-4">
         <h6 class="fw-bold">Koleksi Sertifikat</h6>
         <p class="text-muted small">Daftar sertifikat kegiatan yang telah Anda ikuti.</p>
+        <p class="text-muted small mb-0">Kehadiran terkonfirmasi: {{ $jumlahKegiatanHadir }} dari {{ $minimumKegiatanHadir }} kegiatan hadir.</p>
     </div>
 
     <div class="row g-3 index-card-grid">
@@ -25,9 +26,15 @@
                 </div>
             </div>
             <div class="pt-3 mt-auto border-top index-card__actions">
-                <a href="{{ route('kader.sertifikat.download', $cert) }}" class="btn btn-outline-success btn-ui btn-ui-sm" aria-label="Unduh sertifikat {{ $cert->kegiatan->nama_kegiatan }}" title="Unduh sertifikat">
-                    <i class="bi bi-download"></i>
-                </a>
+                @if($canDownloadSertifikat && $kegiatanHadirIds->contains($cert->kegiatan_id))
+                    <a href="{{ route('kader.sertifikat.download', $cert) }}" class="btn btn-outline-success btn-ui btn-ui-sm" aria-label="Unduh sertifikat {{ $cert->kegiatan->nama_kegiatan }}" title="Unduh sertifikat">
+                        <i class="bi bi-download"></i>
+                    </a>
+                @elseif(! $canDownloadSertifikat)
+                    <span class="small text-muted">Unduh terkunci sampai {{ $minimumKegiatanHadir }} kegiatan hadir.</span>
+                @else
+                    <span class="small text-muted">Unduh terkunci sampai kehadiran kegiatan terkonfirmasi.</span>
+                @endif
             </div>
         </div>
         </div>

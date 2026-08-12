@@ -6,6 +6,7 @@ use App\Http\Requests\SertifikatRequest;
 use App\Jobs\GenerateCertificateJob;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
+use App\Models\Presensi;
 use App\Models\Sertifikat;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -43,7 +44,11 @@ class SertifikatController extends Controller
         $pdf = Pdf::loadView('pdf.sertifikat', compact('kegiatan', 'anggota', 'nomorSertifikat', 'role', 'instruktur'))
             ->setPaper('a4', 'landscape');
         $path = 'sertifikat/'.$nomorSertifikat.'.pdf';
-        Storage::disk('public')->put($path, $pdf->output());
+        $stored = Storage::disk('public')->put($path, $pdf->output());
+
+        if (! $stored) {
+            throw new \RuntimeException('Gagal menyimpan file sertifikat.');
+        }
 
         return Sertifikat::updateOrCreate(
             ['kegiatan_id' => $kegiatan->id, 'anggota_id' => $anggota->id],
@@ -77,14 +82,70 @@ class SertifikatController extends Controller
         }
 
         $sertifikats = Sertifikat::where('anggota_id', $anggota->id)->with('kegiatan')->latest()->paginate(6);
+        $jumlahKegiatanHadir = $anggota->jumlahKegiatanHadir();
+        $canDownloadSertifikat = $jumlahKegiatanHadir >= Sertifikat::MINIMUM_KEGIATAN_HADIR;
+        $kegiatanHadirIds = $anggota->presensi()
+            ->where('status_kehadiran', 'hadir')
+            ->distinct()
+            ->pluck('kegiatan_id');
 
-        return view('kader.sertifikat.index', compact('sertifikats'));
+        return view('kader.sertifikat.index', compact(
+            'sertifikats',
+            'jumlahKegiatanHadir',
+            'canDownloadSertifikat',
+            'kegiatanHadirIds',
+        ))->with('minimumKegiatanHadir', Sertifikat::MINIMUM_KEGIATAN_HADIR);
+    }
+
+    public function klaim(Presensi $presensi)
+    {
+        $anggota = auth()->user()->anggota;
+
+        if (! $anggota || (int) $presensi->anggota_id !== $anggota->id || $presensi->status_kehadiran !== 'hadir') {
+            abort(403);
+        }
+
+        if ($anggota->jumlahKegiatanHadir() < Sertifikat::MINIMUM_KEGIATAN_HADIR) {
+            abort(403);
+        }
+
+        $alreadyExists = Sertifikat::where('kegiatan_id', $presensi->kegiatan_id)
+            ->where('anggota_id', $anggota->id)
+            ->exists();
+
+        if ($alreadyExists) {
+            return redirect()->route('kader.riwayat.index')
+                ->with('info', 'Sertifikat untuk kegiatan ini sudah tersedia.');
+        }
+
+        GenerateCertificateJob::dispatch($presensi);
+
+        return redirect()->route('kader.riwayat.index')
+            ->with('success', 'Klaim sertifikat sedang diproses.');
     }
 
     public function download(Sertifikat $sertifikat)
     {
-        // Pastikan hanya pemilik atau admin yang bisa download
-        if (auth()->user()->role !== 'admin' && auth()->user()->anggota->id !== $sertifikat->anggota_id) {
+        if (auth()->user()->role === 'admin') {
+            return Storage::disk('public')->download($sertifikat->file_sertifikat);
+        }
+
+        $anggota = auth()->user()->anggota;
+
+        if (! $anggota || (int) $sertifikat->anggota_id !== $anggota->id) {
+            abort(403);
+        }
+
+        if ($anggota->jumlahKegiatanHadir() < Sertifikat::MINIMUM_KEGIATAN_HADIR) {
+            abort(403);
+        }
+
+        $targetIsAttended = $anggota->presensi()
+            ->where('kegiatan_id', $sertifikat->kegiatan_id)
+            ->where('status_kehadiran', 'hadir')
+            ->exists();
+
+        if (! $targetIsAttended) {
             abort(403);
         }
 

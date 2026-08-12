@@ -272,12 +272,21 @@ test('kader can view sertifikat list', function () {
 test('kader can download sertifikat pdf', function () {
     $user = User::factory()->kader()->create();
     $anggota = Anggota::factory()->create(['user_id' => $user->id]);
+    $kegiatans = Kegiatan::factory()->count(Sertifikat::MINIMUM_KEGIATAN_HADIR)->create();
+
+    foreach ($kegiatans as $kegiatan) {
+        Presensi::factory()->hadir()->create([
+            'anggota_id' => $anggota->id,
+            'kegiatan_id' => $kegiatan->id,
+        ]);
+    }
 
     Storage::fake('public');
     Storage::disk('public')->put('sertifikat/test.pdf', 'dummy content');
 
     $sertifikat = Sertifikat::factory()->create([
         'anggota_id' => $anggota->id,
+        'kegiatan_id' => $kegiatans->first()->id,
         'file_sertifikat' => 'sertifikat/test.pdf',
     ]);
 
@@ -301,33 +310,26 @@ test('kader can view riwayat keaktifan', function () {
     $response->assertSuccessful();
 });
 
-test('kader history shows certificates without claim controls', function (?string $statusKlaim) {
+test('kader history shows progress and an eligible claim form without upload controls', function () {
     $user = User::factory()->kader()->create();
     $anggota = Anggota::factory()->create(['user_id' => $user->id]);
-    $kegiatan = Kegiatan::factory()->create();
-    $presensi = Presensi::factory()->create([
+    $kegiatans = Kegiatan::factory()->count(Sertifikat::MINIMUM_KEGIATAN_HADIR)->create();
+    $presensis = $kegiatans->map(fn ($kegiatan) => Presensi::factory()->hadir()->create([
         'anggota_id' => $anggota->id,
         'kegiatan_id' => $kegiatan->id,
-        'status_klaim' => $statusKlaim,
-        'bukti_kehadiran' => 'bukti_kehadiran/legacy-proof.jpg',
-    ]);
-    $sertifikat = Sertifikat::factory()->create([
-        'anggota_id' => $anggota->id,
-        'kegiatan_id' => $kegiatan->id,
-    ]);
+    ]));
 
     $response = $this->actingAs($user)->get(route('kader.riwayat.index'));
 
     $response->assertSuccessful()
-        ->assertSeeText('Tersedia')
-        ->assertSee(route('kader.sertifikat.download', $sertifikat), false)
+        ->assertSeeText(Sertifikat::MINIMUM_KEGIATAN_HADIR.' dari '.Sertifikat::MINIMUM_KEGIATAN_HADIR.' kegiatan hadir')
+        ->assertSee(route('kader.sertifikat.klaim', $presensis->first()), false)
+        ->assertSeeText('Klaim Sertifikat')
         ->assertDontSee('type="file"', false)
         ->assertDontSee('multipart/form-data', false)
-        ->assertDontSeeText('Klaim Sertifikat')
-        ->assertDontSee('/klaim', false);
-
-    expect($presensi->fresh()->status_klaim)->toBe($statusKlaim);
-})->with([null, 'pending', 'disetujui', 'ditolak']);
+        ->assertDontSeeText('bukti_kehadiran')
+        ->assertDontSeeText('status_klaim');
+});
 
 test('kader can view arsip list', function () {
     $user = User::factory()->kader()->create();

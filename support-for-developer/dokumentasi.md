@@ -547,10 +547,11 @@ Referensi:
 ### 4.6.2 Sertifikat milik kader
 
 #### Tujuan fitur
-Kader melihat daftar sertifikat miliknya dan mengunduhnya.
+Kader melihat daftar sertifikat miliknya, mengajukan klaim setelah memenuhi syarat kehadiran, dan mengunduh sertifikat yang target kegiatannya masih dihadiri.
 
 #### Route
 - `GET /kader/sertifikat`
+- `POST /kader/sertifikat/{presensi}/klaim`
 - `GET /kader/sertifikat/{sertifikat}/download`
 
 Referensi:
@@ -559,7 +560,9 @@ Referensi:
 
 #### Aturan akses
 - Jika user tidak punya data anggota -> redirect error.
-- Download hanya boleh dilakukan oleh admin atau pemilik sertifikat.
+- Kader hanya dapat mengunduh sertifikat miliknya setelah memiliki presensi `hadir` pada minimal tiga kegiatan berbeda.
+- Kegiatan pada sertifikat yang diunduh juga wajib masih memiliki presensi `hadir` milik kader.
+- Admin tetap dapat mengunduh melalui route admin tanpa syarat tiga kehadiran.
 
 Referensi:
 - `app/Http/Controllers/SertifikatController.php:75`
@@ -567,13 +570,13 @@ Referensi:
 
 ### 4.6.3 Data klaim historis
 
-Route klaim kader dan route verifikasi setuju/tolak tidak lagi tersedia. Presensi baru dikonfirmasi langsung oleh instruktur melalui modul presensi, sedangkan sertifikat tetap dibuat melalui aksi generate admin yang sudah ada.
+Klaim kader tersedia melalui satu POST tanpa body dan tanpa upload bukti. Kader harus memiliki presensi `hadir` pada minimal tiga kegiatan berbeda, lalu dapat memilih presensi `hadir` miliknya sebagai target. Sistem mengantrekan pembuatan sertifikat tanpa approval kedua. Route verifikasi setuju/tolak tetap tidak tersedia.
 
 Kolom `status_klaim` dan `bukti_kehadiran`, beserta file bukti yang sudah tersimpan, dipertahankan untuk retensi data historis. Aplikasi tidak mengubah, menghapus, atau memproses ulang data tersebut melalui alur baru.
 
 ### 4.6.4 Sertifikat di riwayat kader
 
-Halaman riwayat kader hanya menampilkan status kehadiran dan ketersediaan sertifikat berdasarkan ada atau tidaknya record `Sertifikat` untuk kegiatan tersebut. Tidak ada tombol klaim, input file, form multipart, atau proses persetujuan kedua.
+Halaman riwayat kader menampilkan progres kegiatan `hadir` terkonfirmasi. Tombol klaim hanya muncul pada presensi `hadir` milik kader yang sudah memiliki minimal tiga kegiatan hadir dan belum memiliki sertifikat target. Form klaim hanya memakai CSRF dan POST tanpa file atau multipart. Tombol unduh hanya muncul ketika syarat global dan kehadiran target masih terpenuhi; pengecekan server tetap menjadi otorisasi akhir.
 
 ### 4.6.5 Pengaturan background sertifikat
 
@@ -847,6 +850,8 @@ Referensi:
 - Eager load relasi `kegiatan`.
 - Ambil semua sertifikat milik kader, lalu `keyBy('kegiatan_id')`.
 - Hitung statistik `hadir`, `izin`, `alfa`.
+- Hitung progres kelayakan dengan `COUNT(DISTINCT kegiatan_id)` untuk status `hadir`.
+- Tampilkan tombol klaim tanpa upload hanya setelah minimal tiga kegiatan hadir berbeda.
 
 Referensi:
 - `app/Http/Controllers/RiwayatKeaktifanController.php:18`
@@ -1068,7 +1073,8 @@ Agar tidak salah saat refactor, pahami hubungan berikut:
 ### Presensi -> Riwayat -> Sertifikat
 - presensi menentukan status kehadiran kader
 - riwayat menampilkan status itu
-- admin membuat sertifikat secara eksplisit melalui modul sertifikat
+- kader dapat mengklaim sertifikat setelah tiga kegiatan berbeda berstatus `hadir`
+- admin tetap dapat membuat sertifikat secara eksplisit melalui modul sertifikat
 
 ### Anggota -> E-KTA + Profil + Sertifikat + Arsip
 - data anggota dipakai untuk E-KTA
@@ -1176,9 +1182,10 @@ Jika hanya mengingat 12 hal, ingat ini:
 6. Kegiatan mempengaruhi landing, presensi, sertifikat, dan laporan.
 7. Presensi adalah basis riwayat keaktifan.
 8. Hanya instruktur yang dapat menyimpan presensi; admin hanya dapat melihatnya.
-9. Sertifikat dibuat secara eksplisit oleh admin melalui queue.
-10. Data klaim dan file bukti lama dipertahankan tanpa alur baru.
-11. Background sertifikat disimpan di path public dengan ejaan `sertificate`.
+9. Klaim kader membutuhkan tiga kegiatan berbeda berstatus `hadir` dan diproses melalui queue tanpa upload bukti.
+10. Admin tetap dapat membuat sertifikat secara eksplisit melalui queue.
+11. Data klaim dan file bukti lama dipertahankan tanpa diaktifkan kembali.
+12. Background sertifikat disimpan di path public dengan ejaan `sertificate`.
 12. Arsip kader perlu perhatian khusus untuk authorization download.
 13. PWA ada, tetapi offline cache saat ini masih minimal.
 
