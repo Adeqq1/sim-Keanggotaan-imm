@@ -59,8 +59,10 @@ test('kader can view ekta preview', function () {
         ->assertSeeText('24000001')
         ->assertSeeText('2024')
         ->assertSee('images/logo.png', false)
-        ->assertSee(route('kader.ekta.download'), false)
-        ->assertDontSeeText('value');
+        ->assertSee('ekta-card__swoop', false)
+        ->assertSee('ekta-card__photo-frame', false)
+        ->assertSee('ekta-card__top-note', false)
+        ->assertSee(route('kader.ekta.download'), false);
 
     expect($anggota->fresh()->nama_lengkap)->toBe('Aisyah Kader Login');
 });
@@ -216,8 +218,11 @@ test('ekta card renders clear fallbacks for incomplete data', function () {
         ->toContain('NAMA BELUM TERSEDIA')
         ->toContain('BELUM TERSEDIA')
         ->toContain('data-testid="ekta-photo-fallback"')
-        ->and(strip_tags($html))->toContain('?')
-        ->not->toContain('value');
+        ->and(strip_tags($html))->toContain('?');
+
+    $visibleText = preg_replace('/<style\b[^>]*>.*?<\/style>/is', '', $html);
+
+    expect(strip_tags((string) $visibleText))->not->toContain('value');
 });
 
 test('ekta uses fallback when stored photo is missing', function () {

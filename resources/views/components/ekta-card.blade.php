@@ -11,6 +11,7 @@
     $initial = filled($name) ? \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($name, 0, 1)) : '?';
     $displayNia = filled($anggota->nia) ? (string) $anggota->nia : 'BELUM TERSEDIA';
     $activeYear = $anggota->created_at?->format('Y') ?? 'BELUM TERSEDIA';
+    $role = \Illuminate\Support\Str::upper($roleLabel);
 @endphp
 
 <style>
@@ -18,151 +19,156 @@
         width: 100%;
         max-width: 100%;
         aspect-ratio: 1.58 / 1;
+        background: #fcfbfd;
+        border: 1px solid #ded8e1;
+        border-radius: 14px;
+        box-shadow: 0 14px 30px rgba(61, 28, 28, 0.15);
         box-sizing: border-box;
+        color: #302534;
+        font-family: Helvetica, Arial, sans-serif;
         overflow: hidden;
         position: relative;
-        background: #fffaf5;
-        border: 1px solid #e8d9c9;
-        border-radius: 22px;
-        box-shadow: 0 14px 28px rgba(61, 28, 28, 0.16);
-        color: #2d2323;
-        font-family: Helvetica, Arial, sans-serif;
     }
 
-    .ekta-card__top-band {
-        background: #800000;
-        height: 38%;
+    .ekta-card__pattern {
+        background-image: radial-gradient(circle, rgba(128, 0, 0, 0.06) 1px, transparent 1.4px);
+        background-size: 18px 18px;
+        bottom: 0;
         left: 0;
+        opacity: 0.35;
         position: absolute;
         right: 0;
         top: 0;
     }
 
-    .ekta-card__top-band::after {
-        background: #a00000;
-        bottom: -8px;
-        content: "";
-        height: 16px;
-        left: -3%;
+    .ekta-card__swoop-accent,
+    .ekta-card__swoop {
+        border-bottom-right-radius: 100% 78%;
+        left: -9%;
         position: absolute;
-        transform: skewX(-22deg);
+        top: -12%;
+    }
+
+    .ekta-card__swoop-accent {
+        background: #a00000;
+        height: 73%;
+        width: 62%;
+    }
+
+    .ekta-card__swoop {
+        background: #600000;
+        height: 68%;
+        left: -11%;
         width: 58%;
     }
 
-    .ekta-card__top-accent {
-        background: #f2ce45;
-        height: 5px;
+    .ekta-card__brand {
+        display: table;
+        left: 5%;
         position: absolute;
-        right: 0;
-        top: 0;
-        width: 28%;
-    }
-
-    .ekta-card__content {
-        height: 100%;
-        box-sizing: border-box;
-        padding: 16px 22px 34px;
-        position: relative;
+        top: 7%;
+        width: 47%;
         z-index: 2;
     }
 
-    .ekta-card__header,
-    .ekta-card__body {
-        display: table;
-        table-layout: fixed;
-        width: 100%;
-    }
-
     .ekta-card__logo-cell,
-    .ekta-card__header-info,
-    .ekta-card__header-badge,
-    .ekta-card__photo-column,
-    .ekta-card__details {
+    .ekta-card__brand-copy {
         display: table-cell;
-        vertical-align: top;
+        vertical-align: middle;
     }
 
     .ekta-card__logo-cell {
-        padding-right: 10px;
-        width: 42px;
+        padding-right: 9px;
+        width: 22%;
     }
 
     .ekta-card__logo {
         display: block;
-        height: 50px;
+        height: 62px;
         object-fit: contain;
-        width: 32px;
+        width: 40px;
     }
 
     .ekta-card__logo-fallback {
         align-items: center;
         background: #f2ce45;
-        border-radius: 8px;
-        color: #800000;
+        border-radius: 7px;
+        color: #600000;
         display: flex;
-        font-size: 9px;
+        font-size: 8px;
         font-weight: 800;
-        height: 42px;
+        height: 45px;
         justify-content: center;
-        width: 32px;
-    }
-
-    .ekta-card__header-info {
-        vertical-align: middle;
+        width: 34px;
     }
 
     .ekta-card__title {
         color: #ffffff;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 800;
-        letter-spacing: 0.06em;
-        line-height: 1.15;
+        letter-spacing: 0.035em;
+        line-height: 1.18;
         overflow-wrap: anywhere;
     }
 
     .ekta-card__organization {
-        color: rgba(255, 255, 255, 0.76);
-        font-size: 7px;
+        color: rgba(255, 255, 255, 0.74);
+        font-size: 6px;
         letter-spacing: 0.08em;
-        line-height: 1.4;
-        margin-top: 4px;
+        line-height: 1.35;
+        margin-top: 5px;
     }
 
-    .ekta-card__header-badge {
+    .ekta-card__top-note {
+        color: #6b536d;
+        position: absolute;
+        right: 5%;
         text-align: right;
-        vertical-align: middle;
-        width: 54px;
+        top: 8%;
+        z-index: 2;
     }
 
-    .ekta-card__header-badge span {
-        border: 1px solid rgba(255, 255, 255, 0.58);
-        border-radius: 999px;
-        color: #ffffff;
-        display: inline-block;
+    .ekta-card__top-note-label {
+        font-size: 7px;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+    }
+
+    .ekta-card__top-note-rule {
+        background: #f2ce45;
+        height: 4px;
+        margin: 5px 0 4px auto;
+        width: 58px;
+    }
+
+    .ekta-card__top-note-value {
+        color: #800000;
         font-size: 7px;
         font-weight: 700;
-        letter-spacing: 0.12em;
-        padding: 5px 7px;
-    }
-
-    .ekta-card__body {
-        margin-top: 20px;
-    }
-
-    .ekta-card__photo-column {
-        vertical-align: middle;
-        width: 96px;
+        letter-spacing: 0.14em;
     }
 
     .ekta-card__photo-frame {
-        background: #f1e5d8;
-        border: 3px solid #800000;
-        border-radius: 14px;
-        box-shadow: 5px 5px 0 #f2ce45;
+        background: #ffffff;
+        border: 3px solid #600000;
+        border-radius: 50%;
+        bottom: 9%;
+        box-shadow: 0 0 0 4px #ffffff, 0 0 0 7px #a00000, 5px 6px 0 rgba(242, 206, 69, 0.92);
         box-sizing: border-box;
-        height: 96px;
+        height: 39%;
+        left: 5%;
         overflow: hidden;
-        width: 76px;
+        padding: 5px;
+        position: absolute;
+        width: 24%;
+        z-index: 4;
+    }
+
+    .ekta-card__photo-inner {
+        border-radius: 50%;
+        height: 100%;
+        overflow: hidden;
+        width: 100%;
     }
 
     .ekta-card__photo,
@@ -179,7 +185,7 @@
 
     .ekta-card__photo-fallback {
         align-items: center;
-        background: #800000;
+        background: #600000;
         color: #ffffff;
         display: flex;
         font-size: 30px;
@@ -187,192 +193,177 @@
         justify-content: center;
     }
 
-    .ekta-card__status {
-        color: #800000;
-        font-size: 6px;
-        font-weight: 800;
-        letter-spacing: 0.12em;
-        margin-top: 8px;
-        text-align: center;
-        width: 76px;
-    }
-
     .ekta-card__details {
-        min-width: 0;
-        vertical-align: middle;
+        left: 36%;
+        position: absolute;
+        right: 5%;
+        top: 45%;
+        z-index: 3;
     }
 
     .ekta-card__eyebrow {
         color: #a00000;
         font-size: 7px;
         font-weight: 800;
-        letter-spacing: 0.16em;
+        letter-spacing: 0.17em;
         line-height: 1.2;
     }
 
     .ekta-card__name {
-        color: #2d2323;
-        font-size: 17px;
+        color: #600000;
+        font-size: 18px;
         font-weight: 800;
-        line-height: 1.16;
-        margin-top: 4px;
+        letter-spacing: 0.025em;
+        line-height: 1.12;
+        margin-top: 5px;
+        max-width: 100%;
         overflow-wrap: anywhere;
         word-break: break-word;
     }
 
     .ekta-card__meta {
         border-collapse: collapse;
-        margin-top: 13px;
+        margin-top: 12px;
         width: 100%;
     }
 
     .ekta-card__meta td {
-        border-top: 1px solid #eaded2;
-        font-size: 8px;
-        line-height: 1.3;
+        border-top: 1px solid #e4dce7;
+        font-size: 9px;
+        line-height: 1.25;
         padding: 5px 0 3px;
         vertical-align: top;
     }
 
     .ekta-card__meta td:first-child {
-        color: #806c6c;
+        color: #725c75;
         font-weight: 700;
         letter-spacing: 0.08em;
-        width: 48%;
+        width: 47%;
     }
 
     .ekta-card__meta td:last-child {
-        color: #800000;
+        color: #600000;
         font-weight: 800;
         overflow-wrap: anywhere;
         text-align: right;
         word-break: break-word;
     }
 
-    .ekta-card__footer {
-        background: #800000;
-        border-top: 4px solid #f2ce45;
+    .ekta-card__bottom-line {
+        background: #600000;
         bottom: 0;
-        box-sizing: border-box;
-        color: #ffffff;
-        height: 25px;
+        height: 6px;
         left: 0;
-        padding: 6px 22px 0;
         position: absolute;
         right: 0;
+        z-index: 5;
+    }
+
+    .ekta-card__bottom-line::after {
+        background: #f2ce45;
+        content: "";
+        height: 6px;
+        position: absolute;
+        right: 0;
+        width: 23%;
+    }
+
+    .ekta-card__footer {
+        bottom: 3.2%;
+        color: #8b7a8d;
+        font-size: 5px;
+        font-weight: 700;
+        letter-spacing: 0.13em;
+        position: absolute;
+        right: 5%;
+        text-align: right;
         z-index: 3;
     }
 
-    .ekta-card__footer-content {
-        display: table;
-        width: 100%;
-    }
-
-    .ekta-card__footer-text,
-    .ekta-card__footer-role {
-        display: table-cell;
-        font-size: 6px;
-        font-weight: 700;
-        letter-spacing: 0.14em;
-    }
-
-    .ekta-card__footer-role {
-        opacity: 0.78;
-        text-align: right;
-    }
-
     @media (max-width: 360px) {
-        .ekta-card__content {
-            padding-left: 16px;
-            padding-right: 16px;
+        .ekta-card__logo {
+            height: 54px;
+            width: 34px;
         }
 
-        .ekta-card__body {
-            margin-top: 16px;
+        .ekta-card__title {
+            font-size: 11px;
         }
 
-        .ekta-card__photo-column {
-            width: 86px;
-        }
-
-        .ekta-card__photo-frame {
-            height: 88px;
-            width: 70px;
-        }
-
-        .ekta-card__status {
-            width: 70px;
+        .ekta-card__organization,
+        .ekta-card__top-note-label,
+        .ekta-card__top-note-value {
+            font-size: 5px;
         }
 
         .ekta-card__name {
             font-size: 14px;
         }
+
+        .ekta-card__meta td {
+            font-size: 7px;
+        }
     }
 </style>
 
 <div {{ $attributes->merge(['class' => 'ekta-card']) }} data-testid="ekta-card">
-    <div class="ekta-card__top-band" aria-hidden="true">
-        <div class="ekta-card__top-accent"></div>
+    <div class="ekta-card__pattern" aria-hidden="true"></div>
+    <div class="ekta-card__swoop-accent" aria-hidden="true"></div>
+    <div class="ekta-card__swoop" aria-hidden="true"></div>
+
+    <div class="ekta-card__brand">
+        <div class="ekta-card__logo-cell">
+            @if($logoSrc)
+                <img src="{{ $logoSrc }}" alt="Logo IMM" class="ekta-card__logo">
+            @else
+                <span class="ekta-card__logo-fallback" aria-label="Logo IMM">IMM</span>
+            @endif
+        </div>
+        <div class="ekta-card__brand-copy">
+            <div class="ekta-card__title">KARTU TANDA {{ $role }}</div>
+            <div class="ekta-card__organization">IKATAN MAHASISWA MUHAMMADIYAH</div>
+        </div>
     </div>
 
-    <div class="ekta-card__content">
-        <div class="ekta-card__header">
-            <div class="ekta-card__logo-cell">
-                @if($logoSrc)
-                    <img src="{{ $logoSrc }}" alt="Logo IMM" class="ekta-card__logo">
-                @else
-                    <span class="ekta-card__logo-fallback" aria-label="Logo IMM">IMM</span>
-                @endif
-            </div>
-            <div class="ekta-card__header-info">
-                <div class="ekta-card__title">KARTU TANDA {{ \Illuminate\Support\Str::upper($roleLabel) }}</div>
-                <div class="ekta-card__organization">IKATAN MAHASISWA MUHAMMADIYAH</div>
-            </div>
-            <div class="ekta-card__header-badge">
-                <span>E-KTA</span>
-            </div>
-        </div>
+    <div class="ekta-card__top-note">
+        <div class="ekta-card__top-note-label">IDENTITAS DIGITAL</div>
+        <div class="ekta-card__top-note-rule"></div>
+        <div class="ekta-card__top-note-value">E-KTA IMM</div>
+    </div>
 
-        <div class="ekta-card__body">
-            <div class="ekta-card__photo-column">
-                <div class="ekta-card__photo-frame">
-                    @if($photoSrc)
-                        <img
-                            src="{{ $photoSrc }}"
-                            alt="Foto profil {{ $anggota->nama_lengkap ?: 'anggota' }}"
-                            class="ekta-card__photo"
-                        >
-                    @else
-                        <div class="ekta-card__photo-fallback" data-testid="ekta-photo-fallback" aria-label="Inisial anggota">
-                            {{ $initial }}
-                        </div>
-                    @endif
+    <div class="ekta-card__photo-frame">
+        <div class="ekta-card__photo-inner">
+            @if($photoSrc)
+                <img
+                    src="{{ $photoSrc }}"
+                    alt="Foto profil {{ $anggota->nama_lengkap ?: 'anggota' }}"
+                    class="ekta-card__photo"
+                >
+            @else
+                <div class="ekta-card__photo-fallback" data-testid="ekta-photo-fallback" aria-label="Inisial anggota">
+                    {{ $initial }}
                 </div>
-                <div class="ekta-card__status">ANGGOTA AKTIF</div>
-            </div>
-
-            <div class="ekta-card__details">
-                <div class="ekta-card__eyebrow">IDENTITAS ANGGOTA</div>
-                <div class="ekta-card__name">{{ $displayName }}</div>
-
-                <table class="ekta-card__meta" aria-label="Biodata anggota">
-                    <tr>
-                        <td>NOMOR IDENTITAS</td>
-                        <td>{{ $displayNia }}</td>
-                    </tr>
-                    <tr>
-                        <td>AKTIF SEJAK</td>
-                        <td>{{ $activeYear }}</td>
-                    </tr>
-                </table>
-            </div>
+            @endif
         </div>
     </div>
 
-    <div class="ekta-card__footer" aria-hidden="true">
-        <div class="ekta-card__footer-content">
-            <span class="ekta-card__footer-text">KARTU ANGGOTA RESMI</span>
-            <span class="ekta-card__footer-role">{{ \Illuminate\Support\Str::upper($roleLabel) }} IMM</span>
-        </div>
+    <div class="ekta-card__details">
+        <div class="ekta-card__eyebrow">ANGGOTA {{ $role }}</div>
+        <div class="ekta-card__name">{{ $displayName }}</div>
+
+        <table class="ekta-card__meta" aria-label="Biodata anggota">
+            <tr>
+                <td>NIA</td>
+                <td>{{ $displayNia }}</td>
+            </tr>
+            <tr>
+                <td>AKTIF SEJAK</td>
+                <td>{{ $activeYear }}</td>
+            </tr>
+        </table>
     </div>
+
+    <div class="ekta-card__footer">KARTU ANGGOTA RESMI</div>
+    <div class="ekta-card__bottom-line" aria-hidden="true"></div>
 </div>
