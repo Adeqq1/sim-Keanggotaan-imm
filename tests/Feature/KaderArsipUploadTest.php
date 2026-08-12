@@ -32,8 +32,19 @@ describe('Kader Arsip Index', function () {
 
         $response->assertSuccessful();
         $response->assertViewIs('kader.arsip.create');
-        $response->assertSee('Surat Masuk');
+        $response->assertViewHas('kategori', function (array $kategori): bool {
+            return array_keys($kategori) === [
+                'proposal',
+                'lpj',
+                'surat_keputusan',
+            ];
+        });
+        $response->assertSee('<option value="proposal"', false);
         $response->assertSee('Laporan Pertanggung Jawaban (LPJ)');
+        $response->assertSee('Surat Keputusan');
+        $response->assertDontSee('<option value="surat_masuk"', false);
+        $response->assertDontSee('<option value="surat_keluar"', false);
+        $response->assertDontSee('<option value="lainnya"', false);
         $response->assertDontSee('Pilih Anggota');
         $response->assertSee('5MB');
         $response->assertDontSee('JPG');
@@ -108,18 +119,36 @@ describe('Kader Arsip Index', function () {
         $response->assertDontSee('Surat Undangan');
         $response->assertSee('Atur ulang filter');
     });
-});
 
-describe('Kader Arsip Upload (Store)', function () {
-    test('kader bisa upload dokumen PDF dan Excel', function () {
+    test('arsip lama dengan kategori global tetap terlihat oleh kader', function () {
         $user = User::factory()->create(['role' => 'kader']);
         $anggota = Anggota::factory()->create(['user_id' => $user->id]);
 
-        $filePdf = UploadedFile::fake()->create('laporan.pdf', 100, 'application/pdf');
+        Arsip::factory()->create([
+            'anggota_id' => $anggota->id,
+            'judul_dokumen' => 'Surat Masuk Lama',
+            'kategori_arsip' => 'surat_masuk',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('kader.arsip.index'));
+
+        $response->assertSuccessful();
+        $response->assertSee('Surat Masuk Lama');
+        $response->assertSee('Surat Masuk');
+    });
+});
+
+describe('Kader Arsip Upload (Store)', function () {
+    test('kader bisa upload dokumen dengan setiap kategori yang diizinkan', function (string $kategori) {
+        $user = User::factory()->create(['role' => 'kader']);
+        $anggota = Anggota::factory()->create(['user_id' => $user->id]);
+
+        $judul = 'Dokumen '.str_replace('_', ' ', $kategori);
+        $filePdf = UploadedFile::fake()->create($kategori.'.pdf', 100, 'application/pdf');
 
         $response = $this->actingAs($user)->post(route('kader.arsip.store'), [
-            'judul_dokumen' => 'Laporan Pertanggungjawaban',
-            'kategori_arsip' => 'lpj',
+            'judul_dokumen' => $judul,
+            'kategori_arsip' => $kategori,
             'nomor_dokumen' => '001/LPJ/2026',
             'file_arsip' => $filePdf,
         ]);
@@ -129,14 +158,110 @@ describe('Kader Arsip Upload (Store)', function () {
 
         $this->assertDatabaseHas('arsip', [
             'anggota_id' => $anggota->id,
-            'judul_dokumen' => 'Laporan Pertanggungjawaban',
-            'kategori_arsip' => 'lpj',
+            'judul_dokumen' => $judul,
+            'kategori_arsip' => $kategori,
             'nomor_dokumen' => '001/LPJ/2026',
         ]);
 
-        $arsip = Arsip::where('anggota_id', $anggota->id)->first();
+        $arsip = Arsip::where('anggota_id', $anggota->id)->firstOrFail();
         Storage::disk('local')->assertExists($arsip->file_arsip);
-    });
+    })->with([
+        'proposal' => 'proposal',
+        'lpj' => 'lpj',
+        'surat keputusan' => 'surat_keputusan',
+    ]);
+
+    test('kader bisa upload setiap format dokumen yang didukung', function (string $filename, string $mime, ?string $officeDirectory) {
+        $user = User::factory()->create(['role' => 'kader']);
+        $anggota = Anggota::factory()->create(['user_id' => $user->id]);
+        $extension = pathinfo($filename, PATHINFO_EXTENSION);
+
+        if ($officeDirectory === null) {
+            $file = UploadedFile::fake()->create($filename, 100, $mime);
+        } else {
+            $temporaryPath = tempnam(sys_get_temp_dir(), 'arsip-office-');
+
+            if ($temporaryPath === false) {
+                throw new RuntimeException('Gagal membuat fixture Office sementara.');
+            }
+
+            $zip = new ZipArchive;
+
+            if ($zip->open($temporaryPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+                unlink($temporaryPath);
+                throw new RuntimeException('Gagal membuat package Office sementara.');
+            }
+
+            $documentPath = $officeDirectory === 'word' ? 'word/document.xml' : 'xl/workbook.xml';
+            $documentContentType = $officeDirectory === 'word'
+                ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml'
+                : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml';
+            $documentContent = $officeDirectory === 'word'
+                ? '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p/></w:body></w:document>'
+                : '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheets/></workbook>';
+
+            $zip->addFromString('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/'.$documentPath.'" ContentType="'.$documentContentType.'"/></Types>');
+            $zip->addFromString('_rels/.rels', '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="/'.$documentPath.'"/></Relationships>');
+            $zip->addFromString($documentPath, $documentContent);
+            $zip->close();
+
+            $content = file_get_contents($temporaryPath);
+            unlink($temporaryPath);
+
+            if ($content === false) {
+                throw new RuntimeException('Gagal membaca fixture Office sementara.');
+            }
+
+            $file = UploadedFile::fake()->createWithContent($filename, $content)->mimeType($mime);
+        }
+
+        $judul = 'Dokumen Format '.strtoupper($extension);
+
+        $response = $this->actingAs($user)->post(route('kader.arsip.store'), [
+            'judul_dokumen' => $judul,
+            'kategori_arsip' => 'proposal',
+            'file_arsip' => $file,
+        ]);
+
+        $response->assertRedirect(route('kader.arsip.index'));
+        $response->assertSessionHas('success', 'Dokumen berhasil diunggah.');
+
+        $arsip = Arsip::where('anggota_id', $anggota->id)
+            ->where('judul_dokumen', $judul)
+            ->firstOrFail();
+
+        expect($arsip->kategori_arsip)->toBe('proposal')
+            ->and(pathinfo($arsip->file_arsip, PATHINFO_EXTENSION))->toBe($extension);
+        Storage::disk('local')->assertExists($arsip->file_arsip);
+    })->with([
+        'pdf' => ['dokumen.pdf', 'application/pdf', null],
+        'doc' => ['dokumen.doc', 'application/msword', null],
+        'docx' => ['dokumen.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'word'],
+        'xls' => ['dokumen.xls', 'application/vnd.ms-excel', null],
+        'xlsx' => ['dokumen.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'xl'],
+    ]);
+
+    test('kader tidak bisa upload kategori di luar allow-list', function (string $kategori) {
+        $user = User::factory()->create(['role' => 'kader']);
+        $anggota = Anggota::factory()->create(['user_id' => $user->id]);
+        $judul = 'Kategori Ilegal '.str_replace('_', ' ', $kategori);
+
+        $response = $this->actingAs($user)->post(route('kader.arsip.store'), [
+            'judul_dokumen' => $judul,
+            'kategori_arsip' => $kategori,
+            'file_arsip' => UploadedFile::fake()->create('ilegal.pdf', 100, 'application/pdf'),
+        ]);
+
+        $response->assertSessionHasErrors([
+            'kategori_arsip' => 'Kategori tidak valid.',
+        ]);
+        $this->assertDatabaseMissing('arsip', ['judul_dokumen' => $judul]);
+        expect(Storage::disk('local')->allFiles('arsip'))->toBeEmpty();
+    })->with([
+        'surat masuk' => 'surat_masuk',
+        'surat keluar' => 'surat_keluar',
+        'lainnya' => 'lainnya',
+    ]);
 
     test('anggota_id diset otomatis dari backend meskipun kader mencoba manipulasi request', function () {
         $kaderA = User::factory()->create(['role' => 'kader']);
@@ -151,7 +276,7 @@ describe('Kader Arsip Upload (Store)', function () {
         $response = $this->actingAs($kaderA)->post(route('kader.arsip.store'), [
             'anggota_id' => $anggotaB->id,
             'judul_dokumen' => 'Manipulasi Anggota ID',
-            'kategori_arsip' => 'lainnya',
+            'kategori_arsip' => 'proposal',
             'file_arsip' => $filePdf,
         ]);
 
@@ -176,7 +301,7 @@ describe('Kader Arsip Upload (Store)', function () {
 
         $response = $this->actingAs($user)->post(route('kader.arsip.store'), [
             'judul_dokumen' => 'File Jahat',
-            'kategori_arsip' => 'lainnya',
+            'kategori_arsip' => 'proposal',
             'file_arsip' => $fileExe,
         ]);
 
@@ -192,7 +317,7 @@ describe('Kader Arsip Upload (Store)', function () {
 
         $response = $this->actingAs($user)->post(route('kader.arsip.store'), [
             'judul_dokumen' => 'File Raksasa',
-            'kategori_arsip' => 'lainnya',
+            'kategori_arsip' => 'proposal',
             'file_arsip' => $fileBig,
         ]);
 
@@ -208,7 +333,7 @@ describe('Kader Arsip Upload (Store)', function () {
 
         $response = $this->actingAs($user)->post(route('kader.arsip.store'), [
             'judul_dokumen' => 'File Tepat 5MB',
-            'kategori_arsip' => 'lainnya',
+            'kategori_arsip' => 'proposal',
             'file_arsip' => $fileExact,
         ]);
 
@@ -224,7 +349,7 @@ describe('Kader Arsip Upload (Store)', function () {
 
         $response = $this->actingAs($user)->post(route('kader.arsip.store'), [
             'judul_dokumen' => 'Upload Foto JPG',
-            'kategori_arsip' => 'lainnya',
+            'kategori_arsip' => 'proposal',
             'file_arsip' => $fileJpg,
         ]);
 
@@ -239,7 +364,7 @@ describe('Kader Arsip Upload (Store)', function () {
 
         $response = $this->actingAs($user)->post(route('kader.arsip.store'), [
             'judul_dokumen' => 'Upload Foto JPEG',
-            'kategori_arsip' => 'lainnya',
+            'kategori_arsip' => 'proposal',
             'file_arsip' => $fileJpeg,
         ]);
 
@@ -254,7 +379,7 @@ describe('Kader Arsip Upload (Store)', function () {
 
         $response = $this->actingAs($user)->post(route('kader.arsip.store'), [
             'judul_dokumen' => 'Upload Gambar PNG',
-            'kategori_arsip' => 'lainnya',
+            'kategori_arsip' => 'proposal',
             'file_arsip' => $filePng,
         ]);
 

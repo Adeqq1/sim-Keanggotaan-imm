@@ -68,7 +68,10 @@ class ArsipController extends Controller
         }
 
         return view('kader.arsip.create', [
-            'kategori' => Arsip::KATEGORI,
+            'kategori' => array_intersect_key(
+                Arsip::KATEGORI,
+                array_flip(Arsip::KATEGORI_UNGGAH_KADER),
+            ),
         ]);
     }
 
