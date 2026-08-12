@@ -12,7 +12,7 @@ class PresensiRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->role === 'instruktur';
     }
 
     /**
@@ -23,9 +23,9 @@ class PresensiRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'kegiatan_id' => ['required', 'exists:kegiatan,id'],
-            'presensi' => ['required', 'array'],
-            'presensi.*.anggota_id' => ['required', 'exists:anggota,id'],
+            'presensi' => ['required', 'array', 'min:1'],
+            'presensi.*' => ['required', 'array'],
+            'presensi.*.anggota_id' => ['required', 'integer', 'distinct', 'exists:anggota,id'],
             'presensi.*.status_kehadiran' => ['required', 'in:hadir,izin,alfa'],
         ];
     }

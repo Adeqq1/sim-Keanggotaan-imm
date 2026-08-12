@@ -31,7 +31,7 @@
                         <i class="bi bi-three-dots-vertical fs-5"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                        <li><a class="dropdown-item py-2" href="{{ route('admin.presensi.show', $kegiatan) }}"><i class="bi bi-check2-square me-2 text-success"></i> Kelola Presensi</a></li>
+                        <li><a class="dropdown-item py-2" href="{{ route('admin.presensi.show', $kegiatan) }}"><i class="bi bi-check2-square me-2 text-success"></i> {{ auth()->user()->role === 'instruktur' ? 'Kelola Presensi' : 'Lihat Presensi' }}</a></li>
                         <li><a class="dropdown-item py-2" href="{{ route('admin.kegiatan.edit', $kegiatan) }}"><i class="bi bi-pencil me-2 text-info"></i> Ubah Kegiatan</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>

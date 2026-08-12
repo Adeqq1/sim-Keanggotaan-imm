@@ -4,6 +4,7 @@ use App\Models\Anggota;
 use App\Models\Arsip;
 use App\Models\Kegiatan;
 use App\Models\Pendaftaran;
+use App\Models\Presensi;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
@@ -268,33 +269,39 @@ test('admin must provide catatan admin when rejecting pendaftaran', function () 
     expect($pendaftaran->status_validasi)->toBe('pending');
 });
 
-test('admin can store presensi data', function () {
+test('admin can view presensi but cannot store it', function () {
     $admin = User::factory()->admin()->create();
     $kegiatan = Kegiatan::factory()->create();
     $anggota1 = Anggota::factory()->create();
     $anggota2 = Anggota::factory()->create();
-
-    $response = $this->actingAs($admin)
-        ->post(route('admin.presensi.store', $kegiatan->id), [
-            'presensi' => [
-                $anggota1->id => 'hadir',
-                $anggota2->id => 'izin',
-            ],
-        ]);
-
-    $response->assertRedirect(route('admin.kegiatan.index'));
-
-    $this->assertDatabaseHas('presensi', [
+    $presensi = Presensi::create([
         'kegiatan_id' => $kegiatan->id,
         'anggota_id' => $anggota1->id,
         'status_kehadiran' => 'hadir',
+        'waktu_hadir' => now(),
     ]);
 
-    $this->assertDatabaseHas('presensi', [
-        'kegiatan_id' => $kegiatan->id,
-        'anggota_id' => $anggota2->id,
-        'status_kehadiran' => 'izin',
-    ]);
+    $response = $this->actingAs($admin)->get(route('admin.presensi.show', $kegiatan));
+
+    $response->assertSuccessful()
+        ->assertSeeText($anggota1->nama_lengkap)
+        ->assertSeeText('Hadir')
+        ->assertDontSee('name="presensi[', false)
+        ->assertDontSeeText('Simpan Presensi');
+
+    $response = $this->actingAs($admin)->post(route('admin.presensi.store', $kegiatan), [
+            'presensi' => [
+                [
+                    'anggota_id' => $anggota2->id,
+                    'status_kehadiran' => 'izin',
+                ],
+            ],
+        ]);
+
+    $response->assertForbidden();
+    expect($presensi->fresh()->status_kehadiran)->toBe('hadir')
+        ->and($presensi->fresh()->waktu_hadir)->not->toBeNull();
+    expect(Presensi::where('kegiatan_id', $kegiatan->id)->count())->toBe(1);
 });
 
 test('admin cannot access arsip upload page (upload only by kader)', function () {

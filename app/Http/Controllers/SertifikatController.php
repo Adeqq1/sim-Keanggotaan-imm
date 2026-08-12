@@ -6,14 +6,12 @@ use App\Http\Requests\SertifikatRequest;
 use App\Jobs\GenerateCertificateJob;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
-use App\Models\Presensi;
 use App\Models\Sertifikat;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\Format;
 use Intervention\Image\ImageManager;
@@ -91,126 +89,6 @@ class SertifikatController extends Controller
         }
 
         return Storage::disk('public')->download($sertifikat->file_sertifikat);
-    }
-
-    public function klaim(Request $request, Presensi $presensi)
-    {
-        // Security check: only the owner of this attendance record can claim
-        $anggota = auth()->user()->anggota;
-        if (! $anggota || $presensi->anggota_id !== $anggota->id) {
-            abort(403);
-        }
-
-        // Only allow claiming if status_klaim is null or ditolak
-        if ($presensi->status_klaim !== null && $presensi->status_klaim !== 'ditolak') {
-            return redirect()->back()->with('error', 'Sertifikat sedang diproses atau sudah disetujui.');
-        }
-
-        $request->validate([
-            'bukti_kehadiran' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-        ]);
-
-        if ($request->hasFile('bukti_kehadiran')) {
-            $file = $request->file('bukti_kehadiran');
-
-            Log::info('File upload debug', [
-                'isValid' => $file->isValid(),
-                'error' => $file->getError(),
-                'path' => $file->getPathname(),
-                'realPath' => $file->getRealPath(),
-                'size' => $file->getSize(),
-            ]);
-
-            // Delete old file if exists
-            if ($presensi->bukti_kehadiran) {
-                Storage::disk('public')->delete($presensi->bukti_kehadiran);
-            }
-
-            $compressed = false;
-            $path = null;
-
-            if (extension_loaded('gd') && class_exists(ImageManager::class) && function_exists('imagejpeg')) {
-                try {
-                    $manager = new ImageManager(new Driver);
-                    $image = $manager->decodePath($file->getPathname());
-
-                    if ($image->width() > 1200 || $image->height() > 1200) {
-                        $image->scale(width: 1200);
-                    }
-
-                    $encoded = $image->encodeUsingFormat(Format::JPEG, quality: 70);
-                    $filename = Str::random(40).'.jpg';
-                    $path = 'bukti_kehadiran/'.$filename;
-                    Storage::disk('public')->put($path, (string) $encoded);
-                    $compressed = true;
-                } catch (\Throwable $e) {
-                    Log::error('Intervention failed', [
-                        'message' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString(),
-                    ]);
-                }
-            }
-
-            if (! $compressed) {
-                Log::info('Attempting fallback store for Windows compatibility', [
-                    'pathname' => $file->getPathname(),
-                    'originalName' => $file->getClientOriginalName(),
-                ]);
-                $extension = $file->getClientOriginalExtension() ?: 'jpg';
-                $filename = Str::random(40).'.'.$extension;
-                $path = 'bukti_kehadiran/'.$filename;
-
-                $stream = fopen($file->getPathname(), 'r');
-                Storage::disk('public')->put($path, $stream);
-                if (is_resource($stream)) {
-                    fclose($stream);
-                }
-            }
-
-            $presensi->update([
-                'bukti_kehadiran' => $path,
-                'status_klaim' => 'pending',
-            ]);
-
-            return redirect()->back()->with('success', 'Klaim sertifikat berhasil diajukan. Menunggu verifikasi.');
-        }
-
-        return redirect()->back()->with('error', 'Gagal mengunggah bukti kehadiran.');
-    }
-
-    public function verifikasiIndex()
-    {
-        // Admins and instructors shared
-        $pendingClaims = Presensi::where('status_klaim', 'pending')
-            ->with(['kegiatan', 'anggota'])
-            ->latest()
-            ->paginate(6);
-
-        return view('admin.sertifikat.verifikasi', compact('pendingClaims'));
-    }
-
-    public function setuju(Presensi $presensi)
-    {
-        if ($presensi->status_klaim !== 'pending') {
-            return redirect()->back()->with('error', 'Klaim sertifikat tidak sedang menunggu verifikasi.');
-        }
-
-        $presensi->setujuiKlaim();
-
-        GenerateCertificateJob::dispatch($presensi);
-
-        return redirect()->route('admin.sertifikat.verifikasi.index')->with('success', 'Klaim sertifikat disetujui dan sertifikat berhasil diterbitkan.');
-    }
-
-    public function tolak(Presensi $presensi)
-    {
-        if ($presensi->status_klaim !== 'pending') {
-            return redirect()->back()->with('error', 'Klaim sertifikat tidak sedang menunggu verifikasi.');
-        }
-
-        $presensi->tolakKlaim();
-
-        return redirect()->route('admin.sertifikat.verifikasi.index')->with('info', 'Klaim sertifikat telah ditolak.');
     }
 
     public static function useBackground(): bool

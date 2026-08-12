@@ -19,7 +19,7 @@ Aplikasi ini adalah sistem informasi keanggotaan IMM berbasis Laravel dengan 4 a
 
 - **Guest**: pengunjung umum yang bisa melihat landing page, detail kegiatan, dan mengisi pendaftaran.
 - **Admin**: pengelola utama sistem.
-- **Instruktur**: pengelola kegiatan, presensi, dan verifikasi klaim sertifikat.
+- **Instruktur**: pengelola kegiatan dan presensi.
 - **Kader**: anggota yang sudah punya akun login.
 
 Referensi role:
@@ -30,8 +30,8 @@ Referensi role:
 
 - **Public area**: landing page, detail kegiatan, pendaftaran anggota.
 - **Admin area**: dashboard admin, validasi pendaftaran, anggota, kegiatan, presensi, sertifikat, arsip, laporan.
-- **Instruktur area**: memakai prefix route `/admin`, tetapi hak aksesnya hanya untuk modul kegiatan, presensi, dan verifikasi sertifikat.
-- **Kader area**: dashboard kader, E-KTA, riwayat keaktifan, klaim sertifikat, arsip, sertifikat pribadi.
+- **Instruktur area**: memakai prefix route `/admin`, tetapi hak aksesnya hanya untuk modul kegiatan dan presensi.
+- **Kader area**: dashboard kader, E-KTA, riwayat keaktifan, arsip, dan sertifikat pribadi.
 
 Referensi route utama:
 - `routes/web.php:18`
@@ -236,10 +236,10 @@ Referensi:
 - total kegiatan
 - total pendaftar pending
 - total arsip
-- total klaim sertifikat pending
+- total arsip
 
 Referensi:
-- `app/Http/Controllers/DashboardController.php:16`
+- `app/Http/Controllers/DashboardController.php:18`
 
 ### Data tambahan
 - menampilkan 5 kegiatan mendatang
@@ -440,7 +440,7 @@ Referensi:
 ## 4.5 Presensi kegiatan
 
 ### Tujuan fitur
-Admin atau instruktur mencatat kehadiran anggota pada kegiatan.
+Instruktur mencatat dan mengonfirmasi kehadiran anggota pada kegiatan. Admin hanya dapat melihat hasil presensi.
 
 ### Route
 - `GET /admin/presensi/{kegiatan}`
@@ -452,7 +452,9 @@ Referensi:
 - `app/Http/Controllers/PresensiController.php:12`
 
 ### Perilaku utama
-- Form presensi menampilkan anggota aktif.
+- Halaman GET menampilkan anggota aktif untuk admin dan instruktur.
+- Form edit dan POST hanya tersedia untuk instruktur.
+- Status `hadir` yang dipilih instruktur langsung tersimpan bersama `waktu_hadir`.
 - Penyimpanan dilakukan dengan `updateOrCreate` berdasarkan kombinasi:
   - `kegiatan_id`
   - `anggota_id`
@@ -464,9 +466,11 @@ Referensi:
 - `app/Http/Controllers/PresensiController.php:24`
 - `app/Http/Controllers/PresensiController.php:27`
 
-### Catatan penting untuk pengembang
-- Ada file `PresensiRequest`, tetapi controller `store()` saat ini **tidak memakainya**.
-- Jadi struktur request nyata harus dicek dari controller dan test, bukan dari form request itu.
+### Validasi dan otorisasi
+- `PresensiRequest` mengotorisasi hanya role `instruktur`.
+- Payload memakai bentuk nested `presensi[][anggota_id]` dan `presensi[][status_kehadiran]`.
+- ID anggota harus nyata dan unik dalam satu request; status hanya `hadir`, `izin`, atau `alfa`.
+- Admin tetap dapat membuka halaman dalam mode read-only, sedangkan kader menerima `403`.
 
 Referensi:
 - `app/Http/Controllers/PresensiController.php:20`
@@ -477,8 +481,7 @@ Referensi:
 Modul ini berkaitan langsung dengan:
 - dashboard kader
 - riwayat keaktifan
-- klaim sertifikat
-- verifikasi sertifikat
+- sertifikat
 
 ---
 
@@ -486,8 +489,6 @@ Modul ini berkaitan langsung dengan:
 
 Modul sertifikat adalah salah satu modul paling kompleks di aplikasi ini karena melibatkan:
 - presensi
-- klaim user
-- upload bukti
 - queue job
 - file PDF
 - pengaturan background
@@ -541,7 +542,7 @@ Referensi:
 
 #### Hal yang perlu diingat saat mengubah fitur
 - Proses generate berjalan lewat queue.
-- Jangan mengubah format data sertifikat tanpa mengecek proses download, riwayat, dan approval klaim.
+- Jangan mengubah format data sertifikat tanpa mengecek proses download dan riwayat kader.
 
 ### 4.6.2 Sertifikat milik kader
 
@@ -564,101 +565,15 @@ Referensi:
 - `app/Http/Controllers/SertifikatController.php:75`
 - `app/Http/Controllers/SertifikatController.php:88`
 
-### 4.6.3 Klaim sertifikat oleh kader
+### 4.6.3 Data klaim historis
 
-#### Tujuan fitur
-Kader mengajukan klaim sertifikat dengan mengunggah bukti kehadiran.
+Route klaim kader dan route verifikasi setuju/tolak tidak lagi tersedia. Presensi baru dikonfirmasi langsung oleh instruktur melalui modul presensi, sedangkan sertifikat tetap dibuat melalui aksi generate admin yang sudah ada.
 
-#### Route
-- `POST /kader/sertifikat/{presensi}/klaim`
-- `GET /kader/sertifikat/{presensi}/klaim` hanya redirect anti reload/expired
+Kolom `status_klaim` dan `bukti_kehadiran`, beserta file bukti yang sudah tersimpan, dipertahankan untuk retensi data historis. Aplikasi tidak mengubah, menghapus, atau memproses ulang data tersebut melalui alur baru.
 
-Referensi:
-- `routes/web.php:83`
-- `routes/web.php:84`
-- `app/Http/Controllers/SertifikatController.php:96`
+### 4.6.4 Sertifikat di riwayat kader
 
-#### Aturan bisnis utama
-- Hanya pemilik presensi yang boleh klaim.
-- Hanya bisa klaim jika `status_klaim` masih `null` atau `ditolak`.
-- Setelah upload sukses, `status_klaim` menjadi `pending`.
-
-Referensi:
-- `app/Http/Controllers/SertifikatController.php:98`
-- `app/Http/Controllers/SertifikatController.php:104`
-- `app/Http/Controllers/SertifikatController.php:170`
-
-#### Validasi file
-- file wajib image
-- hanya `jpg/jpeg/png`
-- max 2 MB
-
-Referensi:
-- `app/Http/Controllers/SertifikatController.php:109`
-
-#### File upload dan kompresi
-- Bukti disimpan ke `storage/app/public/bukti_kehadiran`.
-- Jika GD + Intervention tersedia, gambar akan di-resize/encode JPEG quality 70.
-- Jika proses image gagal, sistem fallback ke simpan file stream biasa.
-- Ada fallback khusus agar upload tetap jalan di lingkungan Windows.
-
-Referensi:
-- `app/Http/Controllers/SertifikatController.php:132`
-- `app/Http/Controllers/SertifikatController.php:141`
-- `app/Http/Controllers/SertifikatController.php:154`
-- `app/Http/Controllers/SertifikatController.php:163`
-
-#### Hal yang perlu diingat saat mengubah fitur
-- Jangan anggap library gambar selalu tersedia.
-- Jangan hapus fallback upload tanpa alasan kuat.
-- UI klaim terkait erat dengan halaman riwayat kader.
-
-### 4.6.4 Verifikasi klaim sertifikat
-
-#### Tujuan fitur
-Admin dan instruktur memeriksa bukti klaim, lalu menyetujui atau menolak.
-
-#### Route
-- `GET /admin/sertifikat/verifikasi`
-- `POST /admin/sertifikat/verifikasi/{presensi}/setuju`
-- `POST /admin/sertifikat/verifikasi/{presensi}/tolak`
-
-Referensi:
-- `routes/web.php:67`
-- `routes/web.php:68`
-- `routes/web.php:69`
-
-#### Perilaku approve
-Jika disetujui:
-1. status klaim harus masih `pending`
-2. `Presensi::setujuiKlaim()` dipanggil
-3. generate sertifikat didispatch ke queue
-
-Referensi:
-- `app/Http/Controllers/SertifikatController.php:194`
-- `app/Http/Controllers/SertifikatController.php:198`
-- `app/Http/Controllers/SertifikatController.php:200`
-- `app/Models/Presensi.php:33`
-
-`setujuiKlaim()` juga memastikan:
-- `status_klaim = disetujui`
-- `status_kehadiran = hadir`
-- `waktu_hadir` terisi jika sebelumnya kosong
-
-Referensi:
-- `app/Models/Presensi.php:35`
-
-#### Perilaku reject
-Jika ditolak:
-- status harus masih `pending`
-- `Presensi::tolakKlaim()` dipanggil
-- file bukti kehadiran dihapus
-- `status_klaim = ditolak`
-- `bukti_kehadiran = null`
-
-Referensi:
-- `app/Http/Controllers/SertifikatController.php:207`
-- `app/Models/Presensi.php:44`
+Halaman riwayat kader hanya menampilkan status kehadiran dan ketersediaan sertifikat berdasarkan ada atau tidaknya record `Sertifikat` untuk kegiatan tersebut. Tidak ada tombol klaim, input file, form multipart, atau proses persetujuan kedua.
 
 ### 4.6.5 Pengaturan background sertifikat
 
@@ -832,7 +747,6 @@ Instruktur tidak punya prefix route khusus sendiri. Mereka memakai area `/admin`
 ### Modul yang bisa diakses instruktur
 - kegiatan
 - presensi
-- verifikasi klaim sertifikat
 
 Referensi:
 - `routes/web.php:57`
@@ -919,7 +833,7 @@ Referensi:
 ## 6.3 Riwayat keaktifan
 
 ### Tujuan fitur
-Kader melihat riwayat presensi dan status sertifikat per kegiatan.
+Kader melihat riwayat presensi dan ketersediaan sertifikat per kegiatan.
 
 ### Route
 - `GET /kader/riwayat`
@@ -942,9 +856,8 @@ Referensi:
 ### Keterkaitan fitur lain
 Dari halaman ini user bisa:
 - melihat status kehadiran
-- melihat status klaim sertifikat
+- melihat ketersediaan sertifikat
 - download sertifikat yang sudah tersedia
-- membuka alur klaim sertifikat
 
 ### Test terkait
 - `tests/Feature/KaderFunctionalTest.php:95`
@@ -1060,7 +973,7 @@ Folder penting yang dipakai fitur:
 - `storage/app/private/pendaftaran`
 - `storage/app/public/foto_profil`
 - `storage/app/public/kegiatan_thumbnails`
-- `storage/app/public/bukti_kehadiran`
+- `storage/app/public/bukti_kehadiran` (file historis; tidak ada upload baru)
 - `storage/app/public/sertifikat`
 - `storage/app/private/arsip` (file arsip bersifat privat dan diakses melalui route, bukan URL publik)
 - `storage/app/sertifikat_settings.json`
@@ -1124,7 +1037,6 @@ Entry utama:
 - `resources/css/app.css`
 - `resources/css/landing.css`
 - `resources/js/app.js`
-- `resources/js/image-compressor.js`
 
 Referensi:
 - `vite.config.js:7`
@@ -1153,12 +1065,10 @@ Agar tidak salah saat refactor, pahami hubungan berikut:
 - kegiatan dipakai untuk generate sertifikat
 - kegiatan dipakai di export laporan
 
-### Presensi -> Riwayat -> Klaim Sertifikat -> Verifikasi -> Sertifikat
+### Presensi -> Riwayat -> Sertifikat
 - presensi menentukan status kehadiran kader
 - riwayat menampilkan status itu
-- kader bisa klaim sertifikat dari data presensi
-- admin/instruktur verifikasi klaim
-- approval bisa memicu generate sertifikat
+- admin membuat sertifikat secara eksplisit melalui modul sertifikat
 
 ### Anggota -> E-KTA + Profil + Sertifikat + Arsip
 - data anggota dipakai untuk E-KTA
@@ -1172,22 +1082,14 @@ Agar tidak salah saat refactor, pahami hubungan berikut:
 
 Bagian ini wajib dibaca sebelum refactor besar.
 
-### 9.1 Presensi request belum konsisten
-- `PresensiRequest` ada, tetapi belum dipakai controller.
-- Jangan berasumsi validasi presensi saat ini berasal dari form request.
-
-Referensi:
-- `app/Http/Controllers/PresensiController.php:20`
-- `app/Http/Requests/PresensiRequest.php:23`
-
-### 9.2 Arsip kader belum terlihat aman sepenuhnya
+### 9.1 Arsip kader belum terlihat aman sepenuhnya
 - Download arsip tidak mengecek kepemilikan file di controller.
 - Jika ingin membatasi arsip per kader, perbaiki sisi query + authorization.
 
 Referensi:
 - `app/Http/Controllers/ArsipController.php:39`
 
-### 9.3 Anggota manual != akun login
+### 9.2 Anggota manual != akun login
 - Create anggota manual oleh admin tidak otomatis membuat user.
 - Jangan anggap semua anggota pasti punya akun.
 
@@ -1195,7 +1097,7 @@ Referensi:
 - `app/Http/Controllers/AnggotaController.php:24`
 - `app/Http/Controllers/AnggotaController.php:33`
 
-### 9.4 Sertifikat sangat bergantung ke queue dan file system
+### 9.3 Sertifikat sangat bergantung ke queue dan file system
 - Bug sertifikat sering terkait worker queue, penyimpanan file, atau library image/PDF.
 - Saat debug, cek queue, storage path, dan ketersediaan GD/Intervention.
 
@@ -1204,14 +1106,14 @@ Referensi:
 - `app/Http/Controllers/SertifikatController.php:132`
 - `app/Http/Controllers/SertifikatController.php:258`
 
-### 9.5 Cache landing bisa membuat perubahan terasa "tidak masuk"
+### 9.4 Cache landing bisa membuat perubahan terasa "tidak masuk"
 - Jika data kegiatan diubah tetapi landing tidak berubah, cek invalidasi cache `kegiatan.terbaru`.
 
 Referensi:
 - `app/Http/Controllers/LandingController.php:16`
 - `app/Http/Controllers/KegiatanController.php:40`
 
-### 9.6 Beberapa konten landing masih placeholder bisnis
+### 9.5 Beberapa konten landing masih placeholder bisnis
 - `config/landing.php` masih punya beberapa TODO dan placeholder.
 - Saat mengubah copy/branding, bedakan antara perubahan teknis dan perubahan konten bisnis.
 
@@ -1272,12 +1174,13 @@ Jika hanya mengingat 12 hal, ingat ini:
 4. Create anggota manual tidak otomatis membuat akun login.
 5. Landing mengambil 3 kegiatan terbaru dari cache `kegiatan.terbaru`.
 6. Kegiatan mempengaruhi landing, presensi, sertifikat, dan laporan.
-7. Presensi adalah basis riwayat keaktifan dan klaim sertifikat.
-8. Klaim sertifikat mengandalkan upload bukti kehadiran.
-9. Approval klaim bisa memicu generate sertifikat via queue.
-10. Background sertifikat disimpan di path public dengan ejaan `sertificate`.
-11. Arsip kader perlu perhatian khusus untuk authorization download.
-12. PWA ada, tetapi offline cache saat ini masih minimal.
+7. Presensi adalah basis riwayat keaktifan.
+8. Hanya instruktur yang dapat menyimpan presensi; admin hanya dapat melihatnya.
+9. Sertifikat dibuat secara eksplisit oleh admin melalui queue.
+10. Data klaim dan file bukti lama dipertahankan tanpa alur baru.
+11. Background sertifikat disimpan di path public dengan ejaan `sertificate`.
+12. Arsip kader perlu perhatian khusus untuk authorization download.
+13. PWA ada, tetapi offline cache saat ini masih minimal.
 
 ---
 

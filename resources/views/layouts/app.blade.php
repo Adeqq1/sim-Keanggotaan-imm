@@ -78,17 +78,6 @@
                         <i class="bi bi-folder2-open"></i>
                         E-Arsip
                     </a>
-                    @php
-                        $sertifikatPending = \App\Models\Presensi::where('status_klaim', 'pending')->count();
-                    @endphp
-                    <a href="{{ route('admin.sertifikat.verifikasi.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.sertifikat.verifikasi.*') ? 'active' : '' }}">
-                        <i class="bi bi-patch-check"></i>
-                        Verifikasi
-                        @if($sertifikatPending > 0)
-                            <span class="sidebar-badge">{{ $sertifikatPending }}</span>
-                        @endif
-                    </a>
                     <a href="{{ route('admin.laporan.index') }}"
                        class="sidebar-link {{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-bar-graph"></i>
@@ -101,17 +90,6 @@
                        class="sidebar-link {{ request()->routeIs('admin.kegiatan.*') ? 'active' : '' }}">
                         <i class="bi bi-calendar-event"></i>
                         Kegiatan
-                    </a>
-                    @php
-                        $pendingCount = \App\Models\Presensi::where('status_klaim', 'pending')->count();
-                    @endphp
-                    <a href="{{ route('admin.sertifikat.verifikasi.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.sertifikat.verifikasi.*') ? 'active' : '' }}">
-                        <i class="bi bi-patch-check"></i>
-                        Verifikasi
-                        @if($pendingCount > 0)
-                            <span class="sidebar-badge">{{ $pendingCount }}</span>
-                        @endif
                     </a>
 
                 @else

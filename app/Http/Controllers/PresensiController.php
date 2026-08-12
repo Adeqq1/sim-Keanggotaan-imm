@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PresensiRequest;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\Presensi;
-use Illuminate\Http\Request;
 
 class PresensiController extends Controller
 {
@@ -13,17 +13,18 @@ class PresensiController extends Controller
     {
         $anggotas = Anggota::where('status_aktif', true)->orderBy('nama_lengkap')->get();
         $presensis = $kegiatan->presensi;
+        $canManagePresensi = auth()->user()->role === 'instruktur';
 
-        return view('admin.kegiatan.presensi', compact('kegiatan', 'anggotas', 'presensis'));
+        return view('admin.kegiatan.presensi', compact('kegiatan', 'anggotas', 'presensis', 'canManagePresensi'));
     }
 
-    public function store(Request $request, Kegiatan $kegiatan)
+    public function store(PresensiRequest $request, Kegiatan $kegiatan)
     {
-        $presensiData = $request->input('presensi', []);
+        foreach ($request->validated('presensi') as $data) {
+            $status = $data['status_kehadiran'];
 
-        foreach ($presensiData as $anggotaId => $status) {
             Presensi::updateOrCreate(
-                ['kegiatan_id' => $kegiatan->id, 'anggota_id' => $anggotaId],
+                ['kegiatan_id' => $kegiatan->id, 'anggota_id' => $data['anggota_id']],
                 [
                     'status_kehadiran' => $status,
                     'waktu_hadir' => $status === 'hadir' ? now() : null,
