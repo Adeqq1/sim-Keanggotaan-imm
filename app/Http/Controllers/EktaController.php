@@ -2,33 +2,82 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\RoleEnum;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class EktaController extends Controller
 {
     public function show()
     {
-        $anggota = auth()->user()->anggota;
+        $user = auth()->user();
+        $anggota = $user->anggota;
 
         if (! $anggota) {
             return redirect()->route('kader.dashboard')->with('error', 'Data anggota tidak ditemukan.');
         }
 
-        return view('kader.ekta.show', compact('anggota'));
+        $roleLabel = RoleEnum::labelFor($user->role);
+        $photoSrc = $this->photoSource($anggota->foto_profil);
+        $logoSrc = $this->logoSource();
+
+        return view('kader.ekta.show', compact('anggota', 'roleLabel', 'photoSrc', 'logoSrc'));
     }
 
     public function download()
     {
-        $anggota = auth()->user()->anggota;
+        $user = auth()->user();
+        $anggota = $user->anggota;
 
         if (! $anggota) {
             return redirect()->route('kader.dashboard')->with('error', 'Data anggota tidak ditemukan.');
         }
 
-        $pdf = Pdf::loadView('pdf.ekta', compact('anggota'));
+        $roleLabel = RoleEnum::labelFor($user->role);
+        $photoSrc = $this->photoSource($anggota->foto_profil, true);
+        $logoSrc = $this->logoSource(true);
 
-        $filename = 'E-KTA_'.($anggota->nia ?? $anggota->id).'.pdf';
+        $pdf = Pdf::loadView('pdf.ekta', compact('anggota', 'roleLabel', 'photoSrc', 'logoSrc'))
+            ->setPaper([0, 0, 240, 152.25]);
+
+        $filename = 'E-KTA_'.(filled($anggota->nia) ? $anggota->nia : $anggota->id).'.pdf';
 
         return $pdf->download($filename);
+    }
+
+    private function photoSource(?string $path, bool $forPdf = false): ?string
+    {
+        $disk = Storage::disk('public');
+
+        if (! filled($path) || ! $disk->exists($path)) {
+            return null;
+        }
+
+        if ($forPdf) {
+            return $disk->path($path);
+        }
+
+        $mimeType = $disk->mimeType($path);
+        if (! is_string($mimeType) || ! str_starts_with($mimeType, 'image/')) {
+            $mimeType = match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
+                'gif' => 'image/gif',
+                'png' => 'image/png',
+                'webp' => 'image/webp',
+                default => 'image/jpeg',
+            };
+        }
+
+        return 'data:'.$mimeType.';base64,'.base64_encode($disk->get($path));
+    }
+
+    private function logoSource(bool $forPdf = false): ?string
+    {
+        $path = public_path('images/logo.png');
+
+        if (! is_file($path)) {
+            return null;
+        }
+
+        return $forPdf ? $path : asset('images/logo.png');
     }
 }
