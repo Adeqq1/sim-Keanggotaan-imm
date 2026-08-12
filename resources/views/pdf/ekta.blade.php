@@ -59,13 +59,20 @@
         }
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__logo-cell {
-            padding-right: 6pt !important;
-            width: 27pt !important;
+            padding-right: 7pt !important;
+            width: 33pt !important;
+        }
+
+        .ekta-pdf-page .ekta-card--pdf .ekta-card__logo-badge {
+            border-width: 2pt !important;
+            box-shadow: 0 0 0 1.5pt #600000 !important;
+            height: 42pt !important;
+            width: 42pt !important;
         }
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__logo {
-            height: 46pt !important;
-            width: 29pt !important;
+            height: 34pt !important;
+            width: 30pt !important;
         }
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__logo-fallback {
@@ -75,12 +82,12 @@
         }
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__title {
-            font-size: 8.5pt !important;
+            font-size: 10pt !important;
             line-height: 1.1 !important;
         }
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__organization {
-            font-size: 4.1pt !important;
+            font-size: 4.8pt !important;
             margin-top: 2pt !important;
         }
 
@@ -91,7 +98,7 @@
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__top-note-label,
         .ekta-pdf-page .ekta-card--pdf .ekta-card__top-note-value {
-            font-size: 4.5pt !important;
+            font-size: 5.5pt !important;
         }
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__top-note-rule {
@@ -117,11 +124,11 @@
         }
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__eyebrow {
-            font-size: 4.8pt !important;
+            font-size: 5.8pt !important;
         }
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__name {
-            font-size: 9pt !important;
+            font-size: 11pt !important;
             line-height: 1.08 !important;
             margin-top: 2pt !important;
         }
@@ -131,7 +138,7 @@
         }
 
         .ekta-pdf-page .ekta-card--pdf .ekta-card__meta td {
-            font-size: 5.8pt !important;
+            font-size: 6.8pt !important;
             line-height: 1.15 !important;
             padding: 2.5pt 0 1pt !important;
         }

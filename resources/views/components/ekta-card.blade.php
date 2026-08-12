@@ -282,13 +282,18 @@
     }
 
     @media (max-width: 360px) {
+        .ekta-card__logo-badge {
+            height: 50px;
+            width: 50px;
+        }
+
         .ekta-card__logo {
-            height: 54px;
-            width: 34px;
+            height: 41px;
+            width: 36px;
         }
 
         .ekta-card__title {
-            font-size: 11px;
+            font-size: 13px;
         }
 
         .ekta-card__organization,
@@ -298,11 +303,11 @@
         }
 
         .ekta-card__name {
-            font-size: 14px;
+            font-size: 17px;
         }
 
         .ekta-card__meta td {
-            font-size: 7px;
+            font-size: 8px;
         }
     }
 </style>

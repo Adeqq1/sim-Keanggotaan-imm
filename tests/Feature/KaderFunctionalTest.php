@@ -59,6 +59,7 @@ test('kader can view ekta preview', function () {
         ->assertSeeText('24000001')
         ->assertSeeText('2024')
         ->assertSee('images/logo.png', false)
+        ->assertSee('ekta-card__logo-badge', false)
         ->assertSee('ekta-card__swoop', false)
         ->assertSee('ekta-card__photo-frame', false)
         ->assertSee('ekta-card__top-note', false)
