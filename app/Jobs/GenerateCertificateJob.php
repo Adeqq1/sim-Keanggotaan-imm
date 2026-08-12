@@ -10,6 +10,8 @@ use App\Models\Sertifikat;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class GenerateCertificateJob implements ShouldBeUnique, ShouldQueue
 {
@@ -60,5 +62,14 @@ class GenerateCertificateJob implements ShouldBeUnique, ShouldQueue
         if ($kegiatan && $anggota) {
             SertifikatController::generateCertificateFile($kegiatan, $anggota, $this->instruktur);
         }
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        Log::error('Certificate generation job failed.', [
+            'kegiatan_id' => $this->kegiatan?->getKey() ?? $this->presensi?->kegiatan_id,
+            'anggota_id' => $this->anggota?->getKey() ?? $this->presensi?->anggota_id,
+            'message' => $exception?->getMessage(),
+        ]);
     }
 }

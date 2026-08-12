@@ -6,6 +6,7 @@ use App\Models\Kegiatan;
 use App\Models\Presensi;
 use App\Models\Sertifikat;
 use App\Models\User;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -154,8 +155,10 @@ test('eligible kader can claim without uploading proof', function () {
 
     $response->assertRedirect(route('kader.riwayat.index'))
         ->assertSessionHas('success', 'Klaim sertifikat sedang diproses.');
-    Queue::assertPushed(GenerateCertificateJob::class, fn (GenerateCertificateJob $job) =>
-        $job->presensi?->is($target));
+    Queue::assertPushed(
+        GenerateCertificateJob::class,
+        fn (GenerateCertificateJob $job) => $job->presensi?->is($target),
+    );
 
     expect($target->fresh()->bukti_kehadiran)->toBe('bukti_kehadiran/legacy-proof.jpg')
         ->and($target->fresh()->status_klaim)->toBe('pending');
@@ -170,9 +173,30 @@ test('eligible claim generates one certificate without a second approval', funct
         ->post(route('kader.sertifikat.klaim', $target))
         ->assertRedirect(route('kader.riwayat.index'));
 
+    $sertifikat = Sertifikat::where('kegiatan_id', $target->kegiatan_id)
+        ->where('anggota_id', $anggota->id)
+        ->firstOrFail();
+
+    expect($sertifikat)->not->toBeNull();
+    Storage::disk('public')->assertExists($sertifikat->file_sertifikat);
+});
+
+test('certificate job does not create a row when PDF storage fails', function () {
+    $anggota = Anggota::factory()->create();
+    $target = createHadirPresensi($anggota, Sertifikat::MINIMUM_KEGIATAN_HADIR)->first();
+    $disk = Mockery::mock(FilesystemAdapter::class);
+    $disk->shouldReceive('put')->once()->andReturnFalse();
+
+    Storage::shouldReceive('disk')
+        ->once()
+        ->with('public')
+        ->andReturn($disk);
+
+    expect(fn () => (new GenerateCertificateJob($target))->handle())
+        ->toThrow(RuntimeException::class, 'Gagal menyimpan file sertifikat.');
     expect(Sertifikat::where('kegiatan_id', $target->kegiatan_id)
         ->where('anggota_id', $anggota->id)
-        ->count())->toBe(1);
+        ->doesntExist())->toBeTrue();
 });
 
 test('repeated claim creates only one certificate', function () {

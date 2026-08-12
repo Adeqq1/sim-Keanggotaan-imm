@@ -44,7 +44,11 @@ class SertifikatController extends Controller
         $pdf = Pdf::loadView('pdf.sertifikat', compact('kegiatan', 'anggota', 'nomorSertifikat', 'role', 'instruktur'))
             ->setPaper('a4', 'landscape');
         $path = 'sertifikat/'.$nomorSertifikat.'.pdf';
-        Storage::disk('public')->put($path, $pdf->output());
+        $stored = Storage::disk('public')->put($path, $pdf->output());
+
+        if (! $stored) {
+            throw new \RuntimeException('Gagal menyimpan file sertifikat.');
+        }
 
         return Sertifikat::updateOrCreate(
             ['kegiatan_id' => $kegiatan->id, 'anggota_id' => $anggota->id],
