@@ -36,3 +36,8 @@ issue.md
 /database/seeders/StressTestSeeder.php
 CLAUDE.md
 AGENTS.md
+
+# Docker local configuration
+compose.override.yaml
+docker-compose.override.yml
+/.docker-data/
