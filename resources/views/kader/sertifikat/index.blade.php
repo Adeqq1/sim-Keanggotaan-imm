@@ -35,7 +35,7 @@
         <div class="col-12"><div class="card p-5 text-center border-0 shadow-sm bg-light" style="border-radius: 20px;">
             <i class="bi bi-patch-minus display-1 text-muted opacity-25 mb-3"></i>
             <h6 class="fw-bold text-muted">Belum Ada Sertifikat</h6>
-            <p class="text-muted small mb-0 px-4">Sertifikat akan muncul di sini setelah Anda mengikuti kegiatan dan diverifikasi oleh Admin.</p>
+            <p class="text-muted small mb-0 px-4">Sertifikat yang sudah diterbitkan akan muncul di sini.</p>
         </div></div>
     @endforelse
     </div>

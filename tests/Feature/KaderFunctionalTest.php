@@ -301,6 +301,34 @@ test('kader can view riwayat keaktifan', function () {
     $response->assertSuccessful();
 });
 
+test('kader history shows certificates without claim controls', function (?string $statusKlaim) {
+    $user = User::factory()->kader()->create();
+    $anggota = Anggota::factory()->create(['user_id' => $user->id]);
+    $kegiatan = Kegiatan::factory()->create();
+    $presensi = Presensi::factory()->create([
+        'anggota_id' => $anggota->id,
+        'kegiatan_id' => $kegiatan->id,
+        'status_klaim' => $statusKlaim,
+        'bukti_kehadiran' => 'bukti_kehadiran/legacy-proof.jpg',
+    ]);
+    $sertifikat = Sertifikat::factory()->create([
+        'anggota_id' => $anggota->id,
+        'kegiatan_id' => $kegiatan->id,
+    ]);
+
+    $response = $this->actingAs($user)->get(route('kader.riwayat.index'));
+
+    $response->assertSuccessful()
+        ->assertSeeText('Tersedia')
+        ->assertSee(route('kader.sertifikat.download', $sertifikat), false)
+        ->assertDontSee('type="file"', false)
+        ->assertDontSee('multipart/form-data', false)
+        ->assertDontSeeText('Klaim Sertifikat')
+        ->assertDontSee('/klaim', false);
+
+    expect($presensi->fresh()->status_klaim)->toBe($statusKlaim);
+})->with([null, 'pending', 'disetujui', 'ditolak']);
+
 test('kader can view arsip list', function () {
     $user = User::factory()->kader()->create();
     Anggota::factory()->create(['user_id' => $user->id]);

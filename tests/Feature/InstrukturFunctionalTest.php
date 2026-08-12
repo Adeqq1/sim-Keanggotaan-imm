@@ -2,6 +2,8 @@
 
 use App\Models\Anggota;
 use App\Models\Kegiatan;
+use App\Models\Presensi;
+use App\Models\Sertifikat;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -96,38 +98,132 @@ test('instruktur can delete kegiatan and its thumbnail', function () {
     Storage::disk('public')->assertMissing($path);
 });
 
-test('instruktur can store presensi data', function () {
+test('instruktur can view and store presensi data immediately', function () {
     $instruktur = User::factory()->instruktur()->create();
     $kegiatan = Kegiatan::factory()->create();
     $anggota1 = Anggota::factory()->create();
     $anggota2 = Anggota::factory()->create();
 
+    $this->actingAs($instruktur)
+        ->get(route('admin.presensi.show', $kegiatan))
+        ->assertSuccessful()
+        ->assertSee('Simpan Presensi')
+        ->assertSee('name="presensi['.$anggota1->id.'][status_kehadiran]"', false)
+        ->assertSee('value="alfa" checked', false);
+
     $response = $this->actingAs($instruktur)
-        ->post(route('admin.presensi.store', $kegiatan->id), [
+        ->post(route('admin.presensi.store', $kegiatan), [
             'presensi' => [
-                $anggota1->id => 'hadir',
-                $anggota2->id => 'izin',
+                [
+                    'anggota_id' => $anggota1->id,
+                    'status_kehadiran' => 'hadir',
+                ],
+                [
+                    'anggota_id' => $anggota2->id,
+                    'status_kehadiran' => 'izin',
+                ],
             ],
         ]);
 
-    $response->assertRedirect(route('admin.kegiatan.index'));
+    $response->assertRedirect(route('admin.kegiatan.index'))
+        ->assertSessionHas('success', 'Presensi berhasil disimpan.');
 
-    $this->assertDatabaseHas('presensi', [
-        'kegiatan_id' => $kegiatan->id,
-        'anggota_id' => $anggota1->id,
-        'status_kehadiran' => 'hadir',
+    $presensiHadir = Presensi::where('kegiatan_id', $kegiatan->id)
+        ->where('anggota_id', $anggota1->id)
+        ->firstOrFail();
+    $presensiIzin = Presensi::where('kegiatan_id', $kegiatan->id)
+        ->where('anggota_id', $anggota2->id)
+        ->firstOrFail();
+
+    expect($presensiHadir->status_kehadiran)->toBe('hadir')
+        ->and($presensiHadir->waktu_hadir)->not->toBeNull()
+        ->and($presensiIzin->status_kehadiran)->toBe('izin')
+        ->and($presensiIzin->waktu_hadir)->toBeNull();
+    expect(Sertifikat::where('kegiatan_id', $kegiatan->id)->count())->toBe(0);
+});
+
+test('repeated presensi submissions do not create duplicates', function () {
+    $instruktur = User::factory()->instruktur()->create();
+    $kegiatan = Kegiatan::factory()->create();
+    $anggota = Anggota::factory()->create();
+    $payload = [
+        'presensi' => [[
+            'anggota_id' => $anggota->id,
+            'status_kehadiran' => 'hadir',
+        ]],
+    ];
+
+    $this->actingAs($instruktur)->post(route('admin.presensi.store', $kegiatan), $payload)
+        ->assertRedirect(route('admin.kegiatan.index'));
+    $this->actingAs($instruktur)->post(route('admin.presensi.store', $kegiatan), $payload)
+        ->assertRedirect(route('admin.kegiatan.index'));
+
+    expect(Presensi::where('kegiatan_id', $kegiatan->id)
+        ->where('anggota_id', $anggota->id)
+        ->count())->toBe(1);
+    expect(Presensi::where('kegiatan_id', $kegiatan->id)
+        ->where('anggota_id', $anggota->id)
+        ->value('status_kehadiran'))->toBe('hadir');
+});
+
+test('invalid presensi payload is rejected without creating records', function () {
+    $instruktur = User::factory()->instruktur()->create();
+    $kegiatan = Kegiatan::factory()->create();
+    $anggota = Anggota::factory()->create();
+
+    $this->actingAs($instruktur)
+        ->post(route('admin.presensi.store', $kegiatan), [
+            'presensi' => [[
+                'anggota_id' => $anggota->id,
+                'status_kehadiran' => 'tidak_hadir',
+            ]],
+        ])
+        ->assertSessionHasErrors('presensi.0.status_kehadiran');
+
+    $this->actingAs($instruktur)
+        ->post(route('admin.presensi.store', $kegiatan), [
+            'presensi' => [[
+                'anggota_id' => 999999,
+                'status_kehadiran' => 'hadir',
+            ]],
+        ])
+        ->assertSessionHasErrors('presensi.0.anggota_id');
+
+    $this->actingAs($instruktur)
+        ->post(route('admin.presensi.store', $kegiatan), [
+            'presensi' => [
+                ['anggota_id' => $anggota->id, 'status_kehadiran' => 'hadir'],
+                ['anggota_id' => $anggota->id, 'status_kehadiran' => 'izin'],
+            ],
+        ])
+        ->assertSessionHasErrors('presensi.1.anggota_id');
+
+    expect(Presensi::where('kegiatan_id', $kegiatan->id)->count())->toBe(0);
+});
+
+test('inactive anggota cannot receive presensi', function () {
+    $instruktur = User::factory()->instruktur()->create();
+    $kegiatan = Kegiatan::factory()->create();
+    $anggota = Anggota::factory()->inactive()->create();
+
+    $response = $this->actingAs($instruktur)->post(route('admin.presensi.store', $kegiatan), [
+        'presensi' => [[
+            'anggota_id' => $anggota->id,
+            'status_kehadiran' => 'hadir',
+        ]],
     ]);
 
-    $this->assertDatabaseHas('presensi', [
+    $response->assertSessionHasErrors('presensi.0.anggota_id');
+    $this->assertDatabaseMissing('presensi', [
         'kegiatan_id' => $kegiatan->id,
-        'anggota_id' => $anggota2->id,
-        'status_kehadiran' => 'izin',
+        'anggota_id' => $anggota->id,
     ]);
 });
 
 test('kader cannot access kegiatan and presensi management', function () {
     $kader = User::factory()->kader()->create();
     $kegiatan = Kegiatan::factory()->create();
+    $anggota = Anggota::factory()->create();
 
     $response = $this->actingAs($kader)->get(route('admin.kegiatan.index'));
     $response->assertForbidden();
@@ -141,6 +237,16 @@ test('kader cannot access kegiatan and presensi management', function () {
 
     $response = $this->actingAs($kader)->get(route('admin.presensi.show', $kegiatan->id));
     $response->assertForbidden();
+
+    $response = $this->actingAs($kader)->post(route('admin.presensi.store', $kegiatan), [
+        'presensi' => [[
+            'anggota_id' => $anggota->id,
+            'status_kehadiran' => 'hadir',
+        ]],
+    ]);
+    $response->assertForbidden();
+
+    expect(Presensi::where('kegiatan_id', $kegiatan->id)->count())->toBe(0);
 });
 
 test('invalid thumbnail upload is rejected', function () {
