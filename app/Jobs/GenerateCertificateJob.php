@@ -6,10 +6,12 @@ use App\Http\Controllers\SertifikatController;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\Presensi;
+use App\Models\Sertifikat;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
-class GenerateCertificateJob implements ShouldQueue
+class GenerateCertificateJob implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
 
@@ -25,13 +27,35 @@ class GenerateCertificateJob implements ShouldQueue
         //
     }
 
+    public function uniqueId(): string
+    {
+        $kegiatanId = $this->kegiatan?->getKey() ?? $this->presensi?->kegiatan_id;
+        $anggotaId = $this->anggota?->getKey() ?? $this->presensi?->anggota_id;
+
+        return "sertifikat:{$kegiatanId}:{$anggotaId}";
+    }
+
     /**
      * Execute the job.
      */
     public function handle(): void
     {
-        $kegiatan = $this->kegiatan ?? $this->presensi?->kegiatan;
-        $anggota = $this->anggota ?? $this->presensi?->anggota;
+        if ($this->presensi) {
+            $presensi = Presensi::with(['kegiatan', 'anggota'])->find($this->presensi->getKey());
+
+            if (! $presensi
+                || $presensi->status_kehadiran !== 'hadir'
+                || ! $presensi->anggota
+                || $presensi->anggota->jumlahKegiatanHadir() < Sertifikat::MINIMUM_KEGIATAN_HADIR) {
+                return;
+            }
+
+            $kegiatan = $presensi->kegiatan;
+            $anggota = $presensi->anggota;
+        } else {
+            $kegiatan = $this->kegiatan;
+            $anggota = $this->anggota;
+        }
 
         if ($kegiatan && $anggota) {
             SertifikatController::generateCertificateFile($kegiatan, $anggota, $this->instruktur);

@@ -31,7 +31,17 @@ class RiwayatKeaktifanController extends Controller
             'izin' => (clone $presensiQuery)->where('status_kehadiran', 'izin')->count(),
             'alfa' => (clone $presensiQuery)->where('status_kehadiran', 'alfa')->count(),
         ];
+        $jumlahKegiatanHadir = $anggota->jumlahKegiatanHadir();
+        $canClaimSertifikat = $jumlahKegiatanHadir >= Sertifikat::MINIMUM_KEGIATAN_HADIR;
+        $minimumKegiatanHadir = Sertifikat::MINIMUM_KEGIATAN_HADIR;
 
-        return view('kader.riwayat.index', compact('presensis', 'sertifikats', 'stats'));
+        return view('kader.riwayat.index', compact(
+            'presensis',
+            'sertifikats',
+            'stats',
+            'jumlahKegiatanHadir',
+            'canClaimSertifikat',
+            'minimumKegiatanHadir',
+        ));
     }
 }

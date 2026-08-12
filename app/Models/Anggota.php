@@ -43,6 +43,14 @@ class Anggota extends Model
         return $this->hasMany(Presensi::class);
     }
 
+    public function jumlahKegiatanHadir(): int
+    {
+        return $this->presensi()
+            ->where('status_kehadiran', 'hadir')
+            ->distinct()
+            ->count('kegiatan_id');
+    }
+
     public function sertifikat(): HasMany
     {
         return $this->hasMany(Sertifikat::class);

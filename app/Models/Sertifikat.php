@@ -12,6 +12,8 @@ class Sertifikat extends Model
 {
     use HasFactory;
 
+    public const MINIMUM_KEGIATAN_HADIR = 3;
+
     protected $table = 'sertifikat';
 
     public function kegiatan(): BelongsTo

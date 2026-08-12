@@ -84,6 +84,7 @@ Route::middleware(['auth', 'role:kader'])->prefix('kader')->name('kader.')->grou
 
     // Modul Sertifikat
     Route::get('/sertifikat', [SertifikatController::class, 'mySertifikat'])->name('sertifikat.index');
+    Route::post('/sertifikat/{presensi}/klaim', [SertifikatController::class, 'klaim'])->name('sertifikat.klaim');
     Route::get('/sertifikat/{sertifikat}/download', [SertifikatController::class, 'download'])->name('sertifikat.download');
 
     // Modul Riwayat
