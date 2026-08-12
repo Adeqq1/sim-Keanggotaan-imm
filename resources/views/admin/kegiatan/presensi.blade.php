@@ -15,8 +15,9 @@
 
     @foreach($anggotas as $anggota)
         @php
-            $presensi = $presensis->where('anggota_id', $anggota->id)->first();
-            $status = $presensi ? $presensi->status_kehadiran : 'alfa';
+            $presensi = $presensis->firstWhere('anggota_id', $anggota->id);
+            $status = $presensi?->status_kehadiran;
+            $formStatus = $status ?? 'alfa';
         @endphp
         <div class="card mb-2 p-3">
             <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2">
@@ -35,19 +36,23 @@
                 @if($canManagePresensi)
                     <input type="hidden" name="presensi[{{ $anggota->id }}][anggota_id]" value="{{ $anggota->id }}">
                     <div class="btn-group btn-group-sm presensi-control align-self-end align-self-sm-auto" role="group" aria-label="Status kehadiran {{ $anggota->nama_lengkap }}">
-                        <input type="radio" class="btn-check" name="presensi[{{ $anggota->id }}][status_kehadiran]" id="hadir{{ $anggota->id }}" value="hadir" {{ $status === 'hadir' ? 'checked' : '' }}>
+                        <input type="radio" class="btn-check" name="presensi[{{ $anggota->id }}][status_kehadiran]" id="hadir{{ $anggota->id }}" value="hadir" {{ $formStatus === 'hadir' ? 'checked' : '' }}>
                         <label class="btn btn-outline-success px-2" for="hadir{{ $anggota->id }}" title="Hadir"><span aria-hidden="true">H</span><span class="visually-hidden">Hadir</span></label>
 
-                        <input type="radio" class="btn-check" name="presensi[{{ $anggota->id }}][status_kehadiran]" id="izin{{ $anggota->id }}" value="izin" {{ $status === 'izin' ? 'checked' : '' }}>
+                        <input type="radio" class="btn-check" name="presensi[{{ $anggota->id }}][status_kehadiran]" id="izin{{ $anggota->id }}" value="izin" {{ $formStatus === 'izin' ? 'checked' : '' }}>
                         <label class="btn btn-outline-warning px-2" for="izin{{ $anggota->id }}" title="Izin"><span aria-hidden="true">I</span><span class="visually-hidden">Izin</span></label>
 
-                        <input type="radio" class="btn-check" name="presensi[{{ $anggota->id }}][status_kehadiran]" id="alfa{{ $anggota->id }}" value="alfa" {{ $status === 'alfa' ? 'checked' : '' }}>
+                        <input type="radio" class="btn-check" name="presensi[{{ $anggota->id }}][status_kehadiran]" id="alfa{{ $anggota->id }}" value="alfa" {{ $formStatus === 'alfa' ? 'checked' : '' }}>
                         <label class="btn btn-outline-danger px-2" for="alfa{{ $anggota->id }}" title="Alfa"><span aria-hidden="true">A</span><span class="visually-hidden">Alfa</span></label>
                     </div>
                 @else
-                    <span class="badge {{ $status === 'hadir' ? 'bg-success' : ($status === 'izin' ? 'bg-warning text-dark' : 'bg-danger') }} rounded-pill px-3">
-                        {{ ucfirst($status) }}
-                    </span>
+                    @if($status === null)
+                        <span class="badge bg-secondary rounded-pill px-3">Belum dicatat</span>
+                    @else
+                        <span class="badge {{ $status === 'hadir' ? 'bg-success' : ($status === 'izin' ? 'bg-warning text-dark' : 'bg-danger') }} rounded-pill px-3">
+                            {{ ucfirst($status) }}
+                        </span>
+                    @endif
                 @endif
             </div>
         </div>

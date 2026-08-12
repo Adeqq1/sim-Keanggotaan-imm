@@ -285,7 +285,10 @@ test('admin can view presensi but cannot store it', function () {
 
     $response->assertSuccessful()
         ->assertSeeText($anggota1->nama_lengkap)
+        ->assertSeeText($anggota2->nama_lengkap)
         ->assertSeeText('Hadir')
+        ->assertSeeText('Belum dicatat')
+        ->assertDontSeeText('Alfa')
         ->assertDontSee('name="presensi[', false)
         ->assertDontSeeText('Simpan Presensi');
 

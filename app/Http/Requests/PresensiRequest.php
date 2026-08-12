@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PresensiRequest extends FormRequest
 {
@@ -25,7 +26,12 @@ class PresensiRequest extends FormRequest
         return [
             'presensi' => ['required', 'array', 'min:1'],
             'presensi.*' => ['required', 'array'],
-            'presensi.*.anggota_id' => ['required', 'integer', 'distinct', 'exists:anggota,id'],
+            'presensi.*.anggota_id' => [
+                'required',
+                'integer',
+                'distinct',
+                Rule::exists('anggota', 'id')->where('status_aktif', true),
+            ],
             'presensi.*.status_kehadiran' => ['required', 'in:hadir,izin,alfa'],
         ];
     }

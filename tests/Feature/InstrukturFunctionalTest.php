@@ -108,7 +108,8 @@ test('instruktur can view and store presensi data immediately', function () {
         ->get(route('admin.presensi.show', $kegiatan))
         ->assertSuccessful()
         ->assertSee('Simpan Presensi')
-        ->assertSee('name="presensi['.$anggota1->id.'][status_kehadiran]"', false);
+        ->assertSee('name="presensi['.$anggota1->id.'][status_kehadiran]"', false)
+        ->assertSee('value="alfa" checked', false);
 
     $response = $this->actingAs($instruktur)
         ->post(route('admin.presensi.store', $kegiatan), [
@@ -198,6 +199,25 @@ test('invalid presensi payload is rejected without creating records', function (
         ->assertSessionHasErrors('presensi.1.anggota_id');
 
     expect(Presensi::where('kegiatan_id', $kegiatan->id)->count())->toBe(0);
+});
+
+test('inactive anggota cannot receive presensi', function () {
+    $instruktur = User::factory()->instruktur()->create();
+    $kegiatan = Kegiatan::factory()->create();
+    $anggota = Anggota::factory()->inactive()->create();
+
+    $response = $this->actingAs($instruktur)->post(route('admin.presensi.store', $kegiatan), [
+        'presensi' => [[
+            'anggota_id' => $anggota->id,
+            'status_kehadiran' => 'hadir',
+        ]],
+    ]);
+
+    $response->assertSessionHasErrors('presensi.0.anggota_id');
+    $this->assertDatabaseMissing('presensi', [
+        'kegiatan_id' => $kegiatan->id,
+        'anggota_id' => $anggota->id,
+    ]);
 });
 
 test('kader cannot access kegiatan and presensi management', function () {
