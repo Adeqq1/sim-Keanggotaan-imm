@@ -7,10 +7,11 @@ RUN apt-get update \
         libicu-dev \
         libjpeg62-turbo-dev \
         libpng-dev \
+        libwebp-dev \
         libzip-dev \
         unzip \
         zip \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j"$(nproc)" gd intl pdo_mysql zip \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*

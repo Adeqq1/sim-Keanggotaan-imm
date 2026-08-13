@@ -342,7 +342,7 @@ Form request: `AnggotaRequest`
 
 Aturan penting:
 - `nia` boleh nullable, tetapi harus unique jika diisi
-- `foto_profil` harus image `jpg/jpeg/png`, max 2 MB
+- `foto_profil` menerima JPG/JPEG/PNG, maksimum 2 MB dan 2048 x 2048 piksel
 - `role` hanya boleh role tertentu dan tidak boleh `admin` dari form umum
 
 Referensi:
@@ -363,8 +363,10 @@ Referensi:
 - `app/Http/Controllers/AnggotaController.php:56`
 
 ### File upload
-Foto profil disimpan ke:
+Foto profil baru dikonversi di server menjadi WebP lalu disimpan ke:
 - `storage/app/public/foto_profil`
+
+Path database foto baru berakhiran `.webp`. Saat mengganti foto, file baru ditulis dan path database diperbarui terlebih dahulu; foto lama baru dihapus setelah transaksi berhasil. Foto lama JPG/PNG tetap dapat ditampilkan dan tidak dimigrasikan otomatis.
 
 Referensi:
 - `app/Http/Controllers/AnggotaController.php:28`
@@ -909,7 +911,7 @@ Referensi:
 - update `name` dan `email`
 - jika email berubah -> `email_verified_at = null`
 - jika user punya data anggota -> update biodata anggota juga
-- jika upload foto baru -> hapus foto lama lalu simpan foto baru
+- jika upload foto baru -> konversi ke WebP, simpan dan update database, lalu hapus foto lama setelah transaksi berhasil
 
 Referensi:
 - `app/Http/Controllers/ProfileController.php:34`
@@ -924,7 +926,7 @@ Aturan penting:
 - name/email wajib
 - email unique kecuali milik user aktif
 - biodata anggota wajib jika memang diedit lewat form
-- foto profil image max 2 MB
+- foto profil menerima JPG/JPEG/PNG, maksimum 2 MB dan 2048 x 2048 piksel; hasil upload disimpan sebagai WebP
 
 Referensi:
 - `app/Http/Requests/ProfileUpdateRequest.php:25`
