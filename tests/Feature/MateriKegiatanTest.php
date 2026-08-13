@@ -1,11 +1,15 @@
 <?php
 
+use App\Http\Controllers\KegiatanController;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\MateriKegiatan;
 use App\Models\Presensi;
 use App\Models\User;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 
 function materiInstructor(): User
@@ -53,6 +57,32 @@ test('instruktur dapat melihat daftar dan membuat materi privat untuk kegiatan d
     expect($materi->kegiatan_id)->toBe($kegiatan->id)
         ->and($materi->file_materi)->toStartWith('materi_kegiatan/');
     Storage::disk('local')->assertExists($materi->file_materi);
+});
+
+test('kegagalan cleanup rollback tidak menutupi exception database create', function () {
+    Storage::fake('local');
+    $disk = Mockery::mock(FilesystemAdapter::class);
+    $disk->shouldReceive('exists')->once()->andThrow(new RuntimeException('storage cleanup failure'));
+    $event = 'eloquent.creating: '.MateriKegiatan::class;
+
+    Event::listen($event, function () use ($disk): void {
+        Storage::shouldReceive('disk')->once()->with('local')->andReturn($disk);
+        throw new RuntimeException('database create failure');
+    });
+
+    try {
+        expect(fn () => $this->withoutExceptionHandling()
+            ->actingAs(materiInstructor())
+            ->post(route('admin.kegiatan.materi-kegiatan.store', Kegiatan::factory()->create()), [
+                'judul' => 'Materi Gagal',
+                'deskripsi' => 'Database gagal.',
+                'file_materi' => materiFile(),
+            ]))->toThrow(RuntimeException::class, 'database create failure');
+    } finally {
+        Event::forget($event);
+    }
+
+    expect(MateriKegiatan::count())->toBe(0);
 });
 
 test('instruktur dapat memperbarui materi tanpa mengganti file', function () {
@@ -105,6 +135,24 @@ test('menghapus materi menghapus row pivot dan file privat', function () {
     $this->assertModelMissing($materi);
     $this->assertDatabaseEmpty('materi_tersimpan');
     Storage::disk('local')->assertMissing('materi_kegiatan/hapus.pdf');
+});
+
+test('hapus materi membersihkan path terbaru dari row terkunci bukan path route model yang stale', function () {
+    Storage::fake('local');
+    $materi = MateriKegiatan::factory()->create(['file_materi' => 'materi_kegiatan/lama.pdf']);
+    $staleMateri = clone $materi;
+    Storage::disk('local')->put('materi_kegiatan/lama.pdf', 'lama');
+    Storage::disk('local')->put('materi_kegiatan/baru.pdf', 'baru');
+
+    MateriKegiatan::query()->whereKey($materi->id)->update(['file_materi' => 'materi_kegiatan/baru.pdf']);
+    Storage::disk('local')->delete('materi_kegiatan/lama.pdf');
+
+    $this->actingAs(materiInstructor())
+        ->delete(route('admin.kegiatan.materi-kegiatan.destroy', [$materi->kegiatan, $staleMateri]))
+        ->assertRedirect();
+
+    $this->assertModelMissing($materi);
+    Storage::disk('local')->assertMissing(['materi_kegiatan/lama.pdf', 'materi_kegiatan/baru.pdf']);
 });
 
 test('scoped route menolak materi dari kegiatan lain', function (string $method) {
@@ -256,6 +304,25 @@ test('simpan materi idempotent dan tampil pada halaman tersimpan', function () {
         ->assertSee($materi->judul);
 });
 
+test('upsert materi tersimpan mempertahankan waktu pertama kali disimpan', function () {
+    [$user, $anggota] = materiKader();
+    $materi = MateriKegiatan::factory()->create();
+    Presensi::factory()->hadir()->create([
+        'anggota_id' => $anggota->id,
+        'kegiatan_id' => $materi->kegiatan_id,
+    ]);
+
+    $this->actingAs($user)->post(route('kader.materi.save', $materi))->assertRedirect();
+    $createdAt = DB::table('materi_tersimpan')->value('created_at');
+    $this->travel(1)->second();
+    $this->actingAs($user)->post(route('kader.materi.save', $materi))->assertRedirect();
+
+    $pivot = DB::table('materi_tersimpan')->sole();
+    expect($pivot->created_at)->toBe($createdAt)
+        ->and($pivot->updated_at)->not->toBe($createdAt);
+    $this->assertDatabaseCount('materi_tersimpan', 1);
+});
+
 test('perubahan presensi mencabut akses materi tersimpan dan unduhan', function () {
     Storage::fake('local');
     [$user, $anggota] = materiKader();
@@ -302,4 +369,50 @@ test('menghapus kegiatan membersihkan seluruh file materi privat', function () {
     $this->assertModelMissing($kegiatan);
     expect(MateriKegiatan::count())->toBe(0);
     Storage::disk('local')->assertMissing(['materi_kegiatan/satu.pdf', 'materi_kegiatan/dua.pdf']);
+});
+
+test('hapus kegiatan mengambil snapshot materi terbaru dari row terkunci', function () {
+    Storage::fake('local');
+    $kegiatan = Kegiatan::factory()->create();
+    $staleKegiatan = clone $kegiatan;
+    $materi = MateriKegiatan::factory()->create([
+        'kegiatan_id' => $kegiatan->id,
+        'file_materi' => 'materi_kegiatan/terbaru.pdf',
+    ]);
+    Storage::disk('local')->put($materi->file_materi, 'isi');
+
+    app(KegiatanController::class)->destroy($staleKegiatan);
+
+    $this->assertModelMissing($kegiatan);
+    $this->assertModelMissing($materi);
+    Storage::disk('local')->assertMissing('materi_kegiatan/terbaru.pdf');
+});
+
+test('kegagalan exists saat cleanup materi tidak membatalkan penghapusan row', function () {
+    $materi = MateriKegiatan::factory()->create(['file_materi' => 'materi_kegiatan/gagal.pdf']);
+    $disk = Mockery::mock(FilesystemAdapter::class);
+    $disk->shouldReceive('exists')->once()->andThrow(new RuntimeException('storage unavailable'));
+    Storage::shouldReceive('disk')->once()->with('local')->andReturn($disk);
+
+    $this->actingAs(materiInstructor())
+        ->delete(route('admin.kegiatan.materi-kegiatan.destroy', [$materi->kegiatan, $materi]))
+        ->assertRedirect();
+
+    $this->assertModelMissing($materi);
+});
+
+test('kegagalan exists saat cleanup kegiatan tidak membatalkan penghapusan row', function () {
+    $kegiatan = Kegiatan::factory()->create();
+    $materi = MateriKegiatan::factory()->create([
+        'kegiatan_id' => $kegiatan->id,
+        'file_materi' => 'materi_kegiatan/gagal.pdf',
+    ]);
+    $disk = Mockery::mock(FilesystemAdapter::class);
+    $disk->shouldReceive('exists')->once()->andThrow(new RuntimeException('storage unavailable'));
+    Storage::shouldReceive('disk')->once()->with('local')->andReturn($disk);
+
+    app(KegiatanController::class)->destroy($kegiatan);
+
+    $this->assertModelMissing($kegiatan);
+    $this->assertModelMissing($materi);
 });

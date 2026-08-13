@@ -40,7 +40,10 @@ class MateriKegiatanController extends Controller
         $path = $this->storeFile($request->file('file_materi'));
 
         try {
-            $kegiatan->materiKegiatans()->create([...$data, 'file_materi' => $path]);
+            DB::transaction(function () use ($kegiatan, $data, $path): void {
+                $lockedKegiatan = Kegiatan::query()->lockForUpdate()->findOrFail($kegiatan->id);
+                $lockedKegiatan->materiKegiatans()->create([...$data, 'file_materi' => $path]);
+            });
         } catch (Throwable $exception) {
             $this->deleteFile($path, "materi baru kegiatan {$kegiatan->id}");
             throw $exception;
@@ -62,7 +65,8 @@ class MateriKegiatanController extends Controller
         $oldPath = null;
 
         try {
-            DB::transaction(function () use ($materiKegiatan, $data, $newPath, &$oldPath): void {
+            DB::transaction(function () use ($kegiatan, $materiKegiatan, $data, $newPath, &$oldPath): void {
+                Kegiatan::query()->lockForUpdate()->findOrFail($kegiatan->id);
                 $locked = MateriKegiatan::query()->lockForUpdate()->findOrFail($materiKegiatan->id);
                 $oldPath = $locked->file_materi;
                 $locked->update($newPath ? [...$data, 'file_materi' => $newPath] : $data);
@@ -84,9 +88,16 @@ class MateriKegiatanController extends Controller
 
     public function destroy(Kegiatan $kegiatan, MateriKegiatan $materiKegiatan): RedirectResponse
     {
-        $path = $materiKegiatan->file_materi;
         $id = $materiKegiatan->id;
-        $materiKegiatan->delete();
+        $path = DB::transaction(function () use ($kegiatan, $id): string {
+            Kegiatan::query()->lockForUpdate()->findOrFail($kegiatan->id);
+            $locked = MateriKegiatan::query()->lockForUpdate()->findOrFail($id);
+            $path = $locked->file_materi;
+            $locked->delete();
+
+            return $path;
+        });
+
         $this->deleteFile($path, "materi {$id}");
 
         return redirect()->route('admin.kegiatan.materi-kegiatan.index', $kegiatan)
@@ -126,7 +137,16 @@ class MateriKegiatanController extends Controller
     public function save(MateriKegiatan $materiKegiatan): RedirectResponse
     {
         $anggota = $this->authorizedMember($materiKegiatan);
-        $anggota->materiTersimpan()->syncWithoutDetaching([$materiKegiatan->id]);
+        $timestamp = now();
+
+        DB::table('materi_tersimpan')->upsert([
+            [
+                'anggota_id' => $anggota->id,
+                'materi_kegiatan_id' => $materiKegiatan->id,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ],
+        ], ['anggota_id', 'materi_kegiatan_id'], ['updated_at']);
 
         return back()->with('success', 'Materi berhasil disimpan.');
     }
@@ -189,12 +209,14 @@ class MateriKegiatanController extends Controller
 
     private function deleteFile(?string $path, string $context): void
     {
-        if (! $path || ! Storage::disk('local')->exists($path)) {
+        if (! $path) {
             return;
         }
 
         try {
-            if (! Storage::disk('local')->delete($path)) {
+            $disk = Storage::disk('local');
+
+            if ($disk->exists($path) && ! $disk->delete($path)) {
                 report(new RuntimeException("Gagal menghapus file {$context}: {$path}"));
             }
         } catch (Throwable $exception) {

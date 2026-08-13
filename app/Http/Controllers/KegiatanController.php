@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\KegiatanRequest;
 use App\Models\Kegiatan;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Throwable;
@@ -75,17 +76,24 @@ class KegiatanController extends Controller
 
     public function destroy(Kegiatan $kegiatan)
     {
-        $materiPaths = $kegiatan->materiKegiatans()->pluck('file_materi');
+        [$materiPaths, $thumbnail] = DB::transaction(function () use ($kegiatan): array {
+            $locked = Kegiatan::query()->lockForUpdate()->findOrFail($kegiatan->id);
+            $materiPaths = $locked->materiKegiatans()->pluck('file_materi');
+            $thumbnail = $locked->thumbnail;
+            $locked->delete();
 
-        if ($kegiatan->thumbnail) {
-            Storage::disk('public')->delete($kegiatan->thumbnail);
+            return [$materiPaths, $thumbnail];
+        });
+
+        if ($thumbnail) {
+            Storage::disk('public')->delete($thumbnail);
         }
-
-        $kegiatan->delete();
 
         foreach ($materiPaths as $path) {
             try {
-                if (Storage::disk('local')->exists($path) && ! Storage::disk('local')->delete($path)) {
+                $disk = Storage::disk('local');
+
+                if ($disk->exists($path) && ! $disk->delete($path)) {
                     report(new RuntimeException("Gagal menghapus materi kegiatan {$kegiatan->id}: {$path}"));
                 }
             } catch (Throwable $exception) {
