@@ -65,10 +65,26 @@
                         <i class="bi bi-people"></i>
                         Anggota
                     </a>
+                    <p class="sidebar-section-label">Kegiatan</p>
                     <a href="{{ route('admin.kegiatan.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.kegiatan.*') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('admin.kegiatan.index', 'admin.kegiatan.create', 'admin.kegiatan.store', 'admin.kegiatan.show', 'admin.kegiatan.edit', 'admin.kegiatan.update', 'admin.kegiatan.destroy') ? 'active' : '' }}">
                         <i class="bi bi-calendar-event"></i>
-                        Kegiatan
+                        Daftar Kegiatan
+                    </a>
+                    <a href="{{ route('admin.presensi.index') }}"
+                       class="sidebar-link {{ request()->routeIs('admin.presensi.*') ? 'active' : '' }}">
+                        <i class="bi bi-check2-square"></i>
+                        Rekap Presensi
+                    </a>
+                    <a href="{{ route('admin.laporan-kegiatan.index') }}"
+                       class="sidebar-link {{ request()->routeIs('admin.laporan-kegiatan.*', 'admin.kegiatan.laporan-kegiatan.*') ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-text"></i>
+                        Laporan Kegiatan
+                    </a>
+                    <a href="{{ route('admin.materi-kegiatan.index') }}"
+                       class="sidebar-link {{ request()->routeIs('admin.materi-kegiatan.*') ? 'active' : '' }}">
+                        <i class="bi bi-journal-text"></i>
+                        Materi Kegiatan
                     </a>
 
                     <p class="sidebar-section-label">Manajemen</p>
@@ -85,15 +101,20 @@
                     <a href="{{ route('admin.laporan.index') }}"
                        class="sidebar-link {{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-bar-graph"></i>
-                        Laporan
+                        Laporan Sistem
                     </a>
 
                 @elseif(auth()->user()->role === 'instruktur')
                     <p class="sidebar-section-label">Menu Instruktur</p>
                     <a href="{{ route('admin.kegiatan.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.kegiatan.*') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('admin.kegiatan.*', 'admin.presensi.*') ? 'active' : '' }}">
                         <i class="bi bi-calendar-event"></i>
                         Kegiatan
+                    </a>
+                    <a href="{{ route('admin.presensi.index') }}"
+                       class="sidebar-link {{ request()->routeIs('admin.presensi.*') ? 'active' : '' }}">
+                        <i class="bi bi-check2-square"></i>
+                        Rekap Presensi
                     </a>
 
                 @else

@@ -13,7 +13,7 @@
                 <i class="bi bi-people fs-4 d-block"></i>
                 <small style="font-size: 0.7rem;">Anggota</small>
             </a>
-            <a href="{{ route('admin.kegiatan.index') }}" class="nav-link text-center py-2 {{ request()->routeIs('admin.kegiatan.*') ? 'text-primary font-weight-bold' : 'text-muted' }}">
+            <a href="{{ route('admin.kegiatan.index') }}" class="nav-link text-center py-2 {{ request()->routeIs('admin.kegiatan.*', 'admin.presensi.*', 'admin.laporan-kegiatan.*', 'admin.materi-kegiatan.*') ? 'text-primary font-weight-bold' : 'text-muted' }}">
                 <i class="bi bi-calendar-event fs-4 d-block"></i>
                 <small style="font-size: 0.7rem;">Kegiatan</small>
             </a>
@@ -22,7 +22,7 @@
                 <small style="font-size: 0.7rem;">Arsip</small>
             </a>
         @elseif(auth()->user()->role === 'instruktur')
-            <a href="{{ route('admin.kegiatan.index') }}" class="nav-link text-center py-2 {{ request()->routeIs('admin.kegiatan.*') ? 'text-primary font-weight-bold' : 'text-muted' }}">
+            <a href="{{ route('admin.kegiatan.index') }}" class="nav-link text-center py-2 {{ request()->routeIs('admin.kegiatan.*', 'admin.presensi.*') ? 'text-primary font-weight-bold' : 'text-muted' }}">
                 <i class="bi bi-calendar-event fs-4 d-block"></i>
                 <small style="font-size: 0.7rem;">Kegiatan</small>
             </a>

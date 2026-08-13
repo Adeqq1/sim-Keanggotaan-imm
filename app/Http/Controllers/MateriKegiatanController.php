@@ -21,6 +21,13 @@ use Throwable;
 
 class MateriKegiatanController extends Controller
 {
+    public function adminIndex(): View
+    {
+        $materis = MateriKegiatan::query()->with('kegiatan')->latest()->paginate(12);
+
+        return view('admin.kegiatan.materi-index', compact('materis'));
+    }
+
     public function index(Kegiatan $kegiatan): View
     {
         return view('admin.kegiatan.materi.index', [

@@ -3,6 +3,10 @@
         Manajemen Kegiatan
     </x-slot>
 
+    @if(auth()->user()->role === 'admin')
+        <x-kegiatan-submenu />
+    @endif
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h6 class="fw-bold mb-0">Daftar Kegiatan</h6>
         <a href="{{ route('admin.kegiatan.create') }}" class="btn btn-primary btn-ui btn-ui-sm">
@@ -31,6 +35,7 @@
                         <i class="bi bi-three-dots-vertical fs-5"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                        <li><a class="dropdown-item py-2" href="{{ route('admin.kegiatan.show', $kegiatan) }}"><i class="bi bi-eye me-2 text-primary"></i> Lihat Detail</a></li>
                         <li><a class="dropdown-item py-2" href="{{ route('admin.presensi.show', $kegiatan) }}"><i class="bi bi-check2-square me-2 text-success"></i> {{ auth()->user()->role === 'instruktur' ? 'Kelola Presensi' : 'Lihat Presensi' }}</a></li>
                         @if(auth()->user()->role === 'instruktur')
                             <li><a class="dropdown-item py-2" href="{{ route('admin.kegiatan.materi-kegiatan.index', $kegiatan) }}"><i class="bi bi-journal-text me-2 text-primary"></i> Kelola Materi</a></li>
@@ -59,7 +64,7 @@
         <x-_modal-delete
             id="deleteModal{{ $kegiatan->id }}"
             :action="route('admin.kegiatan.destroy', $kegiatan)"
-            message="Menghapus kegiatan ini akan menghapus semua data presensi, sertifikat, dan file materi yang terkait."
+            message="Menghapus kegiatan ini akan menghapus semua data presensi, sertifikat, materi, laporan, dan lampiran yang terkait."
         />
     @endforeach
 

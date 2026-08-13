@@ -9,6 +9,21 @@ use App\Models\Presensi;
 
 class PresensiController extends Controller
 {
+    public function index()
+    {
+        $kegiatans = Kegiatan::query()
+            ->withCount([
+                'presensi',
+                'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir'),
+                'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin'),
+                'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa'),
+            ])
+            ->latest('tanggal_waktu')
+            ->paginate(12);
+
+        return view('admin.kegiatan.rekap-presensi', compact('kegiatans'));
+    }
+
     public function create(Kegiatan $kegiatan)
     {
         $anggotas = Anggota::where('status_aktif', true)->orderBy('nama_lengkap')->get();

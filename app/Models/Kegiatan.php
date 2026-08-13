@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable(['nama_kegiatan', 'deskripsi', 'tanggal_waktu', 'lokasi', 'thumbnail'])]
 class Kegiatan extends Model
@@ -31,6 +32,11 @@ class Kegiatan extends Model
     public function materiKegiatans(): HasMany
     {
         return $this->hasMany(MateriKegiatan::class);
+    }
+
+    public function laporanKegiatan(): HasOne
+    {
+        return $this->hasOne(LaporanKegiatan::class);
     }
 
     /**

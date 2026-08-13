@@ -24,6 +24,18 @@ class KegiatanController extends Controller
         return view('admin.kegiatan.create');
     }
 
+    public function show(Kegiatan $kegiatan)
+    {
+        $kegiatan->load('laporanKegiatan')->loadCount([
+            'presensi',
+            'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir'),
+            'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin'),
+            'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa'),
+        ]);
+
+        return view('admin.kegiatan.show', compact('kegiatan'));
+    }
+
     public function store(KegiatanRequest $request)
     {
         $data = $request->validated();
@@ -76,13 +88,14 @@ class KegiatanController extends Controller
 
     public function destroy(Kegiatan $kegiatan)
     {
-        [$materiPaths, $thumbnail] = DB::transaction(function () use ($kegiatan): array {
+        [$materiPaths, $laporanPath, $thumbnail] = DB::transaction(function () use ($kegiatan): array {
             $locked = Kegiatan::query()->lockForUpdate()->findOrFail($kegiatan->id);
             $materiPaths = $locked->materiKegiatans()->pluck('file_materi');
+            $laporanPath = $locked->laporanKegiatan()->lockForUpdate()->value('file_lampiran');
             $thumbnail = $locked->thumbnail;
             $locked->delete();
 
-            return [$materiPaths, $thumbnail];
+            return [$materiPaths, $laporanPath, $thumbnail];
         });
 
         if ($thumbnail) {
@@ -98,6 +111,18 @@ class KegiatanController extends Controller
                 }
             } catch (Throwable $exception) {
                 report(new RuntimeException("Gagal menghapus materi kegiatan {$kegiatan->id}: {$path}", previous: $exception));
+            }
+        }
+
+        if ($laporanPath) {
+            try {
+                $disk = Storage::disk('local');
+
+                if ($disk->exists($laporanPath) && ! $disk->delete($laporanPath)) {
+                    report(new RuntimeException("Gagal menghapus lampiran laporan kegiatan {$kegiatan->id}: {$laporanPath}"));
+                }
+            } catch (Throwable $exception) {
+                report(new RuntimeException("Gagal menghapus lampiran laporan kegiatan {$kegiatan->id}: {$laporanPath}", previous: $exception));
             }
         }
 
