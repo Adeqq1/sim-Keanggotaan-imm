@@ -46,11 +46,11 @@
                         </div>
                     @endif
                     
-                    <input type="file" name="foto_profil" class="form-control @error('foto_profil') is-invalid @enderror" accept="image/*">
+                    <input type="file" name="foto_profil" class="form-control @error('foto_profil') is-invalid @enderror" accept="image/jpeg,image/png">
                     @error('foto_profil')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
-                    <small class="text-muted">Format: JPG, PNG, max 2MB. Kosongkan jika tidak ingin mengubah.</small>
+                    <small class="text-muted">JPG, JPEG, atau PNG, maksimum 2 MB dan 2048 x 2048 piksel. Disimpan sebagai WebP. Kosongkan jika tidak ingin mengubah.</small>
                 </div>
 
                 <div class="row g-3">

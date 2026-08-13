@@ -6,9 +6,12 @@ use App\Http\Requests\AnggotaRequest;
 use App\Models\Anggota;
 use App\Models\User;
 use App\Services\NiaGenerator;
+use App\Services\ProfilePhoto;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
+use Throwable;
 
 class AnggotaController extends Controller
 {
@@ -35,35 +38,42 @@ class AnggotaController extends Controller
         return view('admin.anggota.create');
     }
 
-    public function store(AnggotaRequest $request)
+    public function store(AnggotaRequest $request, ProfilePhoto $profilePhoto)
     {
         $validated = $request->validated();
+        $newPhotoPath = null;
 
         if ($request->hasFile('foto_profil')) {
-            $path = $request->file('foto_profil')->store('foto_profil', 'public');
-            $validated['foto_profil'] = $path;
+            $newPhotoPath = $profilePhoto->store($request->file('foto_profil'));
+            $validated['foto_profil'] = $newPhotoPath;
         }
 
-        DB::transaction(function () use ($validated) {
-            $user = User::create([
-                'name' => $validated['nama_lengkap'],
-                'email' => $validated['email'],
-                'password' => $validated['password'],
-                'role' => $validated['role'],
-            ]);
+        try {
+            DB::transaction(function () use ($validated) {
+                $user = User::create([
+                    'name' => $validated['nama_lengkap'],
+                    'email' => $validated['email'],
+                    'password' => $validated['password'],
+                    'role' => $validated['role'],
+                ]);
 
-            Anggota::create([
-                'user_id' => $user->id,
-                'nia' => $validated['nia'] ?? null,
-                'nama_lengkap' => $validated['nama_lengkap'],
-                'tempat_lahir' => $validated['tempat_lahir'],
-                'tanggal_lahir' => $validated['tanggal_lahir'],
-                'alamat' => $validated['alamat'],
-                'no_telp' => $validated['no_telp'],
-                'foto_profil' => $validated['foto_profil'] ?? null,
-                'status_aktif' => $validated['status_aktif'] ?? true,
-            ]);
-        });
+                Anggota::create([
+                    'user_id' => $user->id,
+                    'nia' => $validated['nia'] ?? null,
+                    'nama_lengkap' => $validated['nama_lengkap'],
+                    'tempat_lahir' => $validated['tempat_lahir'],
+                    'tanggal_lahir' => $validated['tanggal_lahir'],
+                    'alamat' => $validated['alamat'],
+                    'no_telp' => $validated['no_telp'],
+                    'foto_profil' => $validated['foto_profil'] ?? null,
+                    'status_aktif' => $validated['status_aktif'] ?? true,
+                ]);
+            });
+        } catch (Throwable $exception) {
+            $this->deletePhotoAfterFailure($newPhotoPath, $exception);
+
+            throw $exception;
+        }
 
         return redirect()->route('admin.anggota.index')->with('success', 'Anggota berhasil ditambahkan.');
     }
@@ -82,29 +92,42 @@ class AnggotaController extends Controller
         return view('admin.anggota.edit', compact('anggota'));
     }
 
-    public function update(AnggotaRequest $request, Anggota $anggota)
+    public function update(AnggotaRequest $request, Anggota $anggota, ProfilePhoto $profilePhoto)
     {
         $validated = $request->validated();
+        $newPhotoPath = null;
 
         if ($anggota->user_id === auth()->id() && isset($validated['role']) && $validated['role'] !== 'admin') {
             abort(403, 'Anda tidak bisa menurunkan role akun Anda sendiri.');
         }
 
         if ($request->hasFile('foto_profil')) {
-            if ($anggota->foto_profil) {
-                Storage::disk('public')->delete($anggota->foto_profil);
-            }
-            $path = $request->file('foto_profil')->store('foto_profil', 'public');
-            $validated['foto_profil'] = $path;
+            $newPhotoPath = $profilePhoto->store($request->file('foto_profil'));
+            $validated['foto_profil'] = $newPhotoPath;
         }
 
-        DB::transaction(function () use ($anggota, $validated) {
-            $anggota->update($validated);
+        try {
+            $oldPhotoPath = DB::transaction(function () use ($anggota, $validated) {
+                $lockedAnggota = Anggota::query()
+                    ->lockForUpdate()
+                    ->findOrFail($anggota->getKey());
+                $oldPhotoPath = $lockedAnggota->foto_profil;
 
-            if (isset($validated['role']) && $anggota->user) {
-                $anggota->user->update(['role' => $validated['role']]);
-            }
-        });
+                $lockedAnggota->update($validated);
+
+                if (isset($validated['role']) && $lockedAnggota->user) {
+                    $lockedAnggota->user->update(['role' => $validated['role']]);
+                }
+
+                return $oldPhotoPath;
+            });
+        } catch (Throwable $exception) {
+            $this->deletePhotoAfterFailure($newPhotoPath, $exception);
+
+            throw $exception;
+        }
+
+        $this->deleteReplacedPhoto($oldPhotoPath, $newPhotoPath, $anggota->id);
 
         return redirect()->route('admin.anggota.index')->with('success', 'Anggota berhasil diupdate.');
     }
@@ -127,6 +150,38 @@ class AnggotaController extends Controller
         return redirect()->route('admin.anggota.index')->with('success', 'Anggota berhasil dihapus.');
     }
 
+    private function deletePhotoAfterFailure(?string $path, Throwable $exception): void
+    {
+        if ($path === null) {
+            return;
+        }
+
+        try {
+            if (Storage::disk('public')->exists($path) && ! Storage::disk('public')->delete($path)) {
+                report(new RuntimeException('File foto profil baru gagal dibersihkan.', 0, $exception));
+            }
+        } catch (Throwable $cleanupException) {
+            report($cleanupException);
+        }
+    }
+
+    private function deleteReplacedPhoto(?string $oldPath, ?string $newPath, int $anggotaId): void
+    {
+        if ($oldPath === null || $newPath === null || $oldPath === $newPath) {
+            return;
+        }
+
+        try {
+            $disk = Storage::disk('public');
+
+            if ($disk->exists($oldPath) && ! $disk->delete($oldPath)) {
+                report(new RuntimeException("Foto profil lama gagal dihapus untuk anggota {$anggotaId}: {$oldPath}"));
+            }
+        } catch (Throwable $exception) {
+            report(new RuntimeException("Foto profil lama gagal dihapus untuk anggota {$anggotaId}: {$oldPath}", 0, $exception));
+        }
+    }
+
     /**
      * Generate NIA untuk satu anggota (hanya jika NIA masih kosong).
      */
@@ -137,7 +192,7 @@ class AnggotaController extends Controller
 
             return redirect()->route('admin.anggota.edit', $anggota)
                 ->with('success', 'NIA berhasil dibuat: '.$anggota->fresh()->nia);
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             return redirect()->route('admin.anggota.edit', $anggota)
                 ->with('warning', $e->getMessage());
         }
@@ -161,7 +216,7 @@ class AnggotaController extends Controller
             try {
                 $generator->generateForAnggota($anggota);
                 $jumlahDiproses++;
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $jumlahGagal++;
                 Log::warning('Gagal generate NIA untuk anggota ID: '.$anggota->id, [
                     'error' => $e->getMessage(),

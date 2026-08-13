@@ -35,7 +35,14 @@ class AnggotaRequest extends FormRequest
             'tanggal_lahir' => ['required', 'date'],
             'alamat' => ['required', 'string'],
             'no_telp' => ['required', 'string', 'max:20'],
-            'foto_profil' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'foto_profil' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png',
+                'mimetypes:image/jpeg,image/png',
+                'max:2048',
+                'dimensions:max_width=2048,max_height=2048',
+            ],
             'status_aktif' => ['nullable', 'boolean'],
             'email' => [
                 Rule::requiredIf($isCreate),

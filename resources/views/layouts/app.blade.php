@@ -28,6 +28,10 @@
         </script>
     </head>
     <body class="antialiased">
+        @php
+            $user = auth()->user();
+            $profilePhoto = $user->anggota?->foto_profil;
+        @endphp
 
         {{-- ============================================================
              SIDEBAR DESKTOP (hanya muncul di layar ≥992px via CSS)
@@ -133,11 +137,15 @@
             <div class="sidebar-footer">
                 <div class="d-flex align-items-center gap-2">
                     <div class="sidebar-user-avatar">
-                        {{ substr(auth()->user()->name, 0, 1) }}
+                        @if($profilePhoto)
+                            <img src="{{ Storage::url($profilePhoto) }}" alt="" width="36" height="36" style="object-fit: cover;">
+                        @else
+                            {{ substr($user->name, 0, 1) }}
+                        @endif
                     </div>
                     <div class="overflow-hidden flex-1">
-                        <p class="sidebar-user-name">{{ auth()->user()->name }}</p>
-                        <p class="sidebar-user-role">{{ auth()->user()->role }}</p>
+                        <p class="sidebar-user-name">{{ $user->name }}</p>
+                        <p class="sidebar-user-role">{{ $user->role }}</p>
                     </div>
                     <form method="POST" action="{{ route('logout') }}" class="ms-auto">
                         @csrf
@@ -161,6 +169,9 @@
                     <h1 class="h5 mb-0 fw-bold">{{ $header ?? config('app.name') }}</h1>
                     <div class="dropdown">
                         <button class="btn btn-link text-white p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Buka menu pengguna">
+                            @if($profilePhoto)
+                                <img src="{{ Storage::url($profilePhoto) }}" alt="" width="28" height="28" class="rounded-circle me-1" style="object-fit: cover;">
+                            @endif
                             <i class="bi bi-three-dots-vertical fs-5"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
@@ -184,8 +195,14 @@
                 <h1 class="desktop-topbar-title">{{ $header ?? config('app.name') }}</h1>
                 <div class="dropdown">
                     <button class="user-menu-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="user-avatar-sm">{{ substr(auth()->user()->name, 0, 1) }}</div>
-                        <span>{{ auth()->user()->name }}</span>
+                        <div class="user-avatar-sm">
+                            @if($profilePhoto)
+                                <img src="{{ Storage::url($profilePhoto) }}" alt="" width="28" height="28" class="rounded-circle" style="object-fit: cover;">
+                            @else
+                                {{ substr($user->name, 0, 1) }}
+                            @endif
+                        </div>
+                        <span>{{ $user->name }}</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 12px; min-width: 180px;">
                         <li><a class="dropdown-item py-2" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2 text-primary"></i> Profil</a></li>

@@ -19,11 +19,14 @@
                     {{ substr($user->name, 0, 1) }}
                 </div>
             @endif
-            <div class="mt-2">
-                <label class="form-label small fw-bold">Foto Profil</label>
-                <input type="file" name="foto_profil" class="form-control form-control-sm mx-auto @error('foto_profil') is-invalid @enderror" style="max-width: 250px;">
-                @error('foto_profil') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-            </div>
+            @if($user->anggota)
+                <div class="mt-2">
+                    <label class="form-label small fw-bold">Foto Profil</label>
+                    <input type="file" name="foto_profil" class="form-control form-control-sm mx-auto @error('foto_profil') is-invalid @enderror" accept="image/jpeg,image/png" style="max-width: 250px;">
+                    @error('foto_profil') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                    <small class="text-muted d-block mt-1">JPG, JPEG, atau PNG, maksimum 2 MB dan 2048 x 2048 piksel. Disimpan sebagai WebP.</small>
+                </div>
+            @endif
         </div>
 
         <div class="mb-3">
