@@ -149,6 +149,74 @@ test('admin update replaces the old photo only after storing the new webp', func
     assertProfilePhotoIsWebp($newPath);
 });
 
+test('admin replacement cleans the path superseded by a concurrent update', function () {
+    Storage::fake('public');
+    $admin = User::factory()->admin()->create();
+    $anggota = Anggota::factory()->create([
+        'foto_profil' => 'foto_profil/old.jpg',
+    ]);
+    Storage::disk('public')->put('foto_profil/old.jpg', 'old');
+
+    $converter = Mockery::mock(ProfilePhoto::class);
+    $converter->shouldReceive('store')->once()->andReturnUsing(function () use ($anggota): string {
+        Storage::disk('public')->put('foto_profil/a.webp', 'a');
+        Anggota::query()->whereKey($anggota->getKey())->update(['foto_profil' => 'foto_profil/a.webp']);
+        Storage::disk('public')->delete('foto_profil/old.jpg');
+        Storage::disk('public')->put('foto_profil/b.webp', 'b');
+
+        return 'foto_profil/b.webp';
+    });
+    $this->app->instance(ProfilePhoto::class, $converter);
+
+    $response = $this->actingAs($admin)->put(route('admin.anggota.update', $anggota), adminProfilePhotoPayload([
+        'nia' => $anggota->nia,
+        'nama_lengkap' => $anggota->nama_lengkap,
+        'email' => 'concurrent-update@example.com',
+        'role' => $anggota->user->role,
+        'foto_profil' => UploadedFile::fake()->image('new-photo.png', 24, 16),
+    ]));
+
+    $response->assertRedirect(route('admin.anggota.index'))
+        ->assertSessionHasNoErrors();
+    expect($anggota->refresh()->foto_profil)->toBe('foto_profil/b.webp');
+    Storage::disk('public')->assertMissing('foto_profil/old.jpg');
+    Storage::disk('public')->assertMissing('foto_profil/a.webp');
+    Storage::disk('public')->assertExists('foto_profil/b.webp');
+});
+
+test('profile replacement cleans the path superseded by a concurrent update', function () {
+    Storage::fake('public');
+    $user = User::factory()->kader()->create();
+    $anggota = Anggota::factory()->create([
+        'user_id' => $user->id,
+        'foto_profil' => 'foto_profil/old.jpg',
+    ]);
+    Storage::disk('public')->put('foto_profil/old.jpg', 'old');
+
+    $converter = Mockery::mock(ProfilePhoto::class);
+    $converter->shouldReceive('store')->once()->andReturnUsing(function () use ($anggota): string {
+        Storage::disk('public')->put('foto_profil/a.webp', 'a');
+        Anggota::query()->whereKey($anggota->getKey())->update(['foto_profil' => 'foto_profil/a.webp']);
+        Storage::disk('public')->delete('foto_profil/old.jpg');
+        Storage::disk('public')->put('foto_profil/b.webp', 'b');
+
+        return 'foto_profil/b.webp';
+    });
+    $this->app->instance(ProfilePhoto::class, $converter);
+
+    $response = $this->actingAs($user)->patch(route('profile.update'), profilePhotoPayload([
+        'email' => $user->email,
+        'foto_profil' => UploadedFile::fake()->image('new-photo.png', 24, 16),
+    ]));
+
+    $response->assertRedirect(route('profile.edit'))
+        ->assertSessionHasNoErrors();
+    expect($anggota->refresh()->foto_profil)->toBe('foto_profil/b.webp');
+    Storage::disk('public')->assertMissing('foto_profil/old.jpg');
+    Storage::disk('public')->assertMissing('foto_profil/a.webp');
+    Storage::disk('public')->assertExists('foto_profil/b.webp');
+});
+
 test('profile photo is rendered in the shared authenticated layout for every role', function (string $role, string $surfaceRoute) {
     Storage::fake('public');
     $user = User::factory()->create(['role' => $role]);

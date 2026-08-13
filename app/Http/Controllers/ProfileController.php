@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Anggota;
 use App\Services\ProfilePhoto;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,8 +36,8 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $anggota = $user->anggota;
+        $anggotaId = $anggota?->getKey();
         $validated = $request->validated();
-        $oldPhotoPath = $anggota?->foto_profil;
         $newPhotoPath = null;
 
         if ($request->hasFile('foto_profil') && ! $anggota) {
@@ -50,7 +51,12 @@ class ProfileController extends Controller
         }
 
         try {
-            DB::transaction(function () use ($user, $anggota, $validated, $newPhotoPath) {
+            $oldPhotoPath = DB::transaction(function () use ($user, $anggotaId, $validated, $newPhotoPath) {
+                $lockedAnggota = $anggotaId !== null
+                    ? Anggota::query()->lockForUpdate()->findOrFail($anggotaId)
+                    : null;
+                $oldPhotoPath = $lockedAnggota?->foto_profil;
+
                 $user->fill([
                     'name' => $validated['name'],
                     'email' => $validated['email'],
@@ -62,7 +68,7 @@ class ProfileController extends Controller
 
                 $user->save();
 
-                if ($anggota) {
+                if ($lockedAnggota) {
                     $anggotaData = [
                         'nama_lengkap' => $validated['nama_lengkap'],
                         'tempat_lahir' => $validated['tempat_lahir'],
@@ -75,8 +81,11 @@ class ProfileController extends Controller
                         $anggotaData['foto_profil'] = $newPhotoPath;
                     }
 
-                    $anggota->update($anggotaData);
+                    $lockedAnggota->update($anggotaData);
+                    $user->setRelation('anggota', $lockedAnggota);
                 }
+
+                return $oldPhotoPath;
             });
         } catch (Throwable $exception) {
             $this->deletePhotoAfterFailure($newPhotoPath, $exception);
@@ -84,7 +93,7 @@ class ProfileController extends Controller
             throw $exception;
         }
 
-        $this->deleteReplacedPhoto($oldPhotoPath, $newPhotoPath, $anggota?->id);
+        $this->deleteReplacedPhoto($oldPhotoPath, $newPhotoPath, $anggotaId);
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

@@ -95,7 +95,6 @@ class AnggotaController extends Controller
     public function update(AnggotaRequest $request, Anggota $anggota, ProfilePhoto $profilePhoto)
     {
         $validated = $request->validated();
-        $oldPhotoPath = $anggota->foto_profil;
         $newPhotoPath = null;
 
         if ($anggota->user_id === auth()->id() && isset($validated['role']) && $validated['role'] !== 'admin') {
@@ -108,12 +107,19 @@ class AnggotaController extends Controller
         }
 
         try {
-            DB::transaction(function () use ($anggota, $validated) {
-                $anggota->update($validated);
+            $oldPhotoPath = DB::transaction(function () use ($anggota, $validated) {
+                $lockedAnggota = Anggota::query()
+                    ->lockForUpdate()
+                    ->findOrFail($anggota->getKey());
+                $oldPhotoPath = $lockedAnggota->foto_profil;
 
-                if (isset($validated['role']) && $anggota->user) {
-                    $anggota->user->update(['role' => $validated['role']]);
+                $lockedAnggota->update($validated);
+
+                if (isset($validated['role']) && $lockedAnggota->user) {
+                    $lockedAnggota->user->update(['role' => $validated['role']]);
                 }
+
+                return $oldPhotoPath;
             });
         } catch (Throwable $exception) {
             $this->deletePhotoAfterFailure($newPhotoPath, $exception);
@@ -186,7 +192,7 @@ class AnggotaController extends Controller
 
             return redirect()->route('admin.anggota.edit', $anggota)
                 ->with('success', 'NIA berhasil dibuat: '.$anggota->fresh()->nia);
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             return redirect()->route('admin.anggota.edit', $anggota)
                 ->with('warning', $e->getMessage());
         }
@@ -210,7 +216,7 @@ class AnggotaController extends Controller
             try {
                 $generator->generateForAnggota($anggota);
                 $jumlahDiproses++;
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $jumlahGagal++;
                 Log::warning('Gagal generate NIA untuk anggota ID: '.$anggota->id, [
                     'error' => $e->getMessage(),
