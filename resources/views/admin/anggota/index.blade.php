@@ -32,9 +32,31 @@
     @endif
 
     <form action="{{ route('admin.anggota.index') }}" method="GET" class="mb-4">
-        <div class="input-group shadow-sm">
-            <input type="text" name="search" class="form-control border-0" placeholder="Cari nama atau NIA..." value="{{ request('search') }}">
-            <button class="btn btn-white border-0" type="submit" aria-label="Cari anggota"><i class="bi bi-search text-primary"></i></button>
+        <div class="row g-2 align-items-center">
+            <div class="col-12 col-md">
+                <label for="anggota-search" class="visually-hidden">Cari anggota berdasarkan nama atau NIA</label>
+                <input id="anggota-search" type="text" name="search" class="form-control shadow-sm" placeholder="Cari nama atau NIA..." value="{{ $search }}" aria-label="Cari anggota berdasarkan nama atau NIA">
+            </div>
+            <div class="col-12 col-md-auto">
+                <label for="anggota-role" class="visually-hidden">Filter role anggota</label>
+                <select id="anggota-role" name="role" class="form-select shadow-sm" aria-label="Filter role anggota">
+                    <option value="">Semua role</option>
+                    @foreach (App\Enums\RoleEnum::cases() as $roleOption)
+                        @continue($roleOption === App\Enums\RoleEnum::ADMIN)
+                        <option value="{{ $roleOption->value }}" @selected($selectedRole === $roleOption->value)>
+                            {{ $roleOption->label() }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-12 col-md-auto d-flex gap-2">
+                <button class="btn btn-primary btn-ui flex-grow-1" type="submit">
+                    <i class="bi bi-search me-1"></i> Cari
+                </button>
+                @if($search !== '' || $selectedRole !== null)
+                    <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-secondary btn-ui flex-grow-1 text-nowrap">Atur ulang filter</a>
+                @endif
+            </div>
         </div>
     </form>
 
@@ -83,10 +105,9 @@
         </div>
     @empty
         <div class="col-12 text-center py-5">
-            @if(request('search'))
+            @if($search !== '' || $selectedRole !== null)
                 <i class="bi bi-search display-4 text-muted opacity-50"></i>
-                <p class="text-muted mt-2">Anggota dengan kata kunci "{{ request('search') }}" tidak ditemukan.</p>
-                <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-primary btn-ui btn-ui-sm mt-2">Bersihkan Pencarian</a>
+                <p class="text-muted mt-2">Tidak ada anggota yang sesuai dengan pencarian atau filter yang dipilih.</p>
             @else
                 <i class="bi bi-people display-4 text-muted"></i>
                 <p class="text-muted mt-2">Belum ada data anggota.</p>

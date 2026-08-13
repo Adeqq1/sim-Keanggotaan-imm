@@ -2,35 +2,47 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\RoleEnum;
 use App\Http\Requests\AnggotaRequest;
 use App\Models\Anggota;
 use App\Models\User;
 use App\Services\NiaGenerator;
 use App\Services\ProfilePhoto;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use RuntimeException;
 use Throwable;
 
 class AnggotaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $search = trim(request('search'));
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'role' => ['nullable', Rule::enum(RoleEnum::class)],
+        ]);
 
+        $search = trim($filters['search'] ?? '');
+        $selectedRole = $filters['role'] ?? null;
         $query = Anggota::with('user');
 
         if ($search !== '') {
-            $query->where(function ($q) use ($search) {
-                $q->where('nama_lengkap', 'like', "%{$search}%")
+            $query->where(function ($query) use ($search) {
+                $query->where('nama_lengkap', 'like', "%{$search}%")
                     ->orWhere('nia', 'like', "%{$search}%");
             });
         }
 
+        if ($selectedRole !== null) {
+            $query->whereHas('user', fn ($userQuery) => $userQuery->where('role', $selectedRole));
+        }
+
         $anggotas = $query->latest()->paginate(12)->withQueryString();
 
-        return view('admin.anggota.index', compact('anggotas'));
+        return view('admin.anggota.index', compact('anggotas', 'search', 'selectedRole'));
     }
 
     public function create()
