@@ -7,6 +7,7 @@ use App\Http\Controllers\EktaController;
 use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\LaporanKegiatanController;
 use App\Http\Controllers\MateriKegiatanController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\PresensiController;
@@ -58,6 +59,17 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
         Route::post('/laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
         Route::post('/laporan/export-excel', [LaporanController::class, 'exportExcel'])->name('laporan.exportExcel');
+
+        Route::get('/materi-kegiatan', [MateriKegiatanController::class, 'adminIndex'])->name('materi-kegiatan.index');
+
+        Route::get('/laporan-kegiatan', [LaporanKegiatanController::class, 'index'])->name('laporan-kegiatan.index');
+        Route::get('/kegiatan/{kegiatan}/laporan-kegiatan/create', [LaporanKegiatanController::class, 'create'])->name('kegiatan.laporan-kegiatan.create');
+        Route::post('/kegiatan/{kegiatan}/laporan-kegiatan', [LaporanKegiatanController::class, 'store'])->name('kegiatan.laporan-kegiatan.store');
+        Route::get('/laporan-kegiatan/{laporanKegiatan}', [LaporanKegiatanController::class, 'show'])->name('laporan-kegiatan.show');
+        Route::get('/laporan-kegiatan/{laporanKegiatan}/edit', [LaporanKegiatanController::class, 'edit'])->name('laporan-kegiatan.edit');
+        Route::match(['put', 'patch'], '/laporan-kegiatan/{laporanKegiatan}', [LaporanKegiatanController::class, 'update'])->name('laporan-kegiatan.update');
+        Route::delete('/laporan-kegiatan/{laporanKegiatan}', [LaporanKegiatanController::class, 'destroy'])->name('laporan-kegiatan.destroy');
+        Route::get('/laporan-kegiatan/{laporanKegiatan}/lampiran', [LaporanKegiatanController::class, 'downloadLampiran'])->name('laporan-kegiatan.lampiran.download');
     });
 
     // Admin & Instruktur Shared
@@ -66,6 +78,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::resource('kegiatan', KegiatanController::class);
 
         // Modul Presensi
+        Route::get('/presensi', [PresensiController::class, 'index'])->name('presensi.index');
         Route::get('/presensi/{kegiatan}', [PresensiController::class, 'create'])->name('presensi.show');
     });
 

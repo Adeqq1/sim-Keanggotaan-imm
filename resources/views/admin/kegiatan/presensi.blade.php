@@ -3,6 +3,10 @@
         {{ $canManagePresensi ? 'Kelola Presensi' : 'Lihat Presensi' }}
     </x-slot>
 
+    @if(auth()->user()->role === 'admin')
+        <x-kegiatan-submenu />
+    @endif
+
     <div class="card p-3 mb-4 border-start border-primary border-4">
         <h6 class="fw-bold mb-1 text-primary">{{ $kegiatan->nama_kegiatan }}</h6>
         <p class="text-muted small mb-0"><i class="bi bi-calendar-event me-1"></i> {{ $kegiatan->tanggal_waktu->translatedFormat('d F Y, H:i') }}</p>
