@@ -19,7 +19,7 @@ Aplikasi ini adalah sistem informasi keanggotaan IMM berbasis Laravel dengan 4 a
 
 - **Guest**: pengunjung umum yang bisa melihat landing page, detail kegiatan, dan mengisi pendaftaran.
 - **Admin**: pengelola utama sistem.
-- **Instruktur**: pengelola kegiatan dan presensi.
+- **Instruktur**: pengelola kegiatan, presensi, dan materi kegiatan.
 - **Kader**: anggota yang sudah punya akun login.
 
 Referensi role:
@@ -30,8 +30,8 @@ Referensi role:
 
 - **Public area**: landing page, detail kegiatan, pendaftaran anggota.
 - **Admin area**: dashboard admin, validasi pendaftaran, anggota, kegiatan, presensi, sertifikat, arsip, laporan.
-- **Instruktur area**: memakai prefix route `/admin`, tetapi hak aksesnya hanya untuk modul kegiatan dan presensi.
-- **Kader area**: dashboard kader, E-KTA, riwayat keaktifan, arsip, dan sertifikat pribadi.
+- **Instruktur area**: memakai prefix route `/admin`, tetapi hak aksesnya hanya untuk modul kegiatan, presensi, dan materi kegiatan.
+- **Kader area**: dashboard kader, E-KTA, riwayat keaktifan, arsip, materi kegiatan, dan sertifikat pribadi.
 
 Referensi route utama:
 - `routes/web.php:18`
@@ -752,6 +752,7 @@ Instruktur tidak punya prefix route khusus sendiri. Mereka memakai area `/admin`
 ### Modul yang bisa diakses instruktur
 - kegiatan
 - presensi
+- materi kegiatan
 
 Referensi:
 - `routes/web.php:57`
@@ -896,7 +897,27 @@ Referensi:
 
 ---
 
-## 6.5 Profil user
+## 6.5 Materi kegiatan
+
+### Tujuan fitur
+Instruktur mengelola file materi per kegiatan. Kader hanya dapat melihat, menyimpan penanda, dan mengunduh materi jika presensinya sendiri pada kegiatan tersebut berstatus `hadir`.
+
+### Aturan keamanan utama
+- File berada pada disk `local` di `storage/app/private/materi_kegiatan`, bukan pada disk public.
+- Endpoint simpan dan unduh memeriksa ulang presensi `hadir`; penanda pada `materi_tersimpan` bukan izin permanen.
+- Download dilakukan melalui controller dengan header privat. File yang hilang menghasilkan 404.
+- Penggantian, penghapusan materi, dan penghapusan kegiatan membersihkan file fisik setelah perubahan database berhasil.
+- CRUD instruktur memakai nested resource scoped sehingga materi dari kegiatan lain menghasilkan 404.
+
+Referensi:
+- `app/Http/Controllers/MateriKegiatanController.php`
+- `app/Http/Requests/MateriKegiatanRequest.php`
+- `app/Models/MateriKegiatan.php`
+- `tests/Feature/MateriKegiatanTest.php`
+
+---
+
+## 6.6 Profil user
 
 ### Tujuan fitur
 Semua user login bisa mengubah profil akun dan biodata anggota, serta menghapus akun.

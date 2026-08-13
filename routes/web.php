@@ -7,6 +7,7 @@ use App\Http\Controllers\EktaController;
 use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\MateriKegiatanController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\ProfileController;
@@ -71,6 +72,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Hanya instruktur yang dapat mencatat presensi.
     Route::middleware('role:instruktur')->group(function () {
         Route::post('/presensi/{kegiatan}', [PresensiController::class, 'store'])->name('presensi.store');
+        Route::resource('kegiatan.materi-kegiatan', MateriKegiatanController::class)
+            ->except('show')
+            ->scoped();
     });
 });
 
@@ -95,6 +99,12 @@ Route::middleware(['auth', 'role:kader'])->prefix('kader')->name('kader.')->grou
     Route::get('/arsip/create', [ArsipController::class, 'kaderCreate'])->name('arsip.create');
     Route::post('/arsip', [ArsipController::class, 'kaderStore'])->name('arsip.store');
     Route::get('/arsip/{arsip}/download', [ArsipController::class, 'kaderDownload'])->name('arsip.download');
+
+    // Modul Materi Kegiatan
+    Route::get('/materi', [MateriKegiatanController::class, 'kaderIndex'])->name('materi.index');
+    Route::get('/materi/tersimpan', [MateriKegiatanController::class, 'savedIndex'])->name('materi.saved.index');
+    Route::post('/materi/{materi_kegiatan}/simpan', [MateriKegiatanController::class, 'save'])->name('materi.save');
+    Route::get('/materi/{materi_kegiatan}/unduh', [MateriKegiatanController::class, 'download'])->name('materi.download');
 });
 
 Route::middleware('auth')->group(function () {

@@ -83,6 +83,14 @@
                         <span class="small fw-bold text-dark d-block">Pengaturan</span>
                     </a>
                 </div>
+                <div class="col-6 col-lg-6">
+                    <a href="{{ route('kader.materi.index') }}"
+                       class="card p-3 text-decoration-none h-100 shadow-sm border-0 quick-action-card"
+                       style="border-radius: 15px;">
+                        <i class="bi bi-journal-text text-primary display-6 mb-2"></i>
+                        <span class="small fw-bold text-dark d-block">Materi</span>
+                    </a>
+                </div>
             </div>
         </div>
 

@@ -28,6 +28,11 @@ class Kegiatan extends Model
         return $this->hasMany(Sertifikat::class);
     }
 
+    public function materiKegiatans(): HasMany
+    {
+        return $this->hasMany(MateriKegiatan::class);
+    }
+
     /**
      * Get the URL of the activity's thumbnail, falling back to a lightweight placeholder image.
      */

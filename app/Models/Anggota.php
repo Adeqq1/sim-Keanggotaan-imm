@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['user_id', 'nia', 'nama_lengkap', 'tempat_lahir', 'tanggal_lahir', 'alamat', 'no_telp', 'foto_profil', 'status_aktif'])]
@@ -54,5 +55,10 @@ class Anggota extends Model
     public function sertifikat(): HasMany
     {
         return $this->hasMany(Sertifikat::class);
+    }
+
+    public function materiTersimpan(): BelongsToMany
+    {
+        return $this->belongsToMany(MateriKegiatan::class, 'materi_tersimpan')->withTimestamps();
     }
 }

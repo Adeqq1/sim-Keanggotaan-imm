@@ -32,6 +32,9 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">
                         <li><a class="dropdown-item py-2" href="{{ route('admin.presensi.show', $kegiatan) }}"><i class="bi bi-check2-square me-2 text-success"></i> {{ auth()->user()->role === 'instruktur' ? 'Kelola Presensi' : 'Lihat Presensi' }}</a></li>
+                        @if(auth()->user()->role === 'instruktur')
+                            <li><a class="dropdown-item py-2" href="{{ route('admin.kegiatan.materi-kegiatan.index', $kegiatan) }}"><i class="bi bi-journal-text me-2 text-primary"></i> Kelola Materi</a></li>
+                        @endif
                         <li><a class="dropdown-item py-2" href="{{ route('admin.kegiatan.edit', $kegiatan) }}"><i class="bi bi-pencil me-2 text-info"></i> Ubah Kegiatan</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
@@ -56,7 +59,7 @@
         <x-_modal-delete
             id="deleteModal{{ $kegiatan->id }}"
             :action="route('admin.kegiatan.destroy', $kegiatan)"
-            message="Menghapus kegiatan ini akan menghapus semua data presensi dan sertifikat yang terkait."
+            message="Menghapus kegiatan ini akan menghapus semua data presensi, sertifikat, dan file materi yang terkait."
         />
     @endforeach
 
