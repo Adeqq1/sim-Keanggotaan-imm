@@ -23,13 +23,13 @@ class LaporanKegiatanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tujuan' => ['required', 'string'],
-            'ringkasan' => ['required', 'string'],
-            'agenda' => ['required', 'string'],
-            'narasumber' => ['nullable', 'string'],
-            'hasil' => ['required', 'string'],
-            'kendala' => ['nullable', 'string'],
-            'tindak_lanjut' => ['nullable', 'string'],
+            'tujuan' => ['required', 'string', 'max:16000'],
+            'ringkasan' => ['required', 'string', 'max:16000'],
+            'agenda' => ['required', 'string', 'max:16000'],
+            'narasumber' => ['nullable', 'string', 'max:16000'],
+            'hasil' => ['required', 'string', 'max:16000'],
+            'kendala' => ['nullable', 'string', 'max:16000'],
+            'tindak_lanjut' => ['nullable', 'string', 'max:16000'],
             'file_lampiran' => ['nullable', 'file', 'mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,jpg,jpeg,png', 'max:2048'],
         ];
     }

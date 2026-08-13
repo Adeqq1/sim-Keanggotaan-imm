@@ -7,6 +7,7 @@ use App\Models\MateriKegiatan;
 use App\Models\Presensi;
 use App\Models\User;
 use Illuminate\Database\QueryException;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -47,10 +48,9 @@ test('admin melihat submenu detail kegiatan dan rekap presensi yang terisolasi',
         ->assertSee('Kajian Utama')
         ->assertSeeInOrder(['Jumlah Peserta', '4', 'Hadir', '2', 'Izin', '1', 'Alfa', '1']);
 
-    $this->actingAs($admin)->get(route('admin.presensi.index'))
-        ->assertSuccessful()
-        ->assertSee('Kajian Utama')
-        ->assertSee('Kajian Lain');
+    $rekap = $this->actingAs($admin)->get(route('admin.presensi.index'))->assertSuccessful();
+    $rekap->assertSee("data-kegiatan-id=\"{$kegiatan->id}\" data-peserta=\"4\" data-hadir=\"2\" data-izin=\"1\" data-alfa=\"1\"", false)
+        ->assertSee("data-kegiatan-id=\"{$kegiatanLain->id}\" data-peserta=\"1\" data-hadir=\"1\" data-izin=\"0\" data-alfa=\"0\"", false);
 });
 
 test('kegiatan tanpa presensi ditampilkan sebagai belum dicatat bukan alfa otomatis', function () {
@@ -101,6 +101,41 @@ test('validasi laporan menolak field wajib format dan ukuran lampiran', function
 
     expect(LaporanKegiatan::count())->toBe(0);
     expect(Storage::disk('local')->allFiles('laporan_kegiatan'))->toBe([]);
+});
+
+test('validasi membatasi seluruh narasi laporan saat create dan update', function () {
+    Storage::fake('local');
+    $admin = User::factory()->admin()->create();
+    $kegiatan = Kegiatan::factory()->create();
+    $tooLong = str_repeat('a', 16001);
+    $fields = ['tujuan', 'ringkasan', 'agenda', 'narasumber', 'hasil', 'kendala', 'tindak_lanjut'];
+
+    $this->actingAs($admin)->get(route('admin.kegiatan.laporan-kegiatan.create', $kegiatan))
+        ->assertSuccessful()
+        ->assertSee('maxlength="16000"', false);
+
+    $this->actingAs($admin)->post(
+        route('admin.kegiatan.laporan-kegiatan.store', $kegiatan),
+        laporanPayload(array_fill_keys($fields, $tooLong)),
+    )->assertSessionHasErrors($fields);
+    expect(LaporanKegiatan::count())->toBe(0);
+
+    $path = 'laporan_kegiatan/lama.pdf';
+    Storage::disk('local')->put($path, 'lama');
+    $laporan = LaporanKegiatan::factory()->create([
+        'kegiatan_id' => $kegiatan,
+        'hasil' => 'Hasil lama.',
+        'file_lampiran' => $path,
+    ]);
+
+    $this->actingAs($admin)->put(
+        route('admin.laporan-kegiatan.update', $laporan),
+        laporanPayload(['hasil' => $tooLong]),
+    )->assertSessionHasErrors('hasil');
+
+    expect($laporan->refresh()->hasil)->toBe('Hasil lama.')
+        ->and($laporan->file_lampiran)->toBe($path);
+    Storage::disk('local')->assertExists($path);
 });
 
 test('lampiran privat dapat dibuat dipertahankan diganti diunduh dan dihapus', function () {
@@ -168,6 +203,41 @@ test('menghapus kegiatan cascade laporan dan membersihkan lampiran privat', func
 
     $this->assertModelMissing($laporan);
     Storage::disk('local')->assertMissing($path);
+});
+
+test('kegagalan cleanup thumbnail tetap melanjutkan cleanup seluruh file privat', function () {
+    Storage::fake('local');
+    $localDisk = Storage::disk('local');
+    $admin = User::factory()->admin()->create();
+    $kegiatan = Kegiatan::factory()->create(['thumbnail' => 'kegiatan_thumbnails/gagal.webp']);
+    $materiPath = 'materi_kegiatan/materi.pdf';
+    $laporanPath = 'laporan_kegiatan/lampiran.pdf';
+    $materi = MateriKegiatan::factory()->create(['kegiatan_id' => $kegiatan, 'file_materi' => $materiPath]);
+    $laporan = LaporanKegiatan::factory()->create(['kegiatan_id' => $kegiatan, 'file_lampiran' => $laporanPath]);
+    $localDisk->put($materiPath, 'materi');
+    $localDisk->put($laporanPath, 'laporan');
+
+    $publicDisk = Mockery::mock(FilesystemAdapter::class);
+    $publicDisk->shouldReceive('exists')->once()->with($kegiatan->thumbnail)->andReturnTrue();
+    $publicDisk->shouldReceive('delete')->once()->with($kegiatan->thumbnail)->andThrow(new RuntimeException('public disk unavailable'));
+    Storage::shouldReceive('disk')->once()->with('public')->andReturn($publicDisk);
+    Storage::shouldReceive('disk')->twice()->with('local')->andReturn($localDisk);
+
+    $this->actingAs($admin)->delete(route('admin.kegiatan.destroy', $kegiatan))->assertRedirect();
+
+    $this->assertModelMissing($kegiatan);
+    $this->assertModelMissing($materi);
+    $this->assertModelMissing($laporan);
+    $localDisk->assertMissing([$materiPath, $laporanPath]);
+});
+
+test('sidebar instruktur hanya mengaktifkan rekap presensi pada halaman presensi', function () {
+    $response = $this->actingAs(User::factory()->instruktur()->create())
+        ->get(route('admin.presensi.index'))
+        ->assertSuccessful();
+
+    expect(substr_count($response->getContent(), 'class="sidebar-link active"'))->toBe(1);
+    $response->assertSee('href="'.route('admin.presensi.index').'"'.PHP_EOL.'                       class="sidebar-link active"', false);
 });
 
 test('akses rekap laporan lampiran dan direktori materi mengikuti role', function () {

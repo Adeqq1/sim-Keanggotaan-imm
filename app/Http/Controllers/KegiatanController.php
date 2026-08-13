@@ -98,36 +98,33 @@ class KegiatanController extends Controller
             return [$materiPaths, $laporanPath, $thumbnail];
         });
 
-        if ($thumbnail) {
-            Storage::disk('public')->delete($thumbnail);
-        }
+        $this->deleteFile('public', $thumbnail, "thumbnail kegiatan {$kegiatan->id}");
 
         foreach ($materiPaths as $path) {
-            try {
-                $disk = Storage::disk('local');
-
-                if ($disk->exists($path) && ! $disk->delete($path)) {
-                    report(new RuntimeException("Gagal menghapus materi kegiatan {$kegiatan->id}: {$path}"));
-                }
-            } catch (Throwable $exception) {
-                report(new RuntimeException("Gagal menghapus materi kegiatan {$kegiatan->id}: {$path}", previous: $exception));
-            }
+            $this->deleteFile('local', $path, "materi kegiatan {$kegiatan->id}");
         }
 
-        if ($laporanPath) {
-            try {
-                $disk = Storage::disk('local');
-
-                if ($disk->exists($laporanPath) && ! $disk->delete($laporanPath)) {
-                    report(new RuntimeException("Gagal menghapus lampiran laporan kegiatan {$kegiatan->id}: {$laporanPath}"));
-                }
-            } catch (Throwable $exception) {
-                report(new RuntimeException("Gagal menghapus lampiran laporan kegiatan {$kegiatan->id}: {$laporanPath}", previous: $exception));
-            }
-        }
+        $this->deleteFile('local', $laporanPath, "lampiran laporan kegiatan {$kegiatan->id}");
 
         Cache::forget('kegiatan.terbaru');
 
         return redirect()->route('admin.kegiatan.index')->with('success', 'Kegiatan berhasil dihapus.');
+    }
+
+    private function deleteFile(string $diskName, ?string $path, string $context): void
+    {
+        if (! $path) {
+            return;
+        }
+
+        try {
+            $disk = Storage::disk($diskName);
+
+            if ($disk->exists($path) && ! $disk->delete($path)) {
+                report(new RuntimeException("Gagal menghapus {$context}: {$path}"));
+            }
+        } catch (Throwable $exception) {
+            report(new RuntimeException("Gagal menghapus {$context}: {$path}", previous: $exception));
+        }
     }
 }

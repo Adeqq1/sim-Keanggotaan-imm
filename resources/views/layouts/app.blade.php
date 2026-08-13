@@ -107,7 +107,7 @@
                 @elseif(auth()->user()->role === 'instruktur')
                     <p class="sidebar-section-label">Menu Instruktur</p>
                     <a href="{{ route('admin.kegiatan.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.kegiatan.*', 'admin.presensi.*') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('admin.kegiatan.*') ? 'active' : '' }}">
                         <i class="bi bi-calendar-event"></i>
                         Kegiatan
                     </a>

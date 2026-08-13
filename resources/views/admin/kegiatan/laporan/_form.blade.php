@@ -11,7 +11,7 @@
 ] as $field => [$label, $required])
     <div class="mb-3">
         <label for="{{ $field }}" class="form-label fw-bold">{{ $label }}{{ $required ? ' *' : '' }}</label>
-        <textarea id="{{ $field }}" name="{{ $field }}" rows="4" class="form-control @error($field) is-invalid @enderror" {{ $required ? 'required' : '' }}>{{ old($field, $laporanKegiatan?->{$field}) }}</textarea>
+        <textarea id="{{ $field }}" name="{{ $field }}" rows="4" maxlength="16000" class="form-control @error($field) is-invalid @enderror" {{ $required ? 'required' : '' }}>{{ old($field, $laporanKegiatan?->{$field}) }}</textarea>
         @error($field)<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 @endforeach
