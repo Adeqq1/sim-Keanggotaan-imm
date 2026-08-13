@@ -118,6 +118,11 @@
                         <i class="bi bi-folder2-open"></i>
                         E-Arsip
                     </a>
+                    <a href="{{ route('kader.materi.index') }}"
+                       class="sidebar-link {{ request()->routeIs('kader.materi.*') ? 'active' : '' }}">
+                        <i class="bi bi-journal-text"></i>
+                        Materi
+                    </a>
                     <a href="{{ route('kader.riwayat.index') }}"
                        class="sidebar-link {{ request()->routeIs('kader.riwayat.*') ? 'active' : '' }}">
                         <i class="bi bi-clock-history"></i>
