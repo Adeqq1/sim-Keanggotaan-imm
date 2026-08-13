@@ -42,6 +42,7 @@
                 <select id="anggota-role" name="role" class="form-select shadow-sm" aria-label="Filter role anggota">
                     <option value="">Semua role</option>
                     @foreach (App\Enums\RoleEnum::cases() as $roleOption)
+                        @continue($roleOption === App\Enums\RoleEnum::ADMIN)
                         <option value="{{ $roleOption->value }}" @selected($selectedRole === $roleOption->value)>
                             {{ $roleOption->label() }}
                         </option>

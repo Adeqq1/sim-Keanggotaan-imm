@@ -133,6 +133,17 @@ describe('Admin Member Search', function () {
             ->assertDontSee('Anggota Instruktur Target');
     });
 
+    test('dropdown filter tidak menawarkan role admin', function () {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('admin.anggota.index'))
+            ->assertSuccessful()
+            ->assertSee('<option value="kader"', false)
+            ->assertSee('<option value="instruktur"', false)
+            ->assertDontSee('<option value="admin"', false);
+    });
+
     test('pencarian nama dan filter role diterapkan bersamaan', function () {
         $admin = User::factory()->admin()->create();
         $kader = User::factory()->kader()->create();
