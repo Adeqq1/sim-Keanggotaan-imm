@@ -170,7 +170,10 @@ test('public pendaftaran form renders komisariat and tahun daftar fields', funct
         ->toContain('x-show="role === \'kader\'"')
         ->toContain('x-cloak')
         ->toContain('id="komisariat_id"')
-        ->toContain('id="tahun_daftar"');
+        ->toContain('id="tahun_daftar"')
+        ->toContain('pendaftaran-komisariat')
+        ->toContain('<noscript>')
+        ->toContain('.pendaftaran-komisariat[x-cloak] { display: block !important; }');
 });
 
 test('kader registrasi valid menyimpan komisariat dan tahun daftar', function () {

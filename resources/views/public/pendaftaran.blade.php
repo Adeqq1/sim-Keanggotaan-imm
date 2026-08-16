@@ -47,7 +47,7 @@
             <div class="form-text small">Pilihan ini akan menentukan role akun Anda jika pendaftaran disetujui admin.</div>
             @error('role') <div class="invalid-feedback">{{ $message }}</div> @enderror
 
-            <div x-cloak x-show="role === 'kader'" class="mt-3">
+            <div x-cloak x-show="role === 'kader'" class="pendaftaran-komisariat mt-3">
                 <label for="komisariat_id" class="form-label small fw-bold">Komisariat <span class="text-danger" aria-hidden="true">*</span></label>
                 <select id="komisariat_id" name="komisariat_id" x-model="komisariatId" class="form-select @error('komisariat_id') is-invalid @enderror" :disabled="role !== 'kader'" :required="role === 'kader'">
                     <option value="">Pilih komisariat</option>
@@ -55,8 +55,12 @@
                         <option value="{{ $value }}" @selected(old('komisariat_id') === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
+                <div class="form-text small">Hanya wajib diisi jika Anda mendaftar sebagai Kader.</div>
                 @error('komisariat_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
+            <noscript>
+                <style>.pendaftaran-komisariat[x-cloak] { display: block !important; }</style>
+            </noscript>
         </div>
 
         <div class="mb-3">
