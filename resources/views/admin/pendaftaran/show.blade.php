@@ -21,6 +21,16 @@
                 </span>
             </div>
             <div class="col-12 col-sm-6">
+                <small class="text-muted d-block">Komisariat</small>
+                <span class="fw-bold">
+                    {{ $pendaftaran->komisariat_id ? (\App\Models\Pendaftaran::KOMISARIAT[$pendaftaran->komisariat_id] ?? $pendaftaran->komisariat_id) : 'Tidak tercatat (data lama)' }}
+                </span>
+            </div>
+            <div class="col-12 col-sm-6">
+                <small class="text-muted d-block">Tahun Daftar</small>
+                <span class="fw-bold">{{ $pendaftaran->tahun_daftar ?? 'Tidak tercatat (data lama)' }}</span>
+            </div>
+            <div class="col-12 col-sm-6">
                 <small class="text-muted d-block">Tempat Lahir</small>
                 <span class="fw-bold">{{ $pendaftaran->tempat_lahir }}</span>
             </div>

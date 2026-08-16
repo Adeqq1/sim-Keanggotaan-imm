@@ -12,7 +12,7 @@ beforeEach(function () {
 
 function identityDocumentPayload(array $overrides = []): array
 {
-    return array_merge([
+    $defaults = [
         'nama_lengkap' => 'Calon Anggota',
         'email' => 'calon.anggota@example.com',
         'password' => 'password',
@@ -23,8 +23,16 @@ function identityDocumentPayload(array $overrides = []): array
         'tanggal_lahir' => '2000-01-01',
         'no_telp' => '08123456789',
         'alamat' => 'Jl. Contoh No. 1',
+        'tahun_daftar' => 2024,
         'file_persyaratan' => validIdentityPdf(),
-    ], $overrides);
+    ];
+
+    if (($overrides['role'] ?? $defaults['role']) === 'kader'
+        && ! array_key_exists('komisariat_id', $overrides)) {
+        $defaults['komisariat_id'] = array_key_first(Pendaftaran::KOMISARIAT);
+    }
+
+    return array_merge($defaults, $overrides);
 }
 
 function validIdentityPdf(string $name = 'identitas.pdf'): UploadedFile
