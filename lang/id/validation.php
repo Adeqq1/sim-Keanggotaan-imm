@@ -195,6 +195,8 @@ return [
         'jenis_laporan' => 'jenis laporan',
         'jenis_dokumen_identitas' => 'jenis dokumen identitas',
         'file_persyaratan' => 'dokumen identitas',
+        'komisariat_id' => 'komisariat',
+        'tahun_daftar' => 'tahun daftar',
         'status' => 'status',
         'catatan_admin' => 'catatan admin',
         'bukti_kehadiran' => 'bukti kehadiran',

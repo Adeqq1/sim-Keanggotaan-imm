@@ -37,15 +37,33 @@
             <input type="password" name="password_confirmation" class="form-control" required autocomplete="new-password">
         </div>
 
-        <div class="mb-3">
-            <label class="form-label small fw-bold">Daftar Sebagai <span class="text-danger" aria-hidden="true">*</span></label>
-            <select name="role" class="form-select @error('role') is-invalid @enderror" required>
+        <div class="mb-3" x-data="{ role: @js(old('role')), komisariatId: @js(old('komisariat_id')) }">
+            <label for="role" class="form-label small fw-bold">Daftar Sebagai <span class="text-danger" aria-hidden="true">*</span></label>
+            <select id="role" name="role" x-model="role" class="form-select @error('role') is-invalid @enderror" @change="if (role !== 'kader') komisariatId = ''" required>
                 <option value="">Pilih jenis pendaftaran</option>
                 <option value="kader" @selected(old('role') === 'kader')>Kader</option>
                 <option value="instruktur" @selected(old('role') === 'instruktur')>Instruktur</option>
             </select>
             <div class="form-text small">Pilihan ini akan menentukan role akun Anda jika pendaftaran disetujui admin.</div>
             @error('role') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+            <div x-cloak x-show="role === 'kader'" class="mt-3">
+                <label for="komisariat_id" class="form-label small fw-bold">Komisariat <span class="text-danger" aria-hidden="true">*</span></label>
+                <select id="komisariat_id" name="komisariat_id" x-model="komisariatId" class="form-select @error('komisariat_id') is-invalid @enderror" :disabled="role !== 'kader'" :required="role === 'kader'">
+                    <option value="">Pilih komisariat</option>
+                    @foreach (\App\Models\Pendaftaran::KOMISARIAT as $value => $label)
+                        <option value="{{ $value }}" @selected(old('komisariat_id') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+                @error('komisariat_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="tahun_daftar" class="form-label small fw-bold">Tahun Daftar <span class="text-danger" aria-hidden="true">*</span></label>
+            <input id="tahun_daftar" type="number" name="tahun_daftar" inputmode="numeric" min="2016" max="{{ now()->year }}" step="1" class="form-control @error('tahun_daftar') is-invalid @enderror" value="{{ old('tahun_daftar') }}" aria-describedby="tahun_daftar_help" required>
+            <div id="tahun_daftar_help" class="form-text small">Masukkan tahun 2016 sampai {{ now()->year }}.</div>
+            @error('tahun_daftar') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
 
         <div class="row">

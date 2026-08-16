@@ -16,8 +16,11 @@ test('admin can approve pendaftaran and create kader account', function () {
 
     $admin = User::factory()->admin()->create();
     $password = 'Pendaftaran-Password-2026';
+    $komisariatId = array_key_first(Pendaftaran::KOMISARIAT);
     $pendaftaran = Pendaftaran::factory()->create([
         'password' => Hash::make($password),
+        'komisariat_id' => $komisariatId,
+        'tahun_daftar' => 2024,
     ]);
 
     $response = $this->actingAs($admin)
@@ -42,6 +45,8 @@ test('admin can approve pendaftaran and create kader account', function () {
     $this->assertDatabaseHas('anggota', [
         'user_id' => $newUser->id,
         'nama_lengkap' => $pendaftaran->nama_lengkap,
+        'komisariat_id' => $komisariatId,
+        'tahun_daftar' => 2024,
     ]);
 
     Mail::assertNothingQueued();
@@ -67,7 +72,11 @@ test('admin can approve a legacy pendaftaran with a temporary password', functio
 
 test('admin pendaftaran detail page posts explicit status for approval action', function () {
     $admin = User::factory()->admin()->create();
-    $pendaftaran = Pendaftaran::factory()->instruktur()->create();
+    $komisariatId = array_key_first(Pendaftaran::KOMISARIAT);
+    $pendaftaran = Pendaftaran::factory()->instruktur()->create([
+        'komisariat_id' => $komisariatId,
+        'tahun_daftar' => 2024,
+    ]);
 
     $response = $this->actingAs($admin)
         ->get(route('admin.pendaftaran.show', $pendaftaran));
@@ -80,9 +89,26 @@ test('admin pendaftaran detail page posts explicit status for approval action', 
         ->assertSeeText('Daftar Sebagai')
         ->assertSeeText('Role Akun')
         ->assertSeeText('Instruktur')
+        ->assertSeeText(Pendaftaran::KOMISARIAT[$komisariatId])
+        ->assertSeeText('2024')
         ->assertSeeText('Setujui & Buat Akun')
         ->assertSeeText('Tolak Pendaftaran')
         ->assertSeeText('Kembali ke Daftar');
+});
+
+test('admin pendaftaran detail shows legacy fallback for missing komisariat and tahun', function () {
+    $admin = User::factory()->admin()->create();
+    $pendaftaran = Pendaftaran::factory()->create([
+        'komisariat_id' => null,
+        'tahun_daftar' => null,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.show', $pendaftaran))
+        ->assertOk()
+        ->assertSeeText('Komisariat')
+        ->assertSeeText('Tahun Daftar')
+        ->assertSeeText('Tidak tercatat (data lama)');
 });
 
 test('admin pendaftaran index shows selected role', function () {

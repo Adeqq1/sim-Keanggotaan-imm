@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'nia', 'nama_lengkap', 'tempat_lahir', 'tanggal_lahir', 'alamat', 'no_telp', 'foto_profil', 'status_aktif'])]
+#[Fillable(['user_id', 'nia', 'nama_lengkap', 'tempat_lahir', 'tanggal_lahir', 'alamat', 'no_telp', 'foto_profil', 'status_aktif', 'komisariat_id', 'tahun_daftar'])]
 class Anggota extends Model
 {
     use HasFactory;
@@ -19,6 +19,7 @@ class Anggota extends Model
     protected $casts = [
         'tanggal_lahir' => 'date',
         'status_aktif' => 'boolean',
+        'tahun_daftar' => 'integer',
     ];
 
     /**

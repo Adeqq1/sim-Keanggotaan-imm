@@ -1,6 +1,11 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
+/* Elemen yang menunggu inisialisasi Alpine tidak boleh berkedip. */
+[x-cloak] {
+    display: none !important;
+}
+
 /* ============================================
    Override Bootstrap primary color ke maroon
    ============================================ */

@@ -90,6 +90,8 @@ class ValidasiPendaftaranController extends Controller
                         'tanggal_lahir' => $pendaftar->tanggal_lahir,
                         'no_telp' => $pendaftar->no_telp,
                         'alamat' => $pendaftar->alamat,
+                        'komisariat_id' => $pendaftar->komisariat_id,
+                        'tahun_daftar' => $pendaftar->tahun_daftar,
                         'status_aktif' => true,
                     ]);
 
