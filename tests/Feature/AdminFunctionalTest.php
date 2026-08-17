@@ -283,14 +283,27 @@ test('admin rejection deletes the registration identity document', function () {
 test('admin approval flash renders as auto-dismiss toast', function () {
     $admin = User::factory()->admin()->create();
 
-    $response = $this->actingAs($admin)
+    $content = $this->actingAs($admin)
         ->withSession(['success' => 'Pendaftaran disetujui.'])
-        ->get(route('admin.pendaftaran.index'));
+        ->get(route('admin.pendaftaran.index'))
+        ->assertOk()
+        ->getContent();
 
-    $response->assertOk()
-        ->assertSee('Pendaftaran disetujui.', false)
-        ->assertSee('data-auto-dismiss-toast', false)
-        ->assertSee('data-bs-dismiss="toast"', false);
+    $dom = new DOMDocument();
+    $previous = libxml_use_internal_errors(true);
+    $dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR | LIBXML_NOWARNING);
+    libxml_use_internal_errors($previous);
+    $xpath = new DOMXPath($dom);
+
+    $toasts = $xpath->query('//div[@data-auto-dismiss-toast]');
+    expect($toasts->length)->toBe(1);
+
+    $toast = $toasts->item(0);
+    expect($toast->getAttribute('class'))->toContain('show')
+        ->and($toast->textContent)->toContain('Pendaftaran disetujui.');
+
+    $closeButtons = $xpath->query('.//button[@data-bs-dismiss="toast"]', $toast);
+    expect($closeButtons->length)->toBe(1);
 });
 
 test('admin must provide catatan admin when rejecting pendaftaran', function () {

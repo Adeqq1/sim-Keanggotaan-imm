@@ -40,6 +40,16 @@ function validIdentityPdf(string $name = 'identitas.pdf'): UploadedFile
     return UploadedFile::fake()->createWithContent($name, "%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF");
 }
 
+function identityDocumentXPath(string $content): DOMXPath
+{
+    $dom = new DOMDocument();
+    $previous = libxml_use_internal_errors(true);
+    $dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR | LIBXML_NOWARNING);
+    libxml_use_internal_errors($previous);
+
+    return new DOMXPath($dom);
+}
+
 test('public registration form exposes required identity document fields and roles', function () {
     $response = $this->get(route('pendaftaran'));
 
@@ -299,7 +309,8 @@ test('legacy registration detail identifies missing document metadata without a 
 test('admin can preview image identity document inline with correct headers', function () {
     $admin = User::factory()->admin()->create();
     $path = 'pendaftaran/preview-identity.jpg';
-    Storage::disk('local')->put($path, 'fake-image-content');
+    $image = UploadedFile::fake()->image('preview-identity.jpg', 100, 100);
+    Storage::disk('local')->put($path, $image->getContent());
     $pendaftaran = Pendaftaran::factory()->create([
         'file_persyaratan' => $path,
         'jenis_dokumen_identitas' => 'ktp',
@@ -377,6 +388,20 @@ test('preview returns 404 for documents with disallowed MIME type', function () 
         ->assertNotFound();
 });
 
+test('preview returns 404 for image extension with non-image content', function () {
+    $admin = User::factory()->admin()->create();
+    $path = 'pendaftaran/not-an-image.jpg';
+    Storage::disk('local')->put($path, '<!doctype html><html><body>bukan gambar</body></html>');
+    $pendaftaran = Pendaftaran::factory()->create([
+        'file_persyaratan' => $path,
+        'jenis_dokumen_identitas' => 'ktp',
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.preview', $pendaftaran))
+        ->assertNotFound();
+});
+
 test('only admins can preview registration identity documents', function () {
     $path = 'pendaftaran/access-preview-test.jpg';
     Storage::disk('local')->put($path, 'fake-image-content');
@@ -402,14 +427,34 @@ test('admin pendaftaran index shows preview controls for image and PDF documents
     $jpgDoc = Pendaftaran::factory()->create(['file_persyaratan' => 'pendaftaran/img.jpg']);
     $pdfDoc = Pendaftaran::factory()->create(['file_persyaratan' => 'pendaftaran/doc.pdf']);
 
-    $response = $this->actingAs($admin)->get(route('admin.pendaftaran.index'));
+    $content = $this->actingAs($admin)->get(route('admin.pendaftaran.index'))->assertOk()->getContent();
 
-    $response->assertOk()
-        ->assertSee(route('admin.pendaftaran.document.preview', $jpgDoc), false)
-        ->assertSee('preview-image-btn', false)
-        ->assertSee(route('admin.pendaftaran.document.preview', $pdfDoc), false)
-        ->assertSee('target="_blank"', false)
-        ->assertSee('rel="noopener"', false);
+    $xpath = identityDocumentXPath($content);
+
+    $imageButtons = $xpath->query('//button[contains(concat(" ", normalize-space(@class), " "), " preview-image-btn ")]');
+    expect($imageButtons->length)->toBeGreaterThanOrEqual(1);
+
+    $jpgButton = null;
+    for ($i = 0; $i < $imageButtons->length; $i++) {
+        $node = $imageButtons->item($i);
+        if ($node->getAttribute('data-preview-url') === route('admin.pendaftaran.document.preview', $jpgDoc)) {
+            $jpgButton = $node;
+            break;
+        }
+    }
+
+    expect($jpgButton)->not->toBeNull()
+        ->and($jpgButton->getAttribute('data-download-url'))->toBe(route('admin.pendaftaran.document.download', $jpgDoc))
+        ->and($jpgButton->getAttribute('data-bs-toggle'))->toBe('modal')
+        ->and($jpgButton->getAttribute('data-bs-target'))->toBe('#previewDocumentModal');
+
+    $pdfLinks = $xpath->query('//a[@href="'.route('admin.pendaftaran.document.preview', $pdfDoc).'"]');
+    expect($pdfLinks->length)->toBe(1);
+
+    $pdfLink = $pdfLinks->item(0);
+    expect($pdfLink->getAttribute('target'))->toBe('_blank')
+        ->and($pdfLink->getAttribute('rel'))->toBe('noopener')
+        ->and($pdfLink->getAttribute('data-bs-toggle'))->toBe('');
 });
 
 test('admin pendaftaran detail shows preview controls for image and PDF documents', function () {
