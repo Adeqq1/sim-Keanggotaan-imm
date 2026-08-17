@@ -8,10 +8,6 @@
         <p class="text-muted small">Silakan lengkapi data diri Anda</p>
     </div>
 
-    @if (session('error'))
-        <div class="alert alert-danger small" role="alert">{{ session('error') }}</div>
-    @endif
-
     <form method="POST" action="{{ route('pendaftaran.store') }}" enctype="multipart/form-data">
         @csrf
 

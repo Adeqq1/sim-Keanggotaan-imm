@@ -36,6 +36,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::get('/pendaftaran', [ValidasiPendaftaranController::class, 'index'])->name('pendaftaran.index');
         Route::get('/pendaftaran/{id}', [ValidasiPendaftaranController::class, 'show'])->name('pendaftaran.show');
         Route::get('/pendaftaran/{pendaftaran}/dokumen-identitas', [ValidasiPendaftaranController::class, 'downloadDokumenIdentitas'])->name('pendaftaran.document.download');
+        Route::get('/pendaftaran/{pendaftaran}/dokumen-identitas/preview', [ValidasiPendaftaranController::class, 'previewDokumenIdentitas'])->name('pendaftaran.document.preview');
         Route::post('/pendaftaran/{id}/validate', [ValidasiPendaftaranController::class, 'prosesValidasiPendaftaran'])->name('pendaftaran.validate');
 
         // Modul Anggota

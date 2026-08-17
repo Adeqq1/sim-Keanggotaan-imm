@@ -76,5 +76,7 @@
             </div>
 
         </div>
+
+        <x-_alert />
     </body>
 </html>

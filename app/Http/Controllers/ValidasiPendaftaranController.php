@@ -31,7 +31,7 @@ class ValidasiPendaftaranController extends Controller
         return view('admin.pendaftaran.show', compact('pendaftaran'));
     }
 
-    public function downloadDokumenIdentitas(Pendaftaran $pendaftaran)
+    private function resolveDocumentPathAndName(Pendaftaran $pendaftaran): array
     {
         $path = $pendaftaran->file_persyaratan;
 
@@ -43,7 +43,34 @@ class ValidasiPendaftaranController extends Controller
         $jenisDokumen = Pendaftaran::JENIS_DOKUMEN_IDENTITAS[$pendaftaran->jenis_dokumen_identitas] ?? 'Dokumen';
         $filename = strtolower($jenisDokumen).'-pendaftaran-'.$pendaftaran->id.($extension === '' ? '' : '.'.$extension);
 
+        return [$path, $filename];
+    }
+
+    public function downloadDokumenIdentitas(Pendaftaran $pendaftaran)
+    {
+        [$path, $filename] = $this->resolveDocumentPathAndName($pendaftaran);
+
         return Storage::disk('local')->download($path, $filename, [
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'Pragma' => 'no-cache',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    public function previewDokumenIdentitas(Pendaftaran $pendaftaran)
+    {
+        [$path, $filename] = $this->resolveDocumentPathAndName($pendaftaran);
+
+        $disk = Storage::disk('local');
+        $mime = $disk->mimeType($path);
+
+        $allowed = ['image/jpeg', 'image/png', 'application/pdf'];
+        if (! in_array($mime, $allowed, true)) {
+            abort(404);
+        }
+
+        return $disk->response($path, $filename, [
+            'Content-Type' => $mime,
             'Cache-Control' => 'private, no-store, max-age=0',
             'Pragma' => 'no-cache',
             'X-Content-Type-Options' => 'nosniff',
