@@ -31,6 +31,7 @@
                             @endphp
                             @if(in_array($ext, ['jpg', 'jpeg', 'png']))
                                 <button type="button" class="btn btn-outline-secondary btn-ui btn-ui-sm btn-icon preview-image-btn"
+                                    data-bs-toggle="modal" data-bs-target="#previewDocumentModal"
                                     data-preview-url="{{ route('admin.pendaftaran.document.preview', $item) }}"
                                     data-download-url="{{ route('admin.pendaftaran.document.download', $item) }}"
                                     data-nama="{{ $item->nama_lengkap }}"

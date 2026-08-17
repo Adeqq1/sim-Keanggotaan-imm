@@ -64,6 +64,7 @@
                 <div class="d-flex gap-2 flex-wrap">
                     @if(in_array($ext, ['jpg', 'jpeg', 'png']))
                         <button type="button" class="btn btn-outline-primary btn-ui btn-ui-sm pendaftaran-detail-control py-2 preview-image-btn"
+                            data-bs-toggle="modal" data-bs-target="#previewDocumentModal"
                             data-preview-url="{{ route('admin.pendaftaran.document.preview', $pendaftaran) }}"
                             data-download-url="{{ route('admin.pendaftaran.document.download', $pendaftaran) }}"
                             data-nama="{{ $pendaftaran->nama_lengkap }}">
