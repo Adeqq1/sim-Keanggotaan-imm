@@ -107,15 +107,30 @@
                 @elseif(auth()->user()->role === 'instruktur')
                     <p class="sidebar-section-label">Menu Instruktur</p>
                     <a href="{{ route('admin.kegiatan.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.kegiatan.*') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('admin.kegiatan.*', 'admin.presensi.*') ? 'active' : '' }}">
                         <i class="bi bi-calendar-event"></i>
                         Kegiatan
                     </a>
-                    <a href="{{ route('admin.presensi.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.presensi.*') ? 'active' : '' }}">
-                        <i class="bi bi-check2-square"></i>
-                        Rekap Presensi
-                    </a>
+                    <nav class="sidebar-submenu" aria-label="Navigasi kegiatan">
+                        <a href="{{ route('admin.kegiatan.index') }}"
+                           class="sidebar-sublink {{ request()->routeIs('admin.kegiatan.index', 'admin.kegiatan.show', 'admin.kegiatan.edit', 'admin.kegiatan.update', 'admin.kegiatan.destroy') ? 'active' : '' }}"
+                           @if(request()->routeIs('admin.kegiatan.index', 'admin.kegiatan.show', 'admin.kegiatan.edit', 'admin.kegiatan.update', 'admin.kegiatan.destroy')) aria-current="page" @endif>
+                            <i class="bi bi-list-ul"></i>
+                            Daftar Kegiatan
+                        </a>
+                        <a href="{{ route('admin.kegiatan.create') }}"
+                           class="sidebar-sublink {{ request()->routeIs('admin.kegiatan.create', 'admin.kegiatan.store') ? 'active' : '' }}"
+                           @if(request()->routeIs('admin.kegiatan.create', 'admin.kegiatan.store')) aria-current="page" @endif>
+                            <i class="bi bi-plus-circle"></i>
+                            Buat Kegiatan Baru
+                        </a>
+                        <a href="{{ route('admin.presensi.index') }}"
+                           class="sidebar-sublink {{ request()->routeIs('admin.presensi.*') ? 'active' : '' }}"
+                           @if(request()->routeIs('admin.presensi.*')) aria-current="page" @endif>
+                            <i class="bi bi-check2-square"></i>
+                            Rekap Presensi
+                        </a>
+                    </nav>
 
                 @else
                     <p class="sidebar-section-label">Menu Kader</p>

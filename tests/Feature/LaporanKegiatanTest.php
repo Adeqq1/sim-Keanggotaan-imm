@@ -236,8 +236,12 @@ test('sidebar instruktur hanya mengaktifkan rekap presensi pada halaman presensi
         ->get(route('admin.presensi.index'))
         ->assertSuccessful();
 
-    expect(substr_count($response->getContent(), 'class="sidebar-link active"'))->toBe(1);
-    $response->assertSee('href="'.route('admin.presensi.index').'"'.PHP_EOL.'                       class="sidebar-link active"', false);
+    expect(substr_count($response->getContent(), 'class="sidebar-link active"'))->toBe(1)
+        ->and(substr_count($response->getContent(), 'class="sidebar-sublink active"'))->toBe(1);
+
+    $response
+        ->assertSee('href="'.route('admin.presensi.index').'"'.PHP_EOL.'                           class="sidebar-sublink active"', false)
+        ->assertSee('aria-current="page"', false);
 });
 
 test('akses rekap laporan lampiran dan direktori materi mengikuti role', function () {

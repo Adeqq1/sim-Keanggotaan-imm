@@ -8,6 +8,32 @@ use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
+function instrukturSidebarXPath(string $content): DOMXPath
+{
+    $dom = new DOMDocument();
+    $previous = libxml_use_internal_errors(true);
+    $dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR | LIBXML_NOWARNING);
+    libxml_use_internal_errors($previous);
+
+    return new DOMXPath($dom);
+}
+
+function instrukturSidebarSublink(DOMXPath $xpath, string $href): ?DOMElement
+{
+    $nodes = $xpath->query(
+        '//a[contains(concat(" ", normalize-space(@class), " "), " sidebar-sublink ")][@href="'.$href.'"]'
+    );
+
+    return $nodes->length === 1 ? $nodes->item(0) : null;
+}
+
+function instrukturActiveSublinkCount(DOMXPath $xpath): int
+{
+    return $xpath->query(
+        '//a[contains(concat(" ", normalize-space(@class), " "), " sidebar-sublink ")][contains(concat(" ", normalize-space(@class), " "), " active ")]'
+    )->length;
+}
+
 test('instruktur redirects to admin.kegiatan.index on login', function () {
     $instruktur = User::factory()->instruktur()->create();
 
@@ -17,6 +43,74 @@ test('instruktur redirects to admin.kegiatan.index on login', function () {
     ]);
 
     $response->assertRedirect(route('admin.kegiatan.index'));
+});
+
+test('instruktur sidebar shows kegiatan submenu with correct links', function () {
+    $instruktur = User::factory()->instruktur()->create();
+
+    $response = $this->actingAs($instruktur)
+        ->get(route('admin.kegiatan.index'))
+        ->assertOk()
+        ->assertSee('aria-label="Navigasi kegiatan"', false)
+        ->assertSeeText('Daftar Kegiatan')
+        ->assertSeeText('Buat Kegiatan Baru')
+        ->assertSeeText('Rekap Presensi');
+
+    $xpath = instrukturSidebarXPath($response->getContent());
+
+    foreach ([
+        route('admin.kegiatan.index') => 'Daftar Kegiatan',
+        route('admin.kegiatan.create') => 'Buat Kegiatan Baru',
+        route('admin.presensi.index') => 'Rekap Presensi',
+    ] as $href => $text) {
+        $link = instrukturSidebarSublink($xpath, $href);
+        expect($link)->not->toBeNull()
+            ->and($link->textContent)->toContain($text);
+    }
+
+    $daftar = instrukturSidebarSublink($xpath, route('admin.kegiatan.index'));
+    expect($daftar->getAttribute('class'))->toContain('sidebar-sublink active')
+        ->and($daftar->getAttribute('aria-current'))->toBe('page');
+
+    expect(instrukturActiveSublinkCount($xpath))->toBe(1);
+});
+
+test('instruktur sidebar marks kegiatan create submenu as active', function () {
+    $instruktur = User::factory()->instruktur()->create();
+
+    $content = $this->actingAs($instruktur)
+        ->get(route('admin.kegiatan.create'))
+        ->assertOk()
+        ->getContent();
+
+    $xpath = instrukturSidebarXPath($content);
+    $create = instrukturSidebarSublink($xpath, route('admin.kegiatan.create'));
+
+    expect($create)->not->toBeNull()
+        ->and($create->textContent)->toContain('Buat Kegiatan Baru')
+        ->and($create->getAttribute('class'))->toContain('sidebar-sublink active')
+        ->and($create->getAttribute('aria-current'))->toBe('page');
+
+    expect(instrukturActiveSublinkCount($xpath))->toBe(1);
+});
+
+test('instruktur sidebar marks presensi submenu as active', function () {
+    $instruktur = User::factory()->instruktur()->create();
+
+    $content = $this->actingAs($instruktur)
+        ->get(route('admin.presensi.index'))
+        ->assertOk()
+        ->getContent();
+
+    $xpath = instrukturSidebarXPath($content);
+    $presensi = instrukturSidebarSublink($xpath, route('admin.presensi.index'));
+
+    expect($presensi)->not->toBeNull()
+        ->and($presensi->textContent)->toContain('Rekap Presensi')
+        ->and($presensi->getAttribute('class'))->toContain('sidebar-sublink active')
+        ->and($presensi->getAttribute('aria-current'))->toBe('page');
+
+    expect(instrukturActiveSublinkCount($xpath))->toBe(1);
 });
 
 test('instruktur can access kegiatan management and store new kegiatan with thumbnail', function () {

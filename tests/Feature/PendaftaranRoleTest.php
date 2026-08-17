@@ -35,6 +35,35 @@ function validPendaftaranPayload(array $overrides = []): array
     return array_merge($defaults, $overrides);
 }
 
+function pendaftaranFormXPath(string $content): DOMXPath
+{
+    $dom = new DOMDocument();
+    $previous = libxml_use_internal_errors(true);
+    $dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR | LIBXML_NOWARNING);
+    libxml_use_internal_errors($previous);
+
+    return new DOMXPath($dom);
+}
+
+function pendaftaranFieldWrapperClass(DOMXPath $xpath, string $name): ?string
+{
+    $nodes = $xpath->query('//*[@name="'.$name.'"]');
+    if ($nodes->length === 0) {
+        return null;
+    }
+
+    $node = $nodes->item(0);
+    while ($node instanceof DOMElement) {
+        $class = $node->getAttribute('class');
+        if (str_contains($class, 'col-12')) {
+            return $class;
+        }
+        $node = $node->parentNode;
+    }
+
+    return null;
+}
+
 test('public pendaftaran form shows role choices', function () {
     $response = $this->get(route('pendaftaran'));
 
@@ -173,7 +202,25 @@ test('public pendaftaran form renders komisariat and tahun daftar fields', funct
         ->toContain('id="tahun_daftar"')
         ->toContain('pendaftaran-komisariat')
         ->toContain('<noscript>')
-        ->toContain('.pendaftaran-komisariat[x-cloak] { display: block !important; }');
+        ->toContain('.pendaftaran-komisariat[x-cloak] { display: block !important; }')
+        ->toContain('auth-card--pendaftaran')
+        ->toContain('row g-3');
+
+    $xpath = pendaftaranFormXPath($response->getContent());
+
+    $fields = ['nama_lengkap', 'email', 'role', 'tahun_daftar', 'tempat_lahir', 'tanggal_lahir', 'file_persyaratan'];
+    foreach ($fields as $field) {
+        $class = pendaftaranFieldWrapperClass($xpath, $field);
+        expect($class)->not->toBeNull()
+            ->and($class)->toContain('col-12')
+            ->and($class)->toContain('col-md-6');
+    }
+
+    foreach (['tempat_lahir', 'tanggal_lahir'] as $birthField) {
+        expect(pendaftaranFieldWrapperClass($xpath, $birthField))->not->toContain('col-sm-6');
+    }
+
+    expect($response->getContent())->toContain('Kirim Pendaftaran');
 });
 
 test('kader registrasi valid menyimpan komisariat dan tahun daftar', function () {
