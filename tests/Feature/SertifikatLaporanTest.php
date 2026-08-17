@@ -88,3 +88,23 @@ test('admin bulk certificate generation dispatches GenerateCertificateJob', func
         return $job->kegiatan->id === $kegiatan->id && $job->anggota->id === $anggota2->id;
     });
 });
+
+test('admin laporan page renders semantic form without alert', function () {
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin)->get(route('admin.laporan.index'));
+
+    $content = $response->assertOk()
+        ->assertSee(route('admin.laporan.exportPdf'), false)
+        ->assertSee(route('admin.laporan.exportExcel'), false)
+        ->assertSee('name="jenis_laporan"', false)
+        ->assertSee('name="tanggal_mulai"', false)
+        ->assertSee('name="tanggal_selesai"', false)
+        ->assertSee('data-date-range-form', false)
+        ->getContent();
+
+    expect($content)->not->toContain('alert(');
+    expect($content)->not->toContain('submitForm');
+    expect($content)->not->toContain('formPdf');
+    expect($content)->not->toContain('formExcel');
+});

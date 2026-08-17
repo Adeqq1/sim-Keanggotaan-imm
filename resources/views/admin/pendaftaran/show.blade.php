@@ -58,9 +58,27 @@
             </div>
 
             @if($pendaftaran->file_persyaratan)
-                <a href="{{ route('admin.pendaftaran.document.download', $pendaftaran) }}" class="btn btn-outline-primary btn-ui btn-ui-sm pendaftaran-detail-control w-100 w-sm-auto py-2">
-                    <i class="bi bi-download me-2"></i> Unduh Dokumen Identitas
-                </a>
+                @php
+                    $ext = strtolower(pathinfo($pendaftaran->file_persyaratan, PATHINFO_EXTENSION));
+                @endphp
+                <div class="d-flex gap-2 flex-wrap">
+                    @if(in_array($ext, ['jpg', 'jpeg', 'png']))
+                        <button type="button" class="btn btn-outline-primary btn-ui btn-ui-sm pendaftaran-detail-control py-2 preview-image-btn"
+                            data-preview-url="{{ route('admin.pendaftaran.document.preview', $pendaftaran) }}"
+                            data-download-url="{{ route('admin.pendaftaran.document.download', $pendaftaran) }}"
+                            data-nama="{{ $pendaftaran->nama_lengkap }}">
+                            <i class="bi bi-eye me-2"></i> Pratinjau Dokumen
+                        </button>
+                    @elseif($ext === 'pdf')
+                        <a href="{{ route('admin.pendaftaran.document.preview', $pendaftaran) }}" target="_blank" rel="noopener"
+                           class="btn btn-outline-primary btn-ui btn-ui-sm pendaftaran-detail-control py-2">
+                            <i class="bi bi-file-earmark-pdf me-2"></i> Buka PDF di Tab Baru
+                        </a>
+                    @endif
+                    <a href="{{ route('admin.pendaftaran.document.download', $pendaftaran) }}" class="btn btn-outline-primary btn-ui btn-ui-sm pendaftaran-detail-control py-2">
+                        <i class="bi bi-download me-2"></i> Unduh Dokumen Identitas
+                    </a>
+                </div>
             @else
                 <div class="text-muted small">Dokumen tidak tersedia pada data lama.</div>
             @endif
@@ -130,4 +148,6 @@
             <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar
         </a>
     </div>
+
+    <x-pendaftaran-document-preview />
 </x-app-layout>

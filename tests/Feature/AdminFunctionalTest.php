@@ -280,6 +280,19 @@ test('admin rejection deletes the registration identity document', function () {
     Storage::disk('local')->assertMissing($path);
 });
 
+test('admin approval flash renders as auto-dismiss toast', function () {
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin)
+        ->withSession(['success' => 'Pendaftaran disetujui.'])
+        ->get(route('admin.pendaftaran.index'));
+
+    $response->assertOk()
+        ->assertSee('Pendaftaran disetujui.', false)
+        ->assertSee('data-auto-dismiss-toast', false)
+        ->assertSee('data-bs-dismiss="toast"', false);
+});
+
 test('admin must provide catatan admin when rejecting pendaftaran', function () {
     $admin = User::factory()->admin()->create();
     $pendaftaran = Pendaftaran::factory()->create();

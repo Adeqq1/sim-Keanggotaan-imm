@@ -295,3 +295,141 @@ test('legacy registration detail identifies missing document metadata without a 
         ->assertSeeText('Dokumen tidak tersedia pada data lama')
         ->assertDontSee('admin.pendaftaran.document.download');
 });
+
+test('admin can preview image identity document inline with correct headers', function () {
+    $admin = User::factory()->admin()->create();
+    $path = 'pendaftaran/preview-identity.jpg';
+    Storage::disk('local')->put($path, 'fake-image-content');
+    $pendaftaran = Pendaftaran::factory()->create([
+        'file_persyaratan' => $path,
+        'jenis_dokumen_identitas' => 'ktp',
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.preview', $pendaftaran));
+
+    $response->assertSuccessful()
+        ->assertHeader('Content-Type', 'image/jpeg')
+        ->assertHeader('Content-Disposition', 'inline; filename=ktp-pendaftaran-'.$pendaftaran->id.'.jpg')
+        ->assertHeader('Cache-Control', 'max-age=0, no-store, private')
+        ->assertHeader('Pragma', 'no-cache')
+        ->assertHeader('X-Content-Type-Options', 'nosniff');
+});
+
+test('admin can preview PDF identity document inline', function () {
+    $admin = User::factory()->admin()->create();
+    $path = 'pendaftaran/preview-identity.pdf';
+    Storage::disk('local')->put($path, '%PDF-1.4 content');
+    $pendaftaran = Pendaftaran::factory()->create([
+        'file_persyaratan' => $path,
+        'jenis_dokumen_identitas' => 'ktp',
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.preview', $pendaftaran));
+
+    $response->assertSuccessful()
+        ->assertHeader('Content-Type', 'application/pdf')
+        ->assertHeader('Content-Disposition', 'inline; filename=ktp-pendaftaran-'.$pendaftaran->id.'.pdf');
+});
+
+test('download endpoint remains attachment after preview is added', function () {
+    $admin = User::factory()->admin()->create();
+    $path = 'pendaftaran/download-still-attachment.pdf';
+    Storage::disk('local')->put($path, '%PDF-1.4 attachment test');
+    $pendaftaran = Pendaftaran::factory()->create([
+        'file_persyaratan' => $path,
+        'jenis_dokumen_identitas' => 'ktp',
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.download', $pendaftaran));
+
+    $response->assertSuccessful()
+        ->assertHeader('Content-Disposition', 'attachment; filename=ktp-pendaftaran-'.$pendaftaran->id.'.pdf');
+});
+
+test('preview returns 404 for missing or empty path documents', function () {
+    $admin = User::factory()->admin()->create();
+    $legacy = Pendaftaran::factory()->create(['file_persyaratan' => null]);
+    $missing = Pendaftaran::factory()->create(['file_persyaratan' => 'pendaftaran/missing.pdf']);
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.preview', $legacy))
+        ->assertNotFound();
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.preview', $missing))
+        ->assertNotFound();
+});
+
+test('preview returns 404 for documents with disallowed MIME type', function () {
+    $admin = User::factory()->admin()->create();
+    $path = 'pendaftaran/unknown-type.bin';
+    Storage::disk('local')->put($path, 'binary content');
+    $pendaftaran = Pendaftaran::factory()->create([
+        'file_persyaratan' => $path,
+        'jenis_dokumen_identitas' => 'ktp',
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.preview', $pendaftaran))
+        ->assertNotFound();
+});
+
+test('only admins can preview registration identity documents', function () {
+    $path = 'pendaftaran/access-preview-test.jpg';
+    Storage::disk('local')->put($path, 'fake-image-content');
+    $pendaftaran = Pendaftaran::factory()->create(['file_persyaratan' => $path]);
+    $kader = User::factory()->kader()->create();
+    $instruktur = User::factory()->instruktur()->create();
+
+    $this->get(route('admin.pendaftaran.document.preview', $pendaftaran))
+        ->assertRedirect(route('login'));
+
+    $this->actingAs($kader)
+        ->get(route('admin.pendaftaran.document.preview', $pendaftaran))
+        ->assertForbidden();
+
+    $this->actingAs($instruktur)
+        ->get(route('admin.pendaftaran.document.preview', $pendaftaran))
+        ->assertForbidden();
+});
+
+test('admin pendaftaran index shows preview controls for image and PDF documents', function () {
+    $admin = User::factory()->admin()->create();
+
+    $jpgDoc = Pendaftaran::factory()->create(['file_persyaratan' => 'pendaftaran/img.jpg']);
+    $pdfDoc = Pendaftaran::factory()->create(['file_persyaratan' => 'pendaftaran/doc.pdf']);
+
+    $response = $this->actingAs($admin)->get(route('admin.pendaftaran.index'));
+
+    $response->assertOk()
+        ->assertSee(route('admin.pendaftaran.document.preview', $jpgDoc), false)
+        ->assertSee('preview-image-btn', false)
+        ->assertSee(route('admin.pendaftaran.document.preview', $pdfDoc), false)
+        ->assertSee('target="_blank"', false)
+        ->assertSee('rel="noopener"', false);
+});
+
+test('admin pendaftaran detail shows preview controls for image and PDF documents', function () {
+    $admin = User::factory()->admin()->create();
+
+    $jpgDoc = Pendaftaran::factory()->create(['file_persyaratan' => 'pendaftaran/detail-img.jpg']);
+    $pdfDoc = Pendaftaran::factory()->create(['file_persyaratan' => 'pendaftaran/detail-doc.pdf']);
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.show', $jpgDoc))
+        ->assertOk()
+        ->assertSee(route('admin.pendaftaran.document.preview', $jpgDoc), false)
+        ->assertSee('Pratinjau Dokumen', false)
+        ->assertSee('preview-image-btn', false);
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.show', $pdfDoc))
+        ->assertOk()
+        ->assertSee(route('admin.pendaftaran.document.preview', $pdfDoc), false)
+        ->assertSee('Buka PDF di Tab Baru', false)
+        ->assertSee('target="_blank"', false)
+        ->assertSee('rel="noopener"', false);
+});

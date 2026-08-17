@@ -26,6 +26,23 @@
                     <div class="mt-3 d-flex gap-2 index-card__actions">
                         <a href="{{ route('admin.pendaftaran.show', $item) }}" class="btn btn-primary btn-ui btn-ui-sm flex-grow-1">Detail & Validasi</a>
                         @if($item->file_persyaratan)
+                            @php
+                                $ext = strtolower(pathinfo($item->file_persyaratan, PATHINFO_EXTENSION));
+                            @endphp
+                            @if(in_array($ext, ['jpg', 'jpeg', 'png']))
+                                <button type="button" class="btn btn-outline-secondary btn-ui btn-ui-sm btn-icon preview-image-btn"
+                                    data-preview-url="{{ route('admin.pendaftaran.document.preview', $item) }}"
+                                    data-download-url="{{ route('admin.pendaftaran.document.download', $item) }}"
+                                    data-nama="{{ $item->nama_lengkap }}"
+                                    aria-label="Pratinjau dokumen identitas" title="Pratinjau dokumen identitas">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            @elseif($ext === 'pdf')
+                                <a href="{{ route('admin.pendaftaran.document.preview', $item) }}" target="_blank" rel="noopener"
+                                   class="btn btn-outline-secondary btn-ui btn-ui-sm btn-icon" aria-label="Buka PDF di tab baru" title="Buka PDF di tab baru">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </a>
+                            @endif
                             <a href="{{ route('admin.pendaftaran.document.download', $item) }}" class="btn btn-outline-secondary btn-ui btn-ui-sm btn-icon" aria-label="Unduh dokumen identitas" title="Unduh dokumen identitas"><i class="bi bi-file-earmark-text"></i></a>
                         @endif
                     </div>
@@ -38,6 +55,8 @@
             </div>
         @endforelse
     </div>
+
+    <x-pendaftaran-document-preview />
 
     {{ $pendaftarans->links('components.pagination') }}
 </x-app-layout>
