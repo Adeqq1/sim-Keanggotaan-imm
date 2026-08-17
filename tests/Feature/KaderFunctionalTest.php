@@ -17,6 +17,20 @@ test('kader can view profile edit page', function () {
     $response->assertSuccessful();
 });
 
+test('kader dashboard renders five existing quick actions', function () {
+    $user = User::factory()->kader()->create();
+    Anggota::factory()->create(['user_id' => $user->id]);
+
+    $response = $this->actingAs($user)->get(route('kader.dashboard'));
+
+    $response->assertOk()
+        ->assertSee(route('kader.ekta'), false)
+        ->assertSee(route('kader.sertifikat.index'), false)
+        ->assertSee(route('kader.riwayat.index'), false)
+        ->assertSee(route('profile.edit'), false)
+        ->assertSee(route('kader.materi.index'), false);
+});
+
 test('kader can update profile', function () {
     $user = User::factory()->kader()->create();
     $anggota = Anggota::factory()->create(['user_id' => $user->id]);

@@ -8,7 +8,7 @@
     @endif
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h6 class="fw-bold mb-0">Daftar Kegiatan</h6>
+        <h6 class="fw-bold mb-0 desktop-section-heading"><i class="bi bi-list-ul"></i> Daftar Kegiatan</h6>
         <a href="{{ route('admin.kegiatan.create') }}" class="btn btn-primary btn-ui btn-ui-sm">
             <i class="bi bi-plus-lg"></i> Tambah
         </a>
@@ -17,7 +17,7 @@
     <div class="row g-3 index-card-grid">
     @forelse($kegiatans as $kegiatan)
         <div class="col-12 col-sm-6">
-        <div class="card h-100 p-3 index-card d-flex flex-column">
+        <div class="card h-100 p-3 index-card d-flex flex-column desktop-kegiatan-index-card">
             <div class="d-flex align-items-center">
                 <div class="bg-light rounded p-2 me-3 text-center" style="min-width: 55px;">
                     <span class="d-block fw-bold text-primary fs-5">{{ $kegiatan->tanggal_waktu->format('d') }}</span>

@@ -867,7 +867,235 @@ canvas {
     .app-main-content .btn-ui,
     .app-main-content .quick-action-card,
     .desktop-topbar .btn-ui,
-    .sidebar-desktop .btn-ui {
+    .sidebar-desktop .btn-ui,
+    .desktop-stat-card,
+    .desktop-quick-action,
+    .desktop-kegiatan-item,
+    .desktop-kegiatan-index-card {
         transition: none;
+    }
+}
+
+/* ============================================
+   DESKTOP DASHBOARD REDESIGN (opt-in, ≥992px)
+   ============================================ */
+@media (min-width: 992px) {
+    /* Surface panel konsisten untuk dashboard */
+    .desktop-panel {
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 14px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Heading section yang jelas dengan ikon pendukung */
+    .desktop-section-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 1rem;
+        min-width: 0;
+    }
+    .desktop-section-heading i {
+        color: var(--bs-primary);
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    /* Statistik ringkas: ikon + nilai + label dalam satu baris */
+    .desktop-stat-grid {
+        gap: 1rem;
+    }
+    .desktop-stat-card {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.9rem;
+        padding: 1.1rem 1.25rem;
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 14px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        height: 100%;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .desktop-stat-card:hover {
+        border-color: rgba(128, 0, 0, 0.18);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+    }
+    .desktop-stat-icon {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-size: 1.35rem;
+    }
+    .desktop-stat-body {
+        min-width: 0;
+    }
+    .desktop-stat-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        line-height: 1.1;
+        color: #1a1a2e;
+    }
+    .desktop-stat-label {
+        font-size: 0.72rem;
+        color: #6c757d;
+        letter-spacing: 0.02em;
+    }
+
+    /* Aksi cepat: kartu link yang konsisten */
+    .desktop-quick-action {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.9rem 1rem;
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 12px;
+        color: #212529;
+        text-decoration: none;
+        height: 100%;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    }
+    .desktop-quick-action:hover {
+        border-color: rgba(128, 0, 0, 0.22);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+        color: var(--bs-link-color);
+        transform: translateY(-1px);
+    }
+    .desktop-quick-action:focus-visible {
+        outline: 3px solid rgba(128, 0, 0, 0.35);
+        outline-offset: 2px;
+    }
+    .desktop-quick-action__icon {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        font-size: 1.2rem;
+    }
+    .desktop-quick-action__label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #212529;
+        min-width: 0;
+    }
+    .desktop-quick-action:hover .desktop-quick-action__label {
+        color: var(--bs-link-color);
+    }
+
+    /* Daftar kegiatan mudah dipindai */
+    .desktop-kegiatan-item {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        padding: 0.85rem 1rem;
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .desktop-kegiatan-item:hover {
+        border-color: rgba(128, 0, 0, 0.16);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .desktop-kegiatan-date {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #f8f1f1;
+        border-radius: 10px;
+        color: var(--bs-primary);
+    }
+    .desktop-kegiatan-date__day {
+        font-size: 1.1rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .desktop-kegiatan-date__month {
+        font-size: 0.6rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .desktop-kegiatan-body {
+        flex: 1;
+        min-width: 0;
+    }
+    .desktop-kegiatan-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .desktop-kegiatan-meta {
+        font-size: 0.75rem;
+        color: #6c757d;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .desktop-kegiatan-time {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #6c757d;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    /* Navigasi desktop: perbaiki kepadatan dan focus */
+    .sidebar-nav {
+        padding-top: 0.75rem;
+    }
+    .sidebar-section-label {
+        padding-top: 1.25rem;
+        padding-bottom: 0.4rem;
+    }
+    .sidebar-link {
+        padding-top: 0.7rem;
+        padding-bottom: 0.7rem;
+    }
+    .sidebar-link:focus-visible {
+        outline: 2px solid rgba(255, 255, 255, 0.7);
+        outline-offset: 1px;
+    }
+
+    /* Daftar kegiatan index (dashboard instruktur) */
+    .desktop-kegiatan-index-card {
+        border-radius: 14px;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .desktop-kegiatan-index-card:hover {
+        border-color: rgba(128, 0, 0, 0.18);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Topbar: judul lebih tegas, ruang pengguna rapi */
+    .desktop-topbar {
+        padding-top: 0.85rem;
+        padding-bottom: 0.85rem;
+    }
+    .desktop-topbar-title {
+        font-size: 1.2rem;
     }
 }
