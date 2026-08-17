@@ -85,3 +85,15 @@ test('non-admin is forbidden to access admin dashboard', function () {
 
     $response->assertStatus(403);
 });
+
+test('admin dashboard renders chart data and all quick actions', function () {
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+    $response->assertOk()
+        ->assertViewHas('chartData')
+        ->assertSee(route('admin.pendaftaran.index'), false)
+        ->assertSee(route('admin.sertifikat.create'), false)
+        ->assertSee(route('admin.laporan.index'), false);
+});

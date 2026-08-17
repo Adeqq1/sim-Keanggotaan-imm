@@ -51,55 +51,65 @@
                 @if(auth()->user()->role === 'admin')
                     <p class="sidebar-section-label">Menu Admin</p>
                     <a href="{{ route('admin.dashboard') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
+                       @if(request()->routeIs('admin.dashboard')) aria-current="page" @endif>
                         <i class="bi bi-speedometer2"></i>
                         Dashboard
                     </a>
                     <a href="{{ route('admin.pendaftaran.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.pendaftaran.*') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('admin.pendaftaran.*') ? 'active' : '' }}"
+                       @if(request()->routeIs('admin.pendaftaran.*')) aria-current="page" @endif>
                         <i class="bi bi-person-plus"></i>
                         Pendaftaran
                     </a>
                     <a href="{{ route('admin.anggota.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.anggota.*') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('admin.anggota.*') ? 'active' : '' }}"
+                       @if(request()->routeIs('admin.anggota.*')) aria-current="page" @endif>
                         <i class="bi bi-people"></i>
                         Anggota
                     </a>
                     <p class="sidebar-section-label">Kegiatan</p>
                     <a href="{{ route('admin.kegiatan.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.kegiatan.index', 'admin.kegiatan.create', 'admin.kegiatan.store', 'admin.kegiatan.show', 'admin.kegiatan.edit', 'admin.kegiatan.update', 'admin.kegiatan.destroy') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('admin.kegiatan.index', 'admin.kegiatan.create', 'admin.kegiatan.store', 'admin.kegiatan.show', 'admin.kegiatan.edit', 'admin.kegiatan.update', 'admin.kegiatan.destroy') ? 'active' : '' }}"
+                       @if(request()->routeIs('admin.kegiatan.index', 'admin.kegiatan.create', 'admin.kegiatan.store', 'admin.kegiatan.show', 'admin.kegiatan.edit', 'admin.kegiatan.update', 'admin.kegiatan.destroy')) aria-current="page" @endif>
                         <i class="bi bi-calendar-event"></i>
                         Daftar Kegiatan
                     </a>
                     <a href="{{ route('admin.presensi.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.presensi.*') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('admin.presensi.*') ? 'active' : '' }}"
+                       @if(request()->routeIs('admin.presensi.*')) aria-current="page" @endif>
                         <i class="bi bi-check2-square"></i>
                         Rekap Presensi
                     </a>
                     <a href="{{ route('admin.laporan-kegiatan.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.laporan-kegiatan.*', 'admin.kegiatan.laporan-kegiatan.*') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('admin.laporan-kegiatan.*', 'admin.kegiatan.laporan-kegiatan.*') ? 'active' : '' }}"
+                       @if(request()->routeIs('admin.laporan-kegiatan.*', 'admin.kegiatan.laporan-kegiatan.*')) aria-current="page" @endif>
                         <i class="bi bi-file-earmark-text"></i>
                         Laporan Kegiatan
                     </a>
                     <a href="{{ route('admin.materi-kegiatan.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.materi-kegiatan.*') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('admin.materi-kegiatan.*') ? 'active' : '' }}"
+                       @if(request()->routeIs('admin.materi-kegiatan.*')) aria-current="page" @endif>
                         <i class="bi bi-journal-text"></i>
                         Materi Kegiatan
                     </a>
 
                     <p class="sidebar-section-label">Manajemen</p>
                     <a href="{{ route('admin.sertifikat.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.sertifikat.index') || request()->routeIs('admin.sertifikat.create') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('admin.sertifikat.index') || request()->routeIs('admin.sertifikat.create') ? 'active' : '' }}"
+                       @if(request()->routeIs('admin.sertifikat.index') || request()->routeIs('admin.sertifikat.create')) aria-current="page" @endif>
                         <i class="bi bi-patch-plus"></i>
                         Sertifikat
                     </a>
                     <a href="{{ route('admin.arsip.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.arsip.*') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('admin.arsip.*') ? 'active' : '' }}"
+                       @if(request()->routeIs('admin.arsip.*')) aria-current="page" @endif>
                         <i class="bi bi-folder2-open"></i>
                         E-Arsip
                     </a>
                     <a href="{{ route('admin.laporan.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}"
+                       @if(request()->routeIs('admin.laporan.*')) aria-current="page" @endif>
                         <i class="bi bi-file-earmark-bar-graph"></i>
                         Laporan Sistem
                     </a>
@@ -107,7 +117,8 @@
                 @elseif(auth()->user()->role === 'instruktur')
                     <p class="sidebar-section-label">Menu Instruktur</p>
                     <a href="{{ route('admin.kegiatan.index') }}"
-                       class="sidebar-link {{ request()->routeIs('admin.kegiatan.*', 'admin.presensi.*') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('admin.kegiatan.*', 'admin.presensi.*') ? 'active' : '' }}"
+                       @if(request()->routeIs('admin.kegiatan.*', 'admin.presensi.*')) aria-current="page" @endif>
                         <i class="bi bi-calendar-event"></i>
                         Kegiatan
                     </a>
@@ -135,32 +146,38 @@
                 @else
                     <p class="sidebar-section-label">Menu Kader</p>
                     <a href="{{ route('kader.dashboard') }}"
-                       class="sidebar-link {{ request()->routeIs('kader.dashboard') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('kader.dashboard') ? 'active' : '' }}"
+                       @if(request()->routeIs('kader.dashboard')) aria-current="page" @endif>
                         <i class="bi bi-house"></i>
                         Dashboard
                     </a>
                     <a href="{{ route('kader.ekta') }}"
-                       class="sidebar-link {{ request()->routeIs('kader.ekta') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('kader.ekta') ? 'active' : '' }}"
+                       @if(request()->routeIs('kader.ekta')) aria-current="page" @endif>
                         <i class="bi bi-person-vcard"></i>
                         E-KTA Digital
                     </a>
                     <a href="{{ route('kader.sertifikat.index') }}"
-                       class="sidebar-link {{ request()->routeIs('kader.sertifikat.*') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('kader.sertifikat.*') ? 'active' : '' }}"
+                       @if(request()->routeIs('kader.sertifikat.*')) aria-current="page" @endif>
                         <i class="bi bi-award"></i>
                         E-Sertifikat
                     </a>
                     <a href="{{ route('kader.arsip.index') }}"
-                       class="sidebar-link {{ request()->routeIs('kader.arsip.*') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('kader.arsip.*') ? 'active' : '' }}"
+                       @if(request()->routeIs('kader.arsip.*')) aria-current="page" @endif>
                         <i class="bi bi-folder2-open"></i>
                         E-Arsip
                     </a>
                     <a href="{{ route('kader.materi.index') }}"
-                       class="sidebar-link {{ request()->routeIs('kader.materi.*') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('kader.materi.*') ? 'active' : '' }}"
+                       @if(request()->routeIs('kader.materi.*')) aria-current="page" @endif>
                         <i class="bi bi-journal-text"></i>
                         Materi
                     </a>
                     <a href="{{ route('kader.riwayat.index') }}"
-                       class="sidebar-link {{ request()->routeIs('kader.riwayat.*') ? 'active' : '' }}">
+                       class="sidebar-link {{ request()->routeIs('kader.riwayat.*') ? 'active' : '' }}"
+                       @if(request()->routeIs('kader.riwayat.*')) aria-current="page" @endif>
                         <i class="bi bi-clock-history"></i>
                         Riwayat
                     </a>
@@ -168,7 +185,8 @@
 
                 <p class="sidebar-section-label">Akun</p>
                 <a href="{{ route('profile.edit') }}"
-                   class="sidebar-link {{ request()->routeIs('profile.edit') ? 'active' : '' }}">
+                   class="sidebar-link {{ request()->routeIs('profile.edit') ? 'active' : '' }}"
+                   @if(request()->routeIs('profile.edit')) aria-current="page" @endif>
                     <i class="bi bi-person-circle"></i>
                     Profil Saya
                 </a>
