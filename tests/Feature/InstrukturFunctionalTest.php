@@ -19,6 +19,41 @@ test('instruktur redirects to admin.kegiatan.index on login', function () {
     $response->assertRedirect(route('admin.kegiatan.index'));
 });
 
+test('instruktur sidebar shows kegiatan submenu with correct links', function () {
+    $instruktur = User::factory()->instruktur()->create();
+
+    $this->actingAs($instruktur)
+        ->get(route('admin.kegiatan.index'))
+        ->assertOk()
+        ->assertSee('aria-label="Navigasi kegiatan"', false)
+        ->assertSeeText('Daftar Kegiatan')
+        ->assertSeeText('Buat Kegiatan Baru')
+        ->assertSeeText('Rekap Presensi')
+        ->assertSee(route('admin.kegiatan.index'), false)
+        ->assertSee(route('admin.kegiatan.create'), false)
+        ->assertSee(route('admin.presensi.index'), false);
+});
+
+test('instruktur sidebar marks kegiatan create submenu as active', function () {
+    $instruktur = User::factory()->instruktur()->create();
+
+    $this->actingAs($instruktur)
+        ->get(route('admin.kegiatan.create'))
+        ->assertOk()
+        ->assertSee('Buat Kegiatan Baru')
+        ->assertSee('aria-current="page"', false);
+});
+
+test('instruktur sidebar marks presensi submenu as active', function () {
+    $instruktur = User::factory()->instruktur()->create();
+
+    $this->actingAs($instruktur)
+        ->get(route('admin.presensi.index'))
+        ->assertOk()
+        ->assertSee('Rekap Presensi')
+        ->assertSee('aria-current="page"', false);
+});
+
 test('instruktur can access kegiatan management and store new kegiatan with thumbnail', function () {
     Storage::fake('public');
     $instruktur = User::factory()->instruktur()->create();

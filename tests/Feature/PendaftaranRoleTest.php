@@ -173,7 +173,19 @@ test('public pendaftaran form renders komisariat and tahun daftar fields', funct
         ->toContain('id="tahun_daftar"')
         ->toContain('pendaftaran-komisariat')
         ->toContain('<noscript>')
-        ->toContain('.pendaftaran-komisariat[x-cloak] { display: block !important; }');
+        ->toContain('.pendaftaran-komisariat[x-cloak] { display: block !important; }')
+        ->toContain('auth-card--pendaftaran')
+        ->toContain('row g-3');
+
+    foreach (['nama_lengkap', 'email', 'role', 'tahun_daftar', 'file_persyaratan'] as $field) {
+        expect($response->getContent())->toContain('name="'.$field.'"');
+    }
+
+    foreach (['nama_lengkap', 'email', 'role', 'tahun_daftar', 'file_persyaratan'] as $field) {
+        expect($response->getContent())->toContain('class="col-12 col-md-6"');
+    }
+
+    expect($response->getContent())->toContain('Kirim Pendaftaran');
 });
 
 test('kader registrasi valid menyimpan komisariat dan tahun daftar', function () {

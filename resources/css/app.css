@@ -195,6 +195,50 @@ canvas {
     background: white;
     border-radius: 0 3px 3px 0;
 }
+.sidebar-submenu {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0.15rem 0 0.4rem 2.15rem;
+}
+.sidebar-sublink {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.75rem;
+    border-radius: 8px;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.sidebar-sublink i {
+    font-size: 0.95rem;
+    width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+.sidebar-sublink:hover,
+.sidebar-sublink:focus-visible {
+    background: var(--sidebar-accent);
+    color: var(--sidebar-text-active);
+    text-decoration: none;
+}
+.sidebar-sublink:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.6);
+    outline-offset: 1px;
+}
+.sidebar-sublink.active {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--sidebar-text-active);
+    font-weight: 600;
+}
+.sidebar-sublink.active i {
+    opacity: 1;
+}
+
 .sidebar-badge {
     margin-left: auto;
     font-size: 0.6rem;
@@ -536,6 +580,11 @@ canvas {
     width: 100%;
     max-width: 400px;
     padding: 2rem;
+}
+@media (min-width: 768px) {
+    .auth-card.auth-card--pendaftaran {
+        max-width: 900px;
+    }
 }
 .auth-brand-icon {
     align-items: center;
