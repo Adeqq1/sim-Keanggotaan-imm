@@ -3,6 +3,7 @@
 use App\Models\Anggota;
 use App\Models\Arsip;
 use App\Models\Kegiatan;
+use App\Models\Pendaftaran;
 use App\Models\User;
 use App\Support\SortParams;
 use Illuminate\Http\Request;
@@ -35,6 +36,32 @@ test('admin anggota sorting preserves filters and pagination query strings', fun
         ->assertSee('name="direction"', false)->assertSee('value="asc"', false);
 });
 
+test('member and archive filters preserve the selected sorting', function () {
+    $admin = User::factory()->admin()->create();
+    Anggota::factory()->create(['nama_lengkap' => 'Zeta Filter']);
+    Anggota::factory()->create(['nama_lengkap' => 'Alpha Filter']);
+
+    $this->actingAs($admin)->get(route('admin.anggota.index', [
+        'sort' => 'nama', 'direction' => 'asc',
+    ]))->assertSee('name="sort" value="nama"', false)
+        ->assertSee('name="direction" value="asc"', false);
+
+    $member = Anggota::factory()->create();
+    Arsip::factory()->create(['anggota_id' => $member->id, 'judul_dokumen' => 'Zeta Archive']);
+    Arsip::factory()->create(['anggota_id' => $member->id, 'judul_dokumen' => 'Alpha Archive']);
+
+    $this->actingAs($admin)->get(route('admin.arsip.index', [
+        'q' => 'Archive', 'sort' => 'judul', 'direction' => 'asc',
+    ]))->assertSeeInOrder(['Alpha Archive', 'Zeta Archive'])
+        ->assertSee('name="sort" value="judul"', false)
+        ->assertSee('name="direction" value="asc"', false);
+
+    $this->actingAs($member->user)->get(route('kader.arsip.index', [
+        'q' => 'Archive', 'sort' => 'judul', 'direction' => 'asc',
+    ]))->assertSee('name="sort" value="judul"', false)
+        ->assertSee('name="direction" value="asc"', false);
+});
+
 test('list sorting controls auto-submit without a manual button', function () {
     $admin = User::factory()->admin()->create();
 
@@ -42,6 +69,13 @@ test('list sorting controls auto-submit without a manual button', function () {
         ->assertSuccessful()
         ->assertSee('data-auto-submit-sort', false)
         ->assertDontSee('>Terapkan<', false);
+
+    $script = file_get_contents(resource_path('js/app.js'));
+
+    expect($script)->toContain("[data-auto-submit-sort]")
+        ->toContain('select[name="sort"]')
+        ->toContain('select[name="direction"]')
+        ->toContain('form.requestSubmit()');
 });
 
 test('kader archive sorting remains owned by the authenticated member', function () {
@@ -70,3 +104,48 @@ test('report exports accept sorting fields', function () {
         'direction' => 'asc',
     ])->assertSuccessful();
 });
+
+test('all report types use the generic export sorting keys', function (string $jenis, string $first, string $last) {
+    $admin = User::factory()->admin()->create();
+    $controller = app(\App\Http\Controllers\LaporanController::class);
+    $method = new ReflectionMethod($controller, 'getData');
+    $method->setAccessible(true);
+    $mulai = now()->subDay()->toDateString();
+    $selesai = now()->addDay()->toDateString();
+
+    match ($jenis) {
+        'kegiatan' => [
+            Kegiatan::factory()->create(['nama_kegiatan' => 'Zeta Report', 'tanggal_waktu' => now()]),
+            Kegiatan::factory()->create(['nama_kegiatan' => 'Alpha Report', 'tanggal_waktu' => now()]),
+        ],
+        'anggota' => [
+            Anggota::factory()->create(['nama_lengkap' => 'Zeta Report']),
+            Anggota::factory()->create(['nama_lengkap' => 'Alpha Report']),
+        ],
+        'pendaftaran' => [
+            Pendaftaran::factory()->create(['nama_lengkap' => 'Zeta Report']),
+            Pendaftaran::factory()->create(['nama_lengkap' => 'Alpha Report']),
+        ],
+        'arsip' => [
+            Arsip::factory()->create(['judul_dokumen' => 'Zeta Report']),
+            Arsip::factory()->create(['judul_dokumen' => 'Alpha Report']),
+        ],
+    };
+
+    $ascending = $method->invoke($controller, $jenis, $mulai, $selesai, ['key' => 'nama', 'direction' => 'asc']);
+    $descending = $method->invoke($controller, $jenis, $mulai, $selesai, ['key' => 'nama', 'direction' => 'desc']);
+
+    expect($ascending->first()->{match ($jenis) {
+        'arsip' => 'judul_dokumen',
+        default => 'nama_'.($jenis === 'kegiatan' ? 'kegiatan' : 'lengkap'),
+    }})->toBe($first)
+        ->and($descending->first()->{match ($jenis) {
+            'arsip' => 'judul_dokumen',
+            default => 'nama_'.($jenis === 'kegiatan' ? 'kegiatan' : 'lengkap'),
+        }})->toBe($last);
+})->with([
+    ['kegiatan', 'Alpha Report', 'Zeta Report'],
+    ['anggota', 'Alpha Report', 'Zeta Report'],
+    ['pendaftaran', 'Alpha Report', 'Zeta Report'],
+    ['arsip', 'Alpha Report', 'Zeta Report'],
+]);

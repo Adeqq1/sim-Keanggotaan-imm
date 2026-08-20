@@ -60,9 +60,9 @@ class LaporanController extends Controller
     {
         $columns = [
             'kegiatan' => ['nama' => 'nama_kegiatan', 'tanggal' => 'tanggal_waktu', 'lokasi' => 'lokasi', 'created' => 'created_at'],
-            'anggota' => ['nama' => 'nama_lengkap', 'nia' => 'nia', 'status' => 'status_aktif', 'created' => 'created_at'],
+            'anggota' => ['nama' => 'nama_lengkap', 'tanggal' => 'created_at', 'created' => 'created_at'],
             'pendaftaran' => ['nama' => 'nama_lengkap', 'email' => 'email', 'tanggal' => 'tanggal_daftar', 'created' => 'created_at'],
-            'arsip' => ['judul' => 'judul_dokumen', 'nomor' => 'nomor_dokumen', 'kategori' => 'kategori_arsip', 'tanggal' => 'tanggal_unggah', 'created' => 'created_at'],
+            'arsip' => ['nama' => 'judul_dokumen', 'tanggal' => 'tanggal_unggah', 'created' => 'created_at'],
         ];
         $order = $columns[$jenis][$sort['key']];
 
@@ -83,10 +83,10 @@ class LaporanController extends Controller
     private function resolveSort(Request $request, string $jenis): array
     {
         $options = [
-            'kegiatan' => ['nama', 'tanggal', 'lokasi', 'created'],
-            'anggota' => ['nama', 'nia', 'status', 'created'],
-            'pendaftaran' => ['nama', 'email', 'tanggal', 'created'],
-            'arsip' => ['judul', 'nomor', 'kategori', 'tanggal', 'created'],
+            'kegiatan' => ['nama', 'tanggal', 'created'],
+            'anggota' => ['nama', 'tanggal', 'created'],
+            'pendaftaran' => ['nama', 'tanggal', 'created'],
+            'arsip' => ['nama', 'tanggal', 'created'],
         ];
 
         return SortParams::resolve($request, $options[$jenis], 'created');

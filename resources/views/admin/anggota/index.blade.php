@@ -19,6 +19,8 @@
     </div>
 
     <form action="{{ route('admin.anggota.index') }}" method="GET" class="mb-4">
+        <input type="hidden" name="sort" value="{{ $sort['key'] }}">
+        <input type="hidden" name="direction" value="{{ $sort['direction'] }}">
         <div class="row g-2 align-items-center">
             <div class="col-12 col-md">
                 <label for="anggota-search" class="visually-hidden">Cari anggota berdasarkan nama atau NIA</label>
