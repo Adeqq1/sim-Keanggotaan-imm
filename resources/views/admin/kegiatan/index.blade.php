@@ -24,9 +24,7 @@
                     <span class="d-block fw-bold text-primary fs-5">{{ $kegiatan->tanggal_waktu->format('d') }}</span>
                     <span class="small text-muted text-uppercase" style="font-size: 0.65rem;">{{ $kegiatan->tanggal_waktu->translatedFormat('M Y') }}</span>
                 </div>
-                @if($kegiatan->thumbnail)
-                    <img src="{{ asset('storage/' . $kegiatan->thumbnail) }}" alt="Gambar mini kegiatan" class="rounded me-3" style="width: 55px; height: 55px; object-fit: cover;">
-                @endif
+                <img src="{{ $kegiatan->thumbnail_url }}" alt="Gambar mini {{ $kegiatan->nama_kegiatan }}" class="rounded me-3 flex-shrink-0" style="width: 55px; height: 55px; object-fit: cover;" onerror="this.onerror=null; this.src='{{ asset('images/placeholder-kegiatan.png') }}';">
                 <div class="flex-grow-1 min-w-0">
                     <h6 class="fw-bold mb-1 text-break">{{ $kegiatan->nama_kegiatan }}</h6>
                     <small class="text-muted d-block text-break"><i class="bi bi-geo-alt me-1"></i> {{ $kegiatan->lokasi }}</small>

@@ -13,15 +13,21 @@
                  style="background: linear-gradient(135deg, #800000 0%, #a00000 100%); color: white; border-radius: 20px;">
                 <div class="d-flex align-items-center min-w-0 mb-4">
                     <div class="me-3 position-relative">
-                        @if(auth()->user()->anggota && auth()->user()->anggota->foto_profil)
-                            <img src="{{ Storage::url(auth()->user()->anggota->foto_profil) }}"
+                        @if(auth()->user()->profile_photo_url)
+                            <img src="{{ auth()->user()->profile_photo_url }}"
+                                 alt="{{ auth()->user()->name }}"
                                  class="rounded-circle border border-3 border-white shadow"
                                  width="75" height="75"
-                                 style="object-fit: cover;">
+                                 style="object-fit: cover;"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="rounded-circle bg-white bg-opacity-25 align-items-center justify-content-center text-white fs-1 fw-bold border border-3 border-white shadow"
+                                 style="display: none; width: 75px; height: 75px;">
+                                {{ auth()->user()->initials }}
+                            </div>
                         @else
                             <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center text-white fs-1 fw-bold border border-3 border-white shadow"
                                  style="width: 75px; height: 75px;">
-                                {{ substr(auth()->user()->name, 0, 1) }}
+                                {{ auth()->user()->initials }}
                             </div>
                         @endif
                         <span class="position-absolute bottom-0 end-0 bg-success border border-white border-2 rounded-circle p-2 shadow-sm"></span>
