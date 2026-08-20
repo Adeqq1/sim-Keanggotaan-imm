@@ -6,6 +6,7 @@
     <style>
         @page {
             margin: 0;
+            size: 240pt 152.25pt;
         }
 
         html,
@@ -16,16 +17,31 @@
         }
 
         .ekta-pdf-page {
-            height: 150pt;
+            height: 0;
             page-break-inside: avoid;
+            position: relative;
             width: 240pt;
         }
+
+        .ekta-pdf-page--first { page-break-after: auto; }
+        .ekta-pdf-page--back { page-break-before: always; }
+        .ekta-pdf-page .ekta-card-back--pdf { aspect-ratio: auto !important; border-radius: 5pt !important; height: 140pt !important; left: 0; position: absolute; top: 0; width: 240pt !important; }
+        .ekta-card-back--pdf .ekta-card-back__title { font-size: 6.5pt; }
+        .ekta-card-back--pdf .ekta-card-back__subtitle { font-size: 4pt; }
+        .ekta-card-back--pdf .ekta-card-back__rules { font-size: 4pt; }
+        .ekta-card-back--pdf .ekta-card-back__motto { font-size: 4.5pt; }
+        .ekta-card-back--pdf .ekta-card-back__competence { font-size: 3.5pt; }
+        .ekta-card-back--pdf .ekta-card-back__qr img { height: 28pt; width: 28pt; }
+        .ekta-card-back--pdf .ekta-card-back__signature { font-size: 4pt; }
 
         .ekta-pdf-page .ekta-card--pdf {
             aspect-ratio: auto !important;
             border-radius: 5pt !important;
-            height: 150pt !important;
+            height: 140pt !important;
             page-break-inside: avoid;
+            left: 0;
+            position: absolute;
+            top: 0;
             width: 240pt !important;
         }
 
@@ -136,8 +152,9 @@
         }
     </style>
 </head>
+@php($qrCodeSrc = $qrCodeSrc ?? null)
 <body>
-    <div class="ekta-pdf-page">
+    <div class="ekta-pdf-page ekta-pdf-page--first">
         <x-ekta-card
             class="ekta-card--pdf"
             :anggota="$anggota"
@@ -145,6 +162,9 @@
             :photo-src="$photoSrc"
             :logo-src="$logoSrc"
         />
+    </div>
+    <div class="ekta-pdf-page ekta-pdf-page--back">
+        <x-ekta-card-back class="ekta-card-back--pdf" :anggota="$anggota" :role-label="$roleLabel" :qr-code-src="$qrCodeSrc" :logo-src="$logoSrc" />
     </div>
 </body>
 </html>

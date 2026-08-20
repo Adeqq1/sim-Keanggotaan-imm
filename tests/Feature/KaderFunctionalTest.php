@@ -5,6 +5,7 @@ use App\Models\Kegiatan;
 use App\Models\Presensi;
 use App\Models\Sertifikat;
 use App\Models\User;
+use App\Support\QrCodeHelper;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 
@@ -77,9 +78,32 @@ test('kader can view ekta preview', function () {
         ->assertSee('ekta-card__swoop', false)
         ->assertSee('ekta-card__photo-frame', false)
         ->assertSee('ekta-card__top-note', false)
-        ->assertSee(route('kader.ekta.download'), false);
+        ->assertSee('class="btn btn-primary btn-ui py-3 ekta-print-button"', false)
+        ->assertSeeText('Cetak Kartu')
+        ->assertDontSeeText('Unduh KTA Lengkap (PDF 2 Halaman)');
 
     expect($anggota->fresh()->nama_lengkap)->toBe('Aisyah Kader Login');
+});
+
+test('kader can view both ekta sides and verification payload', function () {
+    $user = User::factory()->kader()->create();
+    Anggota::factory()->create([
+        'user_id' => $user->id,
+        'nama_lengkap' => 'Aisyah Kader Login',
+        'nia' => '24000001',
+        'tahun_daftar' => 2024,
+    ]);
+
+    $response = $this->actingAs($user)->get(route('kader.ekta'));
+
+    $response->assertOk()
+        ->assertSee('data-testid="ekta-flip-container"', false)
+        ->assertSee('data-testid="ekta-front-side"', false)
+        ->assertSee('data-testid="ekta-back-side"', false)
+        ->assertSeeText('KETENTUAN KARTU ANGGOTA')
+        ->assertSeeText('Anggun dalam Moral, Unggul dalam Intelektual')
+        ->assertSeeText('Tri Kompetensi: Religiusitas • Intelektualitas • Humanitas')
+        ->assertSee('data:image/svg+xml;base64,', false);
 });
 
 test('ekta preview displays a stored profile photo', function () {
@@ -117,7 +141,7 @@ test('kader can download ekta pdf', function () {
     expect($response->getContent())->toStartWith('%PDF');
 });
 
-test('ekta PDF keeps short and long cards on one page', function (string $name, bool $withPhoto) {
+test('ekta PDF renders exactly two pages for short and long cards', function (string $name, bool $withPhoto) {
     $user = User::factory()->kader()->create();
     $anggota = Anggota::factory()->create([
         'user_id' => $user->id,
@@ -142,13 +166,24 @@ test('ekta PDF keeps short and long cards on one page', function (string $name, 
     ])->setPaper([0, 0, 240, 152.25]);
     $pdf->render();
 
-    expect($pdf->getDomPDF()->getCanvas()->get_page_count())->toBe(1);
+    expect($pdf->getDomPDF()->getCanvas()->get_page_count())->toBe(2);
 })->with([
     'short fallback' => ['Aisyah Kader', false],
     'long fallback' => ['Aisyah Kader Dengan Nama Sangat Panjang Untuk Kartu', false],
     'short photo' => ['Aisyah Kader', true],
     'long photo' => ['Aisyah Kader Dengan Nama Sangat Panjang Untuk Kartu', true],
 ]);
+
+test('qr verification payload uses safe fallbacks', function () {
+    $anggota = new Anggota;
+    $anggota->nama_lengkap = '';
+    $anggota->nia = null;
+    $anggota->created_at = null;
+
+    expect(QrCodeHelper::makeVerificationPayload($anggota))
+        ->toBe('SIM-IMM:VERIFIED|NIA:BELUM_TERSEDIA|NAMA:ANGGOTA|TAHUN:'.date('Y'));
+    expect(QrCodeHelper::generateDataUri('test'))->toStartWith('data:image/svg+xml;base64,');
+});
 
 test('ekta print styles are limited to the ekta page', function () {
     $user = User::factory()->kader()->create();
@@ -158,7 +193,11 @@ test('ekta print styles are limited to the ekta page', function () {
     $profileResponse = $this->actingAs($user)->get(route('profile.edit'));
 
     $ektaResponse->assertSee('data-testid="ekta-print-styles"', false)
-        ->assertSee('@media print', false);
+        ->assertSee('@media print', false)
+        ->assertSee('size: A4 portrait', false)
+        ->assertSee('print-color-adjust: exact', false)
+        ->assertSee('position: static !important', false)
+        ->assertSee('.ekta-card-back', false);
     $profileResponse->assertDontSee('data-testid="ekta-print-styles"', false)
         ->assertDontSee('@media print', false);
 });

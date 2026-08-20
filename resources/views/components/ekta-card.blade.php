@@ -125,7 +125,7 @@
 
     .ekta-card__organization {
         color: rgba(255, 255, 255, 0.74);
-        font-size: 8px;
+        font-size: 6px;
         letter-spacing: 0.08em;
         line-height: 1.35;
         margin-top: 5px;
