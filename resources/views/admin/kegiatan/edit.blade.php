@@ -49,7 +49,7 @@
 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Thumbnail Kegiatan</label>
-                    @if($kegiatan->thumbnail_url)
+                    @if(filled($kegiatan->thumbnail))
                         <div class="mb-2">
                             <img src="{{ $kegiatan->thumbnail_url }}" alt="Gambar mini kegiatan" class="img-thumbnail" style="max-height: 150px;" onerror="this.onerror=null; this.src='{{ asset('images/placeholder-kegiatan.png') }}';">
                         </div>

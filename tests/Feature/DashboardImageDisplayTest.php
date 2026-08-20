@@ -25,6 +25,16 @@ test('user avatar accessors only return a URL when the photo exists', function (
         ->and($anggota->refresh()->foto_profil_url)->toContain('storage/foto_profil/avatar.webp');
 });
 
+test('initials accessor handles single-word and multi-word names gracefully', function () {
+    $userSingle = User::factory()->make(['name' => 'Sukarno']);
+    $userDouble = User::factory()->make(['name' => 'Ahmad Dahlan']);
+    $userEmpty = User::factory()->make(['name' => '']);
+
+    expect($userSingle->initials)->toBe('S')
+        ->and($userDouble->initials)->toBe('AD')
+        ->and($userEmpty->initials)->toBe('U');
+});
+
 test('admin without anggota renders initials in the shared layout', function () {
     $admin = User::factory()->admin()->create(['name' => 'Ahmad Dahlan']);
 
