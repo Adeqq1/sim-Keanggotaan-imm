@@ -11,6 +11,8 @@
     </div>
 
     <form method="GET" action="{{ route('kader.arsip.index') }}" class="row g-2 mb-4">
+        <input type="hidden" name="sort" value="{{ $sort['key'] }}">
+        <input type="hidden" name="direction" value="{{ $sort['direction'] }}">
         <div class="col-12 col-md-6">
             <input type="text" name="q" value="{{ request('q') }}" class="form-control bg-light border-0" placeholder="Cari judul atau nomor dokumen...">
         </div>
@@ -31,6 +33,7 @@
             </div>
         @endif
     </form>
+    <x-sort-control :action="route('kader.arsip.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" :preserved-inputs="['q' => request('q'), 'kategori' => request('kategori')]" />
 
     <div class="row g-3 index-card-grid">
     @forelse($arsips as $arsip)

@@ -36,6 +36,7 @@
     </div>
 
     <h6 class="fw-bold mb-3">Daftar Kehadiran</h6>
+    <x-sort-control :action="route('kader.riwayat.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
     <div class="row g-3 index-card-grid">
     @forelse($presensis as $p)
         <div class="col-12 col-sm-6">

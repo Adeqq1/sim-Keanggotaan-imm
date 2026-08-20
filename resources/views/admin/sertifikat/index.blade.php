@@ -14,6 +14,7 @@
             </a>
         </div>
     </div>
+    <x-sort-control :action="route('admin.sertifikat.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
 
     <div class="row g-3 index-card-grid">
     @forelse($sertifikats as $cert)

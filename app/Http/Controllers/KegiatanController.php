@@ -7,16 +7,21 @@ use App\Models\Kegiatan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
+use App\Support\SortParams;
 use RuntimeException;
 use Throwable;
 
 class KegiatanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $kegiatans = Kegiatan::latest()->paginate(12);
+        $options = ['nama' => 'Nama', 'tanggal' => 'Tanggal Kegiatan', 'lokasi' => 'Lokasi', 'created' => 'Waktu Ditambahkan'];
+        $sort = SortParams::resolve($request, array_keys($options), 'created');
+        $columns = ['nama' => 'nama_kegiatan', 'tanggal' => 'tanggal_waktu', 'lokasi' => 'lokasi', 'created' => 'created_at'];
+        $kegiatans = Kegiatan::orderBy($columns[$sort['key']], $sort['direction'])->orderByDesc('id')->paginate(12)->withQueryString();
 
-        return view('admin.kegiatan.index', compact('kegiatans'));
+        return view('admin.kegiatan.index', compact('kegiatans', 'options', 'sort'));
     }
 
     public function create()

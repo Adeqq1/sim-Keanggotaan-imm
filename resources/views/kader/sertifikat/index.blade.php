@@ -8,6 +8,7 @@
         <p class="text-muted small">Daftar sertifikat kegiatan yang telah Anda ikuti.</p>
         <p class="text-muted small mb-0">Kehadiran terkonfirmasi: {{ $jumlahKegiatanHadir }} dari {{ $minimumKegiatanHadir }} kegiatan hadir.</p>
     </div>
+    <x-sort-control :action="route('kader.sertifikat.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
 
     <div class="row g-3 index-card-grid">
     @forelse($sertifikats as $cert)

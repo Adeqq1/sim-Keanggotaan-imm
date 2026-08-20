@@ -13,6 +13,7 @@
             <i class="bi bi-plus-lg"></i> Tambah
         </a>
     </div>
+    <x-sort-control :action="route('admin.kegiatan.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
 
     <div class="row g-3 index-card-grid">
     @forelse($kegiatans as $kegiatan)

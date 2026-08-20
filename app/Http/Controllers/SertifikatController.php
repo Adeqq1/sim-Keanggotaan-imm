@@ -11,6 +11,7 @@ use App\Models\Sertifikat;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use App\Support\SortParams;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver;
@@ -19,11 +20,18 @@ use Intervention\Image\ImageManager;
 
 class SertifikatController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $sertifikats = Sertifikat::with(['kegiatan', 'anggota'])->latest()->paginate(6);
+        $options = ['anggota' => 'Nama Anggota', 'kegiatan' => 'Nama Kegiatan', 'nomor' => 'Nomor', 'tanggal_kegiatan' => 'Tanggal Kegiatan', 'created' => 'Waktu Ditambahkan'];
+        $sort = SortParams::resolve($request, array_keys($options), 'created');
+        $columns = ['nomor' => 'nomor_sertifikat', 'created' => 'sertifikat.created_at'];
+        $sertifikats = Sertifikat::with(['kegiatan', 'anggota'])
+            ->when(! in_array($sort['key'], ['anggota', 'kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy($columns[$sort['key']], $sort['direction']))
+            ->when($sort['key'] === 'anggota', fn ($query) => $query->orderBy(Anggota::select('nama_lengkap')->whereColumn('anggota.id', 'sertifikat.anggota_id'), $sort['direction']))
+            ->when(in_array($sort['key'], ['kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy(Kegiatan::select($sort['key'] === 'kegiatan' ? 'nama_kegiatan' : 'tanggal_waktu')->whereColumn('kegiatan.id', 'sertifikat.kegiatan_id'), $sort['direction']))
+            ->orderByDesc('sertifikat.id')->paginate(6)->withQueryString();
 
-        return view('admin.sertifikat.index', compact('sertifikats'));
+        return view('admin.sertifikat.index', compact('sertifikats', 'options', 'sort'));
     }
 
     public function create()
@@ -73,7 +81,7 @@ class SertifikatController extends Controller
         return redirect()->route('admin.sertifikat.index')->with('success', 'Sertifikat sedang dibuat di latar belakang.');
     }
 
-    public function mySertifikat()
+    public function mySertifikat(Request $request)
     {
         $anggota = auth()->user()->anggota;
 
@@ -81,7 +89,13 @@ class SertifikatController extends Controller
             return redirect()->route('kader.dashboard')->with('error', 'Data anggota tidak ditemukan.');
         }
 
-        $sertifikats = Sertifikat::where('anggota_id', $anggota->id)->with('kegiatan')->latest()->paginate(6);
+        $options = ['kegiatan' => 'Nama Kegiatan', 'tanggal_kegiatan' => 'Tanggal Kegiatan', 'nomor' => 'Nomor', 'created' => 'Waktu Ditambahkan'];
+        $sort = SortParams::resolve($request, array_keys($options), 'created');
+        $columns = ['nomor' => 'nomor_sertifikat', 'created' => 'sertifikat.created_at'];
+        $sertifikats = Sertifikat::where('anggota_id', $anggota->id)->with('kegiatan')
+            ->when(! in_array($sort['key'], ['kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy($columns[$sort['key']], $sort['direction']))
+            ->when(in_array($sort['key'], ['kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy(Kegiatan::select($sort['key'] === 'kegiatan' ? 'nama_kegiatan' : 'tanggal_waktu')->whereColumn('kegiatan.id', 'sertifikat.kegiatan_id'), $sort['direction']))
+            ->orderByDesc('sertifikat.id')->paginate(6)->withQueryString();
         $jumlahKegiatanHadir = $anggota->jumlahKegiatanHadir();
         $canDownloadSertifikat = $jumlahKegiatanHadir >= Sertifikat::MINIMUM_KEGIATAN_HADIR;
         $kegiatanHadirIds = $anggota->presensi()
@@ -94,6 +108,7 @@ class SertifikatController extends Controller
             'jumlahKegiatanHadir',
             'canDownloadSertifikat',
             'kegiatanHadirIds',
+            'options', 'sort',
         ))->with('minimumKegiatanHadir', Sertifikat::MINIMUM_KEGIATAN_HADIR);
     }
 
