@@ -90,29 +90,28 @@
     }
 
     .ekta-card-back__footer {
-        align-items: flex-end;
         bottom: 10px;
-        display: table;
         left: 16px;
         position: absolute;
         right: 16px;
+        height: 70px;
         z-index: 2;
     }
 
-    .ekta-card-back__qr,
-    .ekta-card-back__signature {
-        display: table-cell;
-        vertical-align: bottom;
-    }
-
     .ekta-card-back__qr {
+        bottom: 0;
+        left: 0;
+        position: absolute;
         text-align: center;
         width: 25%;
     }
 
     .ekta-card-back__signature {
+        bottom: 0;
         text-align: right;
-        width: 75%;
+        position: absolute;
+        right: 0;
+        width: 72%;
     }
 
     .ekta-card-back__qr img {
@@ -194,7 +193,7 @@
         <div class="ekta-card-back__signature">
             <strong>PENGESAHAN KARTU</strong>
             <small>Diterbitkan: {{ $activeYear }}</small>
-            Pimpinan Komisariat / Cabang IMM
+            <span>Pimpinan Komisariat / Cabang IMM</span>
         </div>
     </div>
     <div class="ekta-card-back__line" aria-hidden="true"></div>

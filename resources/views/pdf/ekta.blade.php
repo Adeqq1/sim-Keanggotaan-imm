@@ -33,7 +33,9 @@
         .ekta-card-back--pdf .ekta-card-back__motto { font-size: 4.5pt; }
         .ekta-card-back--pdf .ekta-card-back__competence { font-size: 3.5pt; }
         .ekta-card-back--pdf .ekta-card-back__qr img { height: 28pt; width: 28pt; }
-        .ekta-card-back--pdf .ekta-card-back__signature { font-size: 4pt; text-align: right; width: 75%; }
+        .ekta-card-back--pdf .ekta-card-back__footer { bottom: 8pt; height: 42pt; left: 10pt; right: 10pt; }
+        .ekta-card-back--pdf .ekta-card-back__qr { bottom: 0; left: 0; position: absolute; width: 25%; }
+        .ekta-card-back--pdf .ekta-card-back__signature { bottom: 0; font-size: 4pt; position: absolute; right: 0; text-align: right; width: 72%; }
 
         .ekta-pdf-page .ekta-card--pdf {
             aspect-ratio: auto !important;
