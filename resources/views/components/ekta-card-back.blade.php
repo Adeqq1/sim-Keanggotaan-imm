@@ -110,6 +110,11 @@
         width: 25%;
     }
 
+    .ekta-card-back__signature {
+        text-align: right;
+        width: 75%;
+    }
+
     .ekta-card-back__qr img {
         background: #fff;
         border: 1px solid #ded8e1;

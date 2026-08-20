@@ -33,7 +33,7 @@
         .ekta-card-back--pdf .ekta-card-back__motto { font-size: 4.5pt; }
         .ekta-card-back--pdf .ekta-card-back__competence { font-size: 3.5pt; }
         .ekta-card-back--pdf .ekta-card-back__qr img { height: 28pt; width: 28pt; }
-        .ekta-card-back--pdf .ekta-card-back__signature { font-size: 4pt; }
+        .ekta-card-back--pdf .ekta-card-back__signature { font-size: 4pt; text-align: right; width: 75%; }
 
         .ekta-pdf-page .ekta-card--pdf {
             aspect-ratio: auto !important;

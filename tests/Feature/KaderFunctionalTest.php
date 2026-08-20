@@ -105,6 +105,8 @@ test('kader can view both ekta sides and verification payload', function () {
         ->assertSeeText('KETENTUAN KARTU ANGGOTA')
         ->assertSeeText('Anggun dalam Moral, Unggul dalam Intelektual')
         ->assertSeeText('Tri Kompetensi: Religiusitas • Intelektualitas • Humanitas')
+        ->assertSee('ekta-card-back__signature', false)
+        ->assertSee('text-align: right', false)
         ->assertSee('data:image/svg+xml;base64,', false);
 });
 
