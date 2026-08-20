@@ -17,7 +17,7 @@ class QrCodeHelper
             'quietzoneSize' => 4,
         ]);
 
-        return 'data:image/svg+xml;base64,'.base64_encode((new QRCode($options))->render($text));
+        return (new QRCode($options))->render($text);
     }
 
     public static function makeVerificationPayload(Anggota $anggota): string

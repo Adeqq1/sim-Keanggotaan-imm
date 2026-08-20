@@ -184,7 +184,10 @@ test('qr verification payload uses safe fallbacks', function () {
 
     expect(QrCodeHelper::makeVerificationPayload($anggota))
         ->toBe('SIM-IMM:VERIFIED|NIA:BELUM_TERSEDIA|NAMA:ANGGOTA|TAHUN:'.date('Y'));
-    expect(QrCodeHelper::generateDataUri('test'))->toStartWith('data:image/svg+xml;base64,');
+
+    $qrCode = QrCodeHelper::generateDataUri('test');
+    expect($qrCode)->toStartWith('data:image/svg+xml;base64,');
+    expect(base64_decode(explode(',', $qrCode, 2)[1]))->toStartWith('<?xml');
 });
 
 test('ekta print styles are limited to the ekta page', function () {

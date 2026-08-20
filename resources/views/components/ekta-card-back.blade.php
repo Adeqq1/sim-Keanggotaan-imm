@@ -114,10 +114,10 @@
         background: #fff;
         border: 1px solid #ded8e1;
         display: block;
-        height: 45px;
+        height: 64px;
         margin: 0 auto;
         padding: 2px;
-        width: 45px;
+        width: 64px;
     }
 
     .ekta-card-back__qr-label {
