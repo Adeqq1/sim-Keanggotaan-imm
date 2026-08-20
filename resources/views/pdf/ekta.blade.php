@@ -17,15 +17,16 @@
         }
 
         .ekta-pdf-page {
-            height: 0;
+            height: 145pt;
+            margin: 0;
+            padding: 0;
             page-break-inside: avoid;
             position: relative;
             width: 240pt;
         }
 
-        .ekta-pdf-page--first { page-break-after: auto; }
-        .ekta-pdf-page--back { page-break-before: always; }
-        .ekta-pdf-page .ekta-card-back--pdf { aspect-ratio: auto !important; border-radius: 5pt !important; height: 140pt !important; left: 0; position: absolute; top: 0; width: 240pt !important; }
+        .ekta-pdf-page--first { page-break-after: always; }
+        .ekta-pdf-page .ekta-card-back--pdf { aspect-ratio: auto !important; border-radius: 5pt !important; height: 145pt !important; left: 0; position: absolute; top: 0; width: 240pt !important; }
         .ekta-card-back--pdf .ekta-card-back__title { font-size: 6.5pt; }
         .ekta-card-back--pdf .ekta-card-back__subtitle { font-size: 4pt; }
         .ekta-card-back--pdf .ekta-card-back__rules { font-size: 4pt; }
@@ -37,9 +38,9 @@
         .ekta-pdf-page .ekta-card--pdf {
             aspect-ratio: auto !important;
             border-radius: 5pt !important;
-            height: 140pt !important;
-            page-break-inside: avoid;
+            height: 145pt !important;
             left: 0;
+            page-break-inside: avoid;
             position: absolute;
             top: 0;
             width: 240pt !important;
@@ -163,7 +164,7 @@
             :logo-src="$logoSrc"
         />
     </div>
-    <div class="ekta-pdf-page ekta-pdf-page--back">
+    <div class="ekta-pdf-page">
         <x-ekta-card-back class="ekta-card-back--pdf" :anggota="$anggota" :role-label="$roleLabel" :qr-code-src="$qrCodeSrc" :logo-src="$logoSrc" />
     </div>
 </body>

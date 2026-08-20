@@ -78,6 +78,8 @@ test('kader can view ekta preview', function () {
         ->assertSee('ekta-card__swoop', false)
         ->assertSee('ekta-card__photo-frame', false)
         ->assertSee('ekta-card__top-note', false)
+        ->assertSee(route('kader.ekta.download'), false)
+        ->assertSeeText('Unduh KTA (PDF)')
         ->assertSee('class="btn btn-primary btn-ui py-3 ekta-print-button"', false)
         ->assertSeeText('Cetak Kartu')
         ->assertDontSeeText('Unduh KTA Lengkap (PDF 2 Halaman)');

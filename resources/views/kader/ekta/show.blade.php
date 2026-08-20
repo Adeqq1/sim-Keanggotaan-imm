@@ -116,7 +116,10 @@
 
             <div class="text-center mb-4 ekta-print-hide"><button type="button" class="btn btn-sm btn-outline-secondary" id="btnFlipCard">Balik Sisi Kartu</button></div>
 
-            <div class="d-grid ekta-print-hide">
+            <div class="d-grid gap-3 ekta-print-hide">
+                <a href="{{ route('kader.ekta.download') }}" class="btn btn-primary btn-ui py-3">
+                    <i class="bi bi-download me-2"></i> Unduh KTA (PDF)
+                </a>
                 <button onclick="window.print()" class="btn btn-primary btn-ui py-3 ekta-print-button">
                     <i class="bi bi-printer me-2"></i> Cetak Kartu
                 </button>
