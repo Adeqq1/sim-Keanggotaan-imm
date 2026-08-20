@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\RoleEnum;
+use App\Support\QrCodeHelper;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,8 +21,9 @@ class EktaController extends Controller
         $roleLabel = RoleEnum::labelFor($user->role);
         $photoSrc = $this->photoSource($anggota->foto_profil);
         $logoSrc = $this->logoSource();
+        $qrCodeSrc = QrCodeHelper::generateDataUri(QrCodeHelper::makeVerificationPayload($anggota));
 
-        return view('kader.ekta.show', compact('anggota', 'roleLabel', 'photoSrc', 'logoSrc'));
+        return view('kader.ekta.show', compact('anggota', 'roleLabel', 'photoSrc', 'logoSrc', 'qrCodeSrc'));
     }
 
     public function download()
@@ -36,8 +38,9 @@ class EktaController extends Controller
         $roleLabel = RoleEnum::labelFor($user->role);
         $photoSrc = $this->photoSource($anggota->foto_profil, true);
         $logoSrc = $this->logoSource(true);
+        $qrCodeSrc = QrCodeHelper::generateDataUri(QrCodeHelper::makeVerificationPayload($anggota));
 
-        $pdf = Pdf::loadView('pdf.ekta', compact('anggota', 'roleLabel', 'photoSrc', 'logoSrc'))
+        $pdf = Pdf::loadView('pdf.ekta', compact('anggota', 'roleLabel', 'photoSrc', 'logoSrc', 'qrCodeSrc'))
             ->setPaper([0, 0, 240, 152.25]);
 
         $filename = 'E-KTA_'.(filled($anggota->nia) ? $anggota->nia : $anggota->id).'.pdf';
