@@ -197,7 +197,7 @@
                 <div class="d-flex align-items-center gap-2">
                     <div class="sidebar-user-avatar">
                         @if($profilePhoto)
-                            <img src="{{ Storage::url($profilePhoto) }}" alt="" width="36" height="36" style="object-fit: cover;">
+                            <img src="{{ Storage::url($profilePhoto) }}" alt="" width="36" height="36" style="object-fit: cover;" onerror="this.onerror=null; this.parentElement.textContent='{{ substr($user->name, 0, 1) }}';">
                         @else
                             {{ substr($user->name, 0, 1) }}
                         @endif
@@ -229,7 +229,7 @@
                     <div class="dropdown">
                         <button class="btn btn-link text-white p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Buka menu pengguna">
                             @if($profilePhoto)
-                                <img src="{{ Storage::url($profilePhoto) }}" alt="" width="28" height="28" class="rounded-circle me-1" style="object-fit: cover;">
+                                <img src="{{ Storage::url($profilePhoto) }}" alt="" width="28" height="28" class="rounded-circle me-1" style="object-fit: cover;" onerror="this.style.display='none';">
                             @endif
                             <i class="bi bi-three-dots-vertical fs-5"></i>
                         </button>
@@ -256,7 +256,7 @@
                     <button class="user-menu-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <div class="user-avatar-sm">
                             @if($profilePhoto)
-                                <img src="{{ Storage::url($profilePhoto) }}" alt="" width="28" height="28" class="rounded-circle" style="object-fit: cover;">
+                                <img src="{{ Storage::url($profilePhoto) }}" alt="" width="28" height="28" class="rounded-circle" style="object-fit: cover;" onerror="this.onerror=null; this.parentElement.textContent='{{ substr($user->name, 0, 1) }}';">
                             @else
                                 {{ substr($user->name, 0, 1) }}
                             @endif

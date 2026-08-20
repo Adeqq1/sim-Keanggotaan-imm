@@ -41,3 +41,4 @@ AGENTS.md
 compose.override.yaml
 docker-compose.override.yml
 /.docker-data/
+\.commandcode

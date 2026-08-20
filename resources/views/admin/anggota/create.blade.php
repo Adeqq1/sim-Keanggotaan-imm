@@ -16,7 +16,21 @@
 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Foto Profil</label>
-                    <input type="file" name="foto_profil" class="form-control @error('foto_profil') is-invalid @enderror" accept="image/jpeg,image/png">
+                    
+                    <div id="admin-create-preview-wrapper" class="mb-2 d-none">
+                        <img id="admin-create-photo-preview"
+                             src=""
+                             alt="Preview Foto Profil"
+                             class="rounded shadow-sm"
+                             width="100" height="100"
+                             style="object-fit: cover;">
+                    </div>
+
+                    <input type="file"
+                           name="foto_profil"
+                           id="admin_create_foto_profil_input"
+                           class="form-control @error('foto_profil') is-invalid @enderror"
+                           accept="image/jpeg,image/png">
                     @error('foto_profil')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -135,4 +149,29 @@
             </form>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('admin_create_foto_profil_input');
+            const wrapper = document.getElementById('admin-create-preview-wrapper');
+            const preview = document.getElementById('admin-create-photo-preview');
+
+            if (input && wrapper && preview) {
+                input.addEventListener('change', function (event) {
+                    const file = event.target.files && event.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            preview.src = e.target.result;
+                            wrapper.classList.remove('d-none');
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        wrapper.classList.add('d-none');
+                        preview.src = '';
+                    }
+                });
+            }
+        });
+    </script>
 </x-app-layout>

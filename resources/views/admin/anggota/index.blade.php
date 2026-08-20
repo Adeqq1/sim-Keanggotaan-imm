@@ -54,7 +54,15 @@
             <div class="d-flex align-items-center gap-2">
                 <div class="me-3">
                     @if($anggota->foto_profil)
-                        <img src="{{ Storage::url($anggota->foto_profil) }}" class="rounded-circle shadow-sm" width="50" height="50" style="object-fit: cover;">
+                        <img src="{{ Storage::url($anggota->foto_profil) }}"
+                             alt="Foto {{ $anggota->nama_lengkap }}"
+                             class="rounded-circle shadow-sm"
+                             width="50" height="50"
+                             style="object-fit: cover;"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="rounded-circle bg-light align-items-center justify-content-center text-primary fw-bold" style="width: 50px; height: 50px; display: none;">
+                            {{ substr($anggota->nama_lengkap, 0, 1) }}
+                        </div>
                     @else
                         <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-primary fw-bold" style="width: 50px; height: 50px;">
                             {{ substr($anggota->nama_lengkap, 0, 1) }}

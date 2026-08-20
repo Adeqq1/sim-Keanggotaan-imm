@@ -13,7 +13,15 @@
         <div class="card-body p-4">
             <div class="text-center mb-4">
                 @if($anggota->foto_profil)
-                    <img src="{{ Storage::url($anggota->foto_profil) }}" class="rounded-circle shadow" width="120" height="120" style="object-fit: cover;">
+                    <img src="{{ Storage::url($anggota->foto_profil) }}"
+                         alt="Foto {{ $anggota->nama_lengkap }}"
+                         class="rounded-circle shadow"
+                         width="120" height="120"
+                         style="object-fit: cover;"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+                    <div class="rounded-circle bg-primary bg-opacity-10 align-items-center justify-content-center text-primary fw-bold shadow" style="width: 120px; height: 120px; font-size: 3rem; display: none;">
+                        {{ substr($anggota->nama_lengkap, 0, 1) }}
+                    </div>
                 @else
                     <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center text-primary fw-bold shadow" style="width: 120px; height: 120px; font-size: 3rem;">
                         {{ substr($anggota->nama_lengkap, 0, 1) }}
