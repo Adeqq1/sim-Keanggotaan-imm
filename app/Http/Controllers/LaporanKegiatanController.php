@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LaporanKegiatanRequest;
 use App\Models\Kegiatan;
 use App\Models\LaporanKegiatan;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -160,6 +161,24 @@ class LaporanKegiatanController extends Controller
             'Pragma' => 'no-cache',
             'X-Content-Type-Options' => 'nosniff',
         ]);
+    }
+
+    public function downloadPdf(LaporanKegiatan $laporanKegiatan): mixed
+    {
+        $laporanKegiatan->load(['kegiatan' => fn ($query) => $query->withCount([
+            'presensi',
+            'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir'),
+            'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin'),
+            'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa'),
+        ])]);
+
+        $kegiatan = $laporanKegiatan->kegiatan;
+        $pdf = Pdf::loadView('pdf.laporan-kegiatan', compact('laporanKegiatan', 'kegiatan'))
+            ->setPaper('a4', 'portrait');
+        $slug = Str::slug($kegiatan->nama_kegiatan) ?: "kegiatan-{$kegiatan->id}";
+        $date = $kegiatan->tanggal_waktu->format('Ymd');
+
+        return $pdf->download("laporan-kegiatan-{$slug}-{$date}.pdf");
     }
 
     private function storeFile(?UploadedFile $file): string

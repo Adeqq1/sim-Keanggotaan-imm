@@ -191,6 +191,126 @@ test('detail laporan membaca metadata dan presensi live', function () {
         ->assertSeeInOrder(['Hadir', '0', 'Izin', '1']);
 });
 
+test('instruktur dapat mengunduh laporan kegiatan sebagai pdf dengan rekap presensi', function () {
+    $instruktur = User::factory()->instruktur()->create();
+    $kegiatan = Kegiatan::factory()->create([
+        'nama_kegiatan' => 'Pelatihan Kader',
+        'tanggal_waktu' => '2026-08-20 10:30:00',
+    ]);
+    $laporan = LaporanKegiatan::factory()->create([
+        'kegiatan_id' => $kegiatan,
+        'tujuan' => 'Tujuan laporan',
+        'ringkasan' => 'Ringkasan laporan',
+        'agenda' => 'Agenda laporan',
+        'narasumber' => 'Narasumber laporan',
+        'hasil' => 'Hasil laporan',
+        'kendala' => "Kendala laporan\nBaris kedua <script>alert(1)</script>",
+        'tindak_lanjut' => 'Tindak lanjut laporan',
+    ]);
+
+    foreach (['hadir', 'hadir', 'izin', 'alfa'] as $status) {
+        Presensi::factory()->create([
+            'kegiatan_id' => $kegiatan,
+            'anggota_id' => Anggota::factory(),
+            'status_kehadiran' => $status,
+        ]);
+    }
+
+    $this->actingAs($instruktur)
+        ->get(route('admin.laporan-kegiatan.download', $laporan))
+        ->assertSuccessful()
+        ->assertDownload('laporan-kegiatan-pelatihan-kader-20260820.pdf')
+        ->assertHeader('content-type', 'application/pdf');
+});
+
+test('template pdf laporan kegiatan menampilkan semua data dengan aman', function () {
+    $kegiatan = Kegiatan::factory()->create([
+        'nama_kegiatan' => 'Kegiatan <Utama>',
+        'deskripsi' => "Deskripsi kegiatan\nBaris kedua",
+    ]);
+    $laporan = LaporanKegiatan::factory()->create([
+        'kegiatan_id' => $kegiatan,
+        'tujuan' => 'Tujuan laporan',
+        'ringkasan' => 'Ringkasan laporan',
+        'agenda' => 'Agenda laporan',
+        'narasumber' => 'Narasumber laporan',
+        'hasil' => 'Hasil laporan',
+        'kendala' => "Kendala laporan\nBaris kedua <script>alert(1)</script>",
+        'tindak_lanjut' => 'Tindak lanjut laporan',
+    ]);
+
+    foreach (['hadir', 'hadir', 'izin', 'alfa'] as $status) {
+        Presensi::factory()->create([
+            'kegiatan_id' => $kegiatan,
+            'anggota_id' => Anggota::factory(),
+            'status_kehadiran' => $status,
+        ]);
+    }
+
+    $kegiatan->loadCount([
+        'presensi',
+        'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir'),
+        'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin'),
+        'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa'),
+    ]);
+    $html = view('pdf.laporan-kegiatan', [
+        'laporanKegiatan' => $laporan,
+        'kegiatan' => $kegiatan,
+    ])->render();
+
+    expect($html)
+        ->toContain('Kegiatan &lt;Utama&gt;')
+        ->toContain('Tujuan laporan')
+        ->toContain('Ringkasan laporan')
+        ->toContain('Agenda laporan')
+        ->toContain('Narasumber laporan')
+        ->toContain('Hasil laporan')
+        ->toContain('Kendala laporan')
+        ->toContain('Tindak lanjut laporan')
+        ->toContain('Baris kedua &lt;script&gt;alert(1)&lt;/script&gt;')
+        ->toContain('<br />')
+        ->toContain('<td>4</td>')
+        ->toContain('<td>2</td>')
+        ->toContain('<td>1</td>')
+        ->not->toContain('<script>alert(1)</script>');
+});
+
+test('tombol laporan instruktur hanya aktif saat laporan tersedia', function () {
+    $instruktur = User::factory()->instruktur()->create();
+    $kegiatan = Kegiatan::factory()->create(['nama_kegiatan' => 'Kegiatan Berlaporan']);
+    $laporan = LaporanKegiatan::factory()->create(['kegiatan_id' => $kegiatan]);
+
+    $this->actingAs($instruktur)->get(route('admin.kegiatan.show', $kegiatan))
+        ->assertSuccessful()
+        ->assertSee('Unduh Laporan')
+        ->assertSee(route('admin.laporan-kegiatan.download', $laporan), false);
+
+    $tanpaLaporan = Kegiatan::factory()->create(['nama_kegiatan' => 'Kegiatan Tanpa Laporan']);
+    $this->actingAs($instruktur)->get(route('admin.kegiatan.show', $tanpaLaporan))
+        ->assertSuccessful()
+        ->assertSee('Laporan belum tersedia')
+        ->assertDontSee(route('admin.laporan-kegiatan.download', ['laporanKegiatan' => $tanpaLaporan->id]), false);
+});
+
+test('download pdf laporan kegiatan hanya untuk instruktur', function () {
+    $kegiatan = Kegiatan::factory()->create();
+    $laporan = LaporanKegiatan::factory()->create(['kegiatan_id' => $kegiatan]);
+
+    foreach ([User::factory()->admin()->create(), User::factory()->kader()->create()] as $user) {
+        $this->actingAs($user)
+            ->get(route('admin.laporan-kegiatan.download', $laporan))
+            ->assertForbidden();
+    }
+
+    auth()->logout();
+    $this->get(route('admin.laporan-kegiatan.download', $laporan))
+        ->assertRedirect(route('login'));
+
+    $this->actingAs(User::factory()->instruktur()->create())
+        ->get(route('admin.laporan-kegiatan.download', ['laporanKegiatan' => 999999]))
+        ->assertNotFound();
+});
+
 test('menghapus kegiatan cascade laporan dan membersihkan lampiran privat', function () {
     Storage::fake('local');
     $admin = User::factory()->admin()->create();

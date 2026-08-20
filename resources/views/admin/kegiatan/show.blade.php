@@ -36,6 +36,13 @@
         <a href="{{ route('admin.presensi.show', $kegiatan) }}" class="btn btn-outline-primary btn-ui">Lihat Presensi</a>
         @if(auth()->user()->role === 'instruktur')
             <a href="{{ route('admin.kegiatan.materi-kegiatan.index', $kegiatan) }}" class="btn btn-outline-primary btn-ui">Kelola Materi</a>
+            @if($kegiatan->laporanKegiatan)
+                <a href="{{ route('admin.laporan-kegiatan.download', $kegiatan->laporanKegiatan) }}" class="btn btn-outline-primary btn-ui" aria-label="Unduh laporan {{ $kegiatan->nama_kegiatan }}">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>Unduh Laporan
+                </a>
+            @else
+                <span class="badge bg-secondary align-self-center">Laporan belum tersedia</span>
+            @endif
         @elseif($kegiatan->laporanKegiatan)
             <a href="{{ route('admin.laporan-kegiatan.show', $kegiatan->laporanKegiatan) }}" class="btn btn-primary btn-ui">Lihat Laporan</a>
             <a href="{{ route('admin.laporan-kegiatan.edit', $kegiatan->laporanKegiatan) }}" class="btn btn-outline-secondary btn-ui">Ubah Laporan</a>

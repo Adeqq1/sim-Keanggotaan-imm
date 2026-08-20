@@ -85,6 +85,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // Hanya instruktur yang dapat mencatat presensi.
     Route::middleware('role:instruktur')->group(function () {
+        Route::get('/laporan-kegiatan/{laporanKegiatan}/download', [LaporanKegiatanController::class, 'downloadPdf'])->name('laporan-kegiatan.download');
         Route::post('/presensi/{kegiatan}', [PresensiController::class, 'store'])->name('presensi.store');
         Route::resource('kegiatan.materi-kegiatan', MateriKegiatanController::class)
             ->except('show')
