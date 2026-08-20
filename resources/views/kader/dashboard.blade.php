@@ -14,15 +14,9 @@
                     <div class="me-3 position-relative">
                         @if(auth()->user()->anggota && auth()->user()->anggota->foto_profil)
                             <img src="{{ Storage::url(auth()->user()->anggota->foto_profil) }}"
-                                 alt="Foto {{ auth()->user()->name }}"
                                  class="rounded-circle border border-3 border-white shadow"
                                  width="75" height="75"
-                                 style="object-fit: cover;"
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <div class="rounded-circle bg-white bg-opacity-25 align-items-center justify-content-center text-white fs-1 fw-bold border border-3 border-white shadow"
-                                 style="width: 75px; height: 75px; display: none;">
-                                {{ substr(auth()->user()->name, 0, 1) }}
-                            </div>
+                                 style="object-fit: cover;">
                         @else
                             <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center text-white fs-1 fw-bold border border-3 border-white shadow"
                                  style="width: 75px; height: 75px;">

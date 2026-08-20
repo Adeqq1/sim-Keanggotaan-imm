@@ -28,26 +28,13 @@
                 <div class="mb-4">
                     <label class="form-label fw-bold">Foto Profil</label>
                     
-                    <div class="mb-2 position-relative d-inline-block">
-                        <img id="admin-photo-preview"
-                             src="{{ $anggota->foto_profil ? Storage::url($anggota->foto_profil) : '' }}"
-                             alt="Foto Profil {{ $anggota->nama_lengkap }}"
-                             class="rounded shadow-sm {{ $anggota->foto_profil ? '' : 'd-none' }}"
-                             width="100" height="100"
-                             style="object-fit: cover;"
-                             onerror="this.classList.add('d-none'); document.getElementById('admin-photo-fallback')?.classList.remove('d-none'); document.getElementById('admin-photo-fallback')?.classList.add('d-flex');">
-                        <div id="admin-photo-fallback"
-                             class="rounded bg-light align-items-center justify-content-center text-primary fw-bold shadow-sm {{ $anggota->foto_profil ? 'd-none' : 'd-flex' }}"
-                             style="width: 100px; height: 100px; font-size: 2rem;">
-                            {{ substr($anggota->nama_lengkap, 0, 1) }}
+                    @if($anggota->foto_profil)
+                        <div class="mb-2">
+                            <img src="{{ Storage::url($anggota->foto_profil) }}" class="rounded shadow-sm" width="100" height="100" style="object-fit: cover;">
                         </div>
-                    </div>
+                    @endif
                     
-                    <input type="file"
-                           name="foto_profil"
-                           id="admin_foto_profil_input"
-                           class="form-control @error('foto_profil') is-invalid @enderror"
-                           accept="image/jpeg,image/png">
+                    <input type="file" name="foto_profil" class="form-control @error('foto_profil') is-invalid @enderror" accept="image/jpeg,image/png">
                     @error('foto_profil')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -161,28 +148,4 @@
             </form>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const input = document.getElementById('admin_foto_profil_input');
-            const preview = document.getElementById('admin-photo-preview');
-            const fallback = document.getElementById('admin-photo-fallback');
-
-            if (input && preview && fallback) {
-                input.addEventListener('change', function (event) {
-                    const file = event.target.files && event.target.files[0];
-                    if (file && file.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            preview.src = e.target.result;
-                            preview.classList.remove('d-none');
-                            fallback.classList.add('d-none');
-                            fallback.classList.remove('d-flex');
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-            }
-        });
-    </script>
 </x-app-layout>

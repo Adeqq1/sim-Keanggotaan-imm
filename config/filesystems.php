@@ -72,6 +72,14 @@ return [
             'throw' => false,
         ],
 
+        'foto_profil' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/foto-profil'),
+            'url' => env('APP_URL').'/storage/foto-profil',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
     ],
 
     /*

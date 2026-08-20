@@ -12,29 +12,17 @@
             @php
                 $foto = $user->anggota && $user->anggota->foto_profil ? Storage::url($user->anggota->foto_profil) : null;
             @endphp
-            <div class="position-relative d-inline-block">
-                <img id="profile-photo-preview"
-                     src="{{ $foto ?? '' }}"
-                     alt="Foto Profil {{ $user->name }}"
-                     class="rounded-circle border border-3 border-light shadow-sm mb-3 {{ $foto ? '' : 'd-none' }}"
-                     width="100" height="100"
-                     style="object-fit: cover;"
-                     onerror="this.classList.add('d-none'); document.getElementById('profile-photo-fallback')?.classList.remove('d-none'); document.getElementById('profile-photo-fallback')?.classList.add('d-flex');">
-                <div id="profile-photo-fallback"
-                     class="rounded-circle bg-light align-items-center justify-content-center text-primary fs-1 fw-bold mx-auto mb-3 shadow-sm {{ $foto ? 'd-none' : 'd-flex' }}"
-                     style="width: 100px; height: 100px;">
+            @if($foto)
+                <img src="{{ $foto }}" class="rounded-circle border border-3 border-light shadow-sm mb-3" width="100" height="100" style="object-fit: cover;">
+            @else
+                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-primary fs-1 fw-bold mx-auto mb-3 shadow-sm" style="width: 100px; height: 100px;">
                     {{ substr($user->name, 0, 1) }}
                 </div>
-            </div>
+            @endif
             @if($user->anggota)
                 <div class="mt-2">
                     <label class="form-label small fw-bold">Foto Profil</label>
-                    <input type="file"
-                           name="foto_profil"
-                           id="foto_profil_input"
-                           class="form-control form-control-sm mx-auto @error('foto_profil') is-invalid @enderror"
-                           accept="image/jpeg,image/png"
-                           style="max-width: 250px;">
+                    <input type="file" name="foto_profil" class="form-control form-control-sm mx-auto @error('foto_profil') is-invalid @enderror" accept="image/jpeg,image/png" style="max-width: 250px;">
                     @error('foto_profil') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                     <small class="text-muted d-block mt-1">JPG, JPEG, atau PNG, maksimum 2 MB dan 2048 x 2048 piksel. Disimpan sebagai WebP.</small>
                 </div>
@@ -88,30 +76,4 @@
             @endif
         </div>
     </form>
-
-    @if($user->anggota)
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const input = document.getElementById('foto_profil_input');
-                const preview = document.getElementById('profile-photo-preview');
-                const fallback = document.getElementById('profile-photo-fallback');
-
-                if (input && preview && fallback) {
-                    input.addEventListener('change', function (event) {
-                        const file = event.target.files && event.target.files[0];
-                        if (file && file.type.startsWith('image/')) {
-                            const reader = new FileReader();
-                            reader.onload = function (e) {
-                                preview.src = e.target.result;
-                                preview.classList.remove('d-none');
-                                fallback.classList.add('d-none');
-                                fallback.classList.remove('d-flex');
-                            };
-                            reader.readAsDataURL(file);
-                        }
-                    });
-                }
-            });
-        </script>
-    @endif
 </section>
