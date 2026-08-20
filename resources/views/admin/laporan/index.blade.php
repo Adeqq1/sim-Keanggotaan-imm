@@ -33,6 +33,24 @@
                 </div>
             </div>
 
+            <div class="row">
+                <div class="col-12 col-sm-6 mb-3">
+                    <label for="sort" class="form-label small fw-bold">Urutkan data berdasarkan</label>
+                    <select id="sort" name="sort" class="form-select">
+                        <option value="nama">Nama / Judul</option>
+                        <option value="tanggal">Tanggal</option>
+                        <option value="created">Waktu Ditambahkan</option>
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 mb-3">
+                    <label for="direction" class="form-label small fw-bold">Arah pengurutan</label>
+                    <select id="direction" name="direction" class="form-select">
+                        <option value="asc">Naik / A-Z / terlama</option>
+                        <option value="desc" selected>Turun / Z-A / terbaru</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="d-grid gap-3 mt-4">
                 <button type="submit" class="btn btn-outline-primary btn-ui py-3">
                     <i class="bi bi-file-earmark-pdf me-2"></i> Export ke PDF

@@ -6,12 +6,17 @@ use App\Http\Requests\KaderArsipRequest;
 use App\Models\Arsip;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Support\SortParams;
+use App\Models\Anggota;
 
 class ArsipController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Arsip::with('anggota')->latest();
+        $options = ['judul' => 'Judul', 'nomor' => 'Nomor', 'kategori' => 'Kategori', 'tanggal' => 'Tanggal Unggah', 'anggota' => 'Nama Anggota', 'created' => 'Waktu Ditambahkan'];
+        $sort = SortParams::resolve($request, array_keys($options), 'created');
+        $columns = ['judul' => 'judul_dokumen', 'nomor' => 'nomor_dokumen', 'kategori' => 'kategori_arsip', 'tanggal' => 'tanggal_unggah', 'created' => 'arsip.created_at', 'anggota' => 'anggota_id'];
+        $query = Arsip::with('anggota');
 
         if ($request->filled('q')) {
             $q = $request->input('q');
@@ -25,9 +30,13 @@ class ArsipController extends Controller
             $query->where('kategori_arsip', $request->input('kategori'));
         }
 
+        $query->when($sort['key'] !== 'anggota', fn ($query) => $query->orderBy($columns[$sort['key']], $sort['direction']))
+            ->when($sort['key'] === 'anggota', fn ($query) => $query->orderBy(Anggota::select('nama_lengkap')->whereColumn('anggota.id', 'arsip.anggota_id'), $sort['direction']))
+            ->orderByDesc('arsip.id');
+
         return view('admin.arsip.index', [
             'arsips' => $query->paginate(6)->withQueryString(),
-            'kategori' => Arsip::KATEGORI,
+            'kategori' => Arsip::KATEGORI, 'options' => $options, 'sort' => $sort,
         ]);
     }
 
@@ -39,7 +48,10 @@ class ArsipController extends Controller
             return redirect()->route('kader.dashboard')->with('error', 'Profil anggota Anda belum dibuat. Silakan hubungi admin.');
         }
 
-        $query = Arsip::where('anggota_id', $anggota->id)->latest();
+        $options = ['judul' => 'Judul', 'nomor' => 'Nomor', 'kategori' => 'Kategori', 'tanggal' => 'Tanggal Unggah', 'created' => 'Waktu Ditambahkan'];
+        $sort = SortParams::resolve($request, array_keys($options), 'created');
+        $columns = ['judul' => 'judul_dokumen', 'nomor' => 'nomor_dokumen', 'kategori' => 'kategori_arsip', 'tanggal' => 'tanggal_unggah', 'created' => 'arsip.created_at'];
+        $query = Arsip::where('anggota_id', $anggota->id)->orderBy($columns[$sort['key']], $sort['direction'])->orderByDesc('arsip.id');
 
         if ($request->filled('q')) {
             $q = $request->input('q');
@@ -55,7 +67,7 @@ class ArsipController extends Controller
 
         return view('kader.arsip.index', [
             'arsips' => $query->paginate(6)->withQueryString(),
-            'kategori' => Arsip::KATEGORI,
+            'kategori' => Arsip::KATEGORI, 'options' => $options, 'sort' => $sort,
         ]);
     }
 

@@ -11,6 +11,7 @@
             <a href="{{ route('admin.kegiatan.materi-kegiatan.create', $kegiatan) }}" class="btn btn-primary btn-ui btn-ui-sm"><i class="bi bi-plus-lg"></i> Tambah Materi</a>
         </div>
     </div>
+    <x-sort-control :action="route('admin.kegiatan.materi-kegiatan.index', $kegiatan)" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
 
     <div class="row g-3 index-card-grid">
         @forelse($materis as $materi)

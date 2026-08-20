@@ -8,6 +8,7 @@
         </div>
         <a href="{{ route('kader.materi.saved.index') }}" class="btn btn-outline-primary btn-ui btn-ui-sm flex-shrink-0"><i class="bi bi-bookmark me-1"></i> Tersimpan</a>
     </div>
+    <x-sort-control :action="route('kader.materi.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
 
     <div class="row g-3 index-card-grid">
         @forelse($materis as $materi)

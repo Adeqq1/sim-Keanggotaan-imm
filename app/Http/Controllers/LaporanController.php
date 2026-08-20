@@ -10,6 +10,8 @@ use App\Models\Kegiatan;
 use App\Models\Pendaftaran;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Support\SortParams;
+use Illuminate\Http\Request;
 
 class LaporanController extends Controller
 {
@@ -25,7 +27,8 @@ class LaporanController extends Controller
         $mulai = $validated['tanggal_mulai'];
         $selesai = $validated['tanggal_selesai'];
 
-        $data = $this->getData($jenis, $mulai, $selesai);
+        $sort = $this->resolveSort($request, $jenis);
+        $data = $this->getData($jenis, $mulai, $selesai, $sort);
 
         $pdf = Pdf::loadView('pdf.laporan', [
             'data' => $data,
@@ -44,7 +47,8 @@ class LaporanController extends Controller
         $mulai = $validated['tanggal_mulai'];
         $selesai = $validated['tanggal_selesai'];
 
-        $data = $this->getData($jenis, $mulai, $selesai);
+        $sort = $this->resolveSort($request, $jenis);
+        $data = $this->getData($jenis, $mulai, $selesai, $sort);
 
         return Excel::download(
             new LaporanExport($data, $jenis),
@@ -52,19 +56,39 @@ class LaporanController extends Controller
         );
     }
 
-    private function getData($jenis, $mulai, $selesai)
+    private function getData($jenis, $mulai, $selesai, array $sort)
     {
+        $columns = [
+            'kegiatan' => ['nama' => 'nama_kegiatan', 'tanggal' => 'tanggal_waktu', 'lokasi' => 'lokasi', 'created' => 'created_at'],
+            'anggota' => ['nama' => 'nama_lengkap', 'nia' => 'nia', 'status' => 'status_aktif', 'created' => 'created_at'],
+            'pendaftaran' => ['nama' => 'nama_lengkap', 'email' => 'email', 'tanggal' => 'tanggal_daftar', 'created' => 'created_at'],
+            'arsip' => ['judul' => 'judul_dokumen', 'nomor' => 'nomor_dokumen', 'kategori' => 'kategori_arsip', 'tanggal' => 'tanggal_unggah', 'created' => 'created_at'],
+        ];
+        $order = $columns[$jenis][$sort['key']];
+
         switch ($jenis) {
             case 'kegiatan':
-                return Kegiatan::whereBetween('tanggal_waktu', [$mulai.' 00:00:00', $selesai.' 23:59:59'])->get();
+                return Kegiatan::whereBetween('tanggal_waktu', [$mulai.' 00:00:00', $selesai.' 23:59:59'])->orderBy($order, $sort['direction'])->orderByDesc('id')->get();
             case 'anggota':
-                return Anggota::whereBetween('created_at', [$mulai.' 00:00:00', $selesai.' 23:59:59'])->get();
+                return Anggota::whereBetween('created_at', [$mulai.' 00:00:00', $selesai.' 23:59:59'])->orderBy($order, $sort['direction'])->orderByDesc('id')->get();
             case 'pendaftaran':
-                return Pendaftaran::whereBetween('tanggal_daftar', [$mulai, $selesai])->get();
+                return Pendaftaran::whereBetween('tanggal_daftar', [$mulai, $selesai])->orderBy($order, $sort['direction'])->orderByDesc('id')->get();
             case 'arsip':
-                return Arsip::whereBetween('tanggal_unggah', [$mulai, $selesai])->get();
+                return Arsip::whereBetween('tanggal_unggah', [$mulai, $selesai])->orderBy($order, $sort['direction'])->orderByDesc('id')->get();
             default:
                 return collect();
         }
+    }
+
+    private function resolveSort(Request $request, string $jenis): array
+    {
+        $options = [
+            'kegiatan' => ['nama', 'tanggal', 'lokasi', 'created'],
+            'anggota' => ['nama', 'nia', 'status', 'created'],
+            'pendaftaran' => ['nama', 'email', 'tanggal', 'created'],
+            'arsip' => ['judul', 'nomor', 'kategori', 'tanggal', 'created'],
+        ];
+
+        return SortParams::resolve($request, $options[$jenis], 'created');
     }
 }

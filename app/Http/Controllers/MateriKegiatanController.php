@@ -18,21 +18,34 @@ use Illuminate\View\View;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
+use Illuminate\Http\Request;
+use App\Support\SortParams;
 
 class MateriKegiatanController extends Controller
 {
-    public function adminIndex(): View
+    public function adminIndex(Request $request): View
     {
-        $materis = MateriKegiatan::query()->with('kegiatan')->latest()->paginate(12);
+        $options = ['judul' => 'Judul', 'kegiatan' => 'Nama Kegiatan', 'tanggal_kegiatan' => 'Tanggal Kegiatan', 'created' => 'Waktu Ditambahkan'];
+        $sort = SortParams::resolve($request, array_keys($options), 'created');
+        $materis = MateriKegiatan::query()->with('kegiatan')
+            ->when(! in_array($sort['key'], ['kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy(['judul' => 'judul', 'created' => 'materi_kegiatan.created_at'][$sort['key']], $sort['direction']))
+            ->when(in_array($sort['key'], ['kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy(
+                Kegiatan::select($sort['key'] === 'kegiatan' ? 'nama_kegiatan' : 'tanggal_waktu')->whereColumn('kegiatan.id', 'materi_kegiatan.kegiatan_id'), $sort['direction']
+            ))
+            ->orderByDesc('materi_kegiatan.id')->paginate(12)->withQueryString();
 
-        return view('admin.kegiatan.materi-index', compact('materis'));
+        return view('admin.kegiatan.materi-index', compact('materis', 'options', 'sort'));
     }
 
-    public function index(Kegiatan $kegiatan): View
+    public function index(Request $request, Kegiatan $kegiatan): View
     {
+        $options = ['judul' => 'Judul', 'created' => 'Waktu Ditambahkan'];
+        $sort = SortParams::resolve($request, array_keys($options), 'created');
         return view('admin.kegiatan.materi.index', [
             'kegiatan' => $kegiatan,
-            'materis' => $kegiatan->materiKegiatans()->latest()->paginate(6),
+            'materis' => $kegiatan->materiKegiatans()->orderBy(['judul' => 'judul', 'created' => 'created_at'][$sort['key']], $sort['direction'])->orderByDesc('id')->paginate(6)->withQueryString(),
+            'options' => $options,
+            'sort' => $sort,
         ]);
     }
 
@@ -111,34 +124,40 @@ class MateriKegiatanController extends Controller
             ->with('success', 'Materi berhasil dihapus.');
     }
 
-    public function kaderIndex(): View|RedirectResponse
+    public function kaderIndex(Request $request): View|RedirectResponse
     {
         $anggota = auth()->user()->anggota;
         if (! $anggota) {
             return $this->missingMemberRedirect();
         }
 
+        $options = ['judul' => 'Judul', 'kegiatan' => 'Nama Kegiatan', 'tanggal_kegiatan' => 'Tanggal Kegiatan', 'created' => 'Waktu Ditambahkan'];
+        $sort = SortParams::resolve($request, array_keys($options), 'created');
         $materis = $this->accessibleQuery($anggota)
             ->withExists(['disimpanOleh as tersimpan' => fn ($query) => $query->whereKey($anggota->id)])
-            ->latest()
-            ->paginate(6);
+            ->when(! in_array($sort['key'], ['kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy(['judul' => 'materi_kegiatan.judul', 'created' => 'materi_kegiatan.created_at'][$sort['key']], $sort['direction']))
+            ->when(in_array($sort['key'], ['kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy(Kegiatan::select($sort['key'] === 'kegiatan' ? 'nama_kegiatan' : 'tanggal_waktu')->whereColumn('kegiatan.id', 'materi_kegiatan.kegiatan_id'), $sort['direction']))
+            ->orderByDesc('materi_kegiatan.id')->paginate(6)->withQueryString();
 
-        return view('kader.materi.index', compact('materis'));
+        return view('kader.materi.index', compact('materis', 'options', 'sort'));
     }
 
-    public function savedIndex(): View|RedirectResponse
+    public function savedIndex(Request $request): View|RedirectResponse
     {
         $anggota = auth()->user()->anggota;
         if (! $anggota) {
             return $this->missingMemberRedirect();
         }
 
+        $options = ['judul' => 'Judul', 'kegiatan' => 'Nama Kegiatan', 'tanggal_kegiatan' => 'Tanggal Kegiatan', 'created' => 'Waktu Ditambahkan'];
+        $sort = SortParams::resolve($request, array_keys($options), 'created');
         $materis = $this->accessibleQuery($anggota)
             ->whereHas('disimpanOleh', fn ($query) => $query->whereKey($anggota->id))
-            ->latest('materi_kegiatan.created_at')
-            ->paginate(6);
+            ->when(! in_array($sort['key'], ['kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy(['judul' => 'materi_kegiatan.judul', 'created' => 'materi_kegiatan.created_at'][$sort['key']], $sort['direction']))
+            ->when(in_array($sort['key'], ['kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy(Kegiatan::select($sort['key'] === 'kegiatan' ? 'nama_kegiatan' : 'tanggal_waktu')->whereColumn('kegiatan.id', 'materi_kegiatan.kegiatan_id'), $sort['direction']))
+            ->orderByDesc('materi_kegiatan.id')->paginate(6)->withQueryString();
 
-        return view('kader.materi.tersimpan', compact('materis'));
+        return view('kader.materi.tersimpan', compact('materis', 'options', 'sort'));
     }
 
     public function save(MateriKegiatan $materiKegiatan): RedirectResponse

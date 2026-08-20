@@ -12,16 +12,22 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Request;
+use App\Support\SortParams;
 use RuntimeException;
 use Throwable;
 
 class ValidasiPendaftaranController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pendaftarans = Pendaftaran::where('status_validasi', 'pending')->latest()->paginate(6);
+        $options = ['nama' => 'Nama', 'email' => 'Email', 'role' => 'Role', 'tanggal' => 'Tanggal Daftar', 'created' => 'Waktu Ditambahkan'];
+        $sort = SortParams::resolve($request, array_keys($options), 'created');
+        $columns = ['nama' => 'nama_lengkap', 'email' => 'email', 'role' => 'role', 'tanggal' => 'tanggal_daftar', 'created' => 'created_at'];
+        $pendaftarans = Pendaftaran::where('status_validasi', 'pending')
+            ->orderBy($columns[$sort['key']], $sort['direction'])->orderByDesc('id')->paginate(6)->withQueryString();
 
-        return view('admin.pendaftaran.index', compact('pendaftarans'));
+        return view('admin.pendaftaran.index', compact('pendaftarans', 'options', 'sort'));
     }
 
     public function show($id)

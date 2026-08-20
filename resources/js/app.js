@@ -11,6 +11,12 @@ window.Alpine = Alpine;
 
 Alpine.start();
 
+document.querySelectorAll('[data-auto-submit-sort]').forEach((form) => {
+    form.querySelectorAll('select[name="sort"], select[name="direction"]').forEach((select) => {
+        select.addEventListener('change', () => form.requestSubmit());
+    });
+});
+
 // --- Preview Dokumen Modal ---
 document.addEventListener('shown.bs.modal', (event) => {
     if (event.target.id !== 'previewDocumentModal') return;

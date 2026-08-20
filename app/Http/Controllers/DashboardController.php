@@ -10,10 +10,12 @@ use App\Models\Presensi;
 use App\Models\Sertifikat;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use App\Support\SortParams;
 
 class DashboardController extends Controller
 {
-    public function adminDashboard()
+    public function adminDashboard(Request $request)
     {
         $stats = [
             'total_anggota' => Anggota::where('status_aktif', true)->count(),
@@ -24,14 +26,17 @@ class DashboardController extends Controller
 
         $now = now();
 
+        $options = ['tanggal' => 'Tanggal Kegiatan', 'nama' => 'Nama', 'lokasi' => 'Lokasi'];
+        $sort = SortParams::resolve($request, array_keys($options), 'tanggal', 'asc');
+        $columns = ['tanggal' => 'tanggal_waktu', 'nama' => 'nama_kegiatan', 'lokasi' => 'lokasi'];
         $recent_kegiatans = Kegiatan::where('tanggal_waktu', '>=', $now)
-            ->orderBy('tanggal_waktu', 'asc')
+            ->orderBy($columns[$sort['key']], $sort['direction'])->orderByDesc('id')
             ->take(5)
             ->get();
 
         $chartData = $this->getChartData($now);
 
-        return view('admin.dashboard', compact('stats', 'recent_kegiatans', 'chartData'));
+        return view('admin.dashboard', compact('stats', 'recent_kegiatans', 'chartData', 'options', 'sort'));
     }
 
     private function getChartData(Carbon $now): array
@@ -110,7 +115,7 @@ class DashboardController extends Controller
         ];
     }
 
-    public function kaderDashboard()
+    public function kaderDashboard(Request $request)
     {
         $user = auth()->user();
         $anggota = $user->anggota;
@@ -124,11 +129,14 @@ class DashboardController extends Controller
             'total_sertifikat' => Sertifikat::where('anggota_id', $anggota->id)->count(),
         ];
 
+        $options = ['tanggal' => 'Tanggal Kegiatan', 'nama' => 'Nama', 'lokasi' => 'Lokasi'];
+        $sort = SortParams::resolve($request, array_keys($options), 'tanggal', 'asc');
+        $columns = ['tanggal' => 'tanggal_waktu', 'nama' => 'nama_kegiatan', 'lokasi' => 'lokasi'];
         $kegiatan_terdekat = Kegiatan::where('tanggal_waktu', '>', now())
-            ->orderBy('tanggal_waktu')
+            ->orderBy($columns[$sort['key']], $sort['direction'])->orderByDesc('id')
             ->take(3)
             ->get();
 
-        return view('kader.dashboard', compact('stats', 'kegiatan_terdekat'));
+        return view('kader.dashboard', compact('stats', 'kegiatan_terdekat', 'options', 'sort'));
     }
 }

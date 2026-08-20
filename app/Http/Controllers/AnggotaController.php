@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use App\Support\SortParams;
 use RuntimeException;
 use Throwable;
 
@@ -27,6 +28,8 @@ class AnggotaController extends Controller
 
         $search = trim($filters['search'] ?? '');
         $selectedRole = $filters['role'] ?? null;
+        $options = ['nama' => 'Nama', 'nia' => 'NIA', 'role' => 'Role', 'status' => 'Status', 'created' => 'Waktu Ditambahkan'];
+        $sort = SortParams::resolve($request, array_keys($options), 'created');
         $query = Anggota::with('user');
 
         if ($search !== '') {
@@ -40,9 +43,16 @@ class AnggotaController extends Controller
             $query->whereHas('user', fn ($userQuery) => $userQuery->where('role', $selectedRole));
         }
 
-        $anggotas = $query->latest()->paginate(12)->withQueryString();
+        $query->when($sort['key'] === 'role', fn ($query) => $query->orderBy(
+            User::select('role')->whereColumn('users.id', 'anggota.user_id'), $sort['direction']
+        ))
+            ->when($sort['key'] !== 'role', fn ($query) => $query->orderBy([
+                'nama' => 'nama_lengkap', 'nia' => 'nia', 'status' => 'status_aktif', 'created' => 'created_at',
+            ][$sort['key']], $sort['direction']))
+            ->orderByDesc('anggota.id');
+        $anggotas = $query->paginate(12)->withQueryString();
 
-        return view('admin.anggota.index', compact('anggotas', 'search', 'selectedRole'));
+        return view('admin.anggota.index', compact('anggotas', 'search', 'selectedRole', 'options', 'sort'));
     }
 
     public function create()

@@ -3,6 +3,7 @@
         Dashboard Admin
     </x-slot>
 
+    <x-sort-control :action="route('admin.dashboard')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
     {{-- Area Statistik Grafik: hanya di desktop --}}
     <div class="d-none d-lg-block mb-4">
         <div class="d-flex justify-content-end mb-3">

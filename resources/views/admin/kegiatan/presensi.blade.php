@@ -11,6 +11,7 @@
         <h6 class="fw-bold mb-1 text-primary">{{ $kegiatan->nama_kegiatan }}</h6>
         <p class="text-muted small mb-0"><i class="bi bi-calendar-event me-1"></i> {{ $kegiatan->tanggal_waktu->translatedFormat('d F Y, H:i') }}</p>
     </div>
+    <x-sort-control :action="route('admin.presensi.show', $kegiatan)" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
 
     @if($canManagePresensi)
         <form action="{{ route('admin.presensi.store', $kegiatan) }}" method="POST">

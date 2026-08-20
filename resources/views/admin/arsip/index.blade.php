@@ -26,6 +26,7 @@
             </div>
         @endif
     </form>
+    <x-sort-control :action="route('admin.arsip.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" :preserved-inputs="['q' => request('q'), 'kategori' => request('kategori')]" />
 
     <div class="row g-3 index-card-grid">
     @forelse($arsips as $arsip)

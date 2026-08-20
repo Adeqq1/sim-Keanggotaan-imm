@@ -7,6 +7,7 @@
         <h6 class="fw-bold">Daftar Calon Anggota</h6>
         <p class="text-muted small">Klik pada nama untuk melihat detail dan melakukan validasi.</p>
     </div>
+    <x-sort-control :action="route('admin.pendaftaran.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
 
     <div class="row g-3 index-card-grid">
         @forelse($pendaftarans as $item)

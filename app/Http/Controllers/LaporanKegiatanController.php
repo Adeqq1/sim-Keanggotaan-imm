@@ -16,11 +16,15 @@ use Illuminate\View\View;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
+use Illuminate\Http\Request;
+use App\Support\SortParams;
 
 class LaporanKegiatanController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $options = ['nama' => 'Nama', 'tanggal' => 'Tanggal Kegiatan', 'laporan' => 'Status Laporan', 'peserta' => 'Peserta', 'hadir' => 'Hadir', 'izin' => 'Izin', 'alfa' => 'Alfa'];
+        $sort = SortParams::resolve($request, array_keys($options), 'tanggal');
         $kegiatans = Kegiatan::query()
             ->with('laporanKegiatan')
             ->withCount([
@@ -29,10 +33,11 @@ class LaporanKegiatanController extends Controller
                 'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin'),
                 'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa'),
             ])
-            ->latest('tanggal_waktu')
-            ->paginate(12);
+            ->withExists('laporanKegiatan as laporan_exists')
+            ->orderBy(['nama' => 'nama_kegiatan', 'tanggal' => 'tanggal_waktu', 'laporan' => 'laporan_exists', 'peserta' => 'presensi_count', 'hadir' => 'hadir_count', 'izin' => 'izin_count', 'alfa' => 'alfa_count'][$sort['key']], $sort['direction'])
+            ->orderByDesc('kegiatan.id')->paginate(12)->withQueryString();
 
-        return view('admin.kegiatan.laporan.index', compact('kegiatans'));
+        return view('admin.kegiatan.laporan.index', compact('kegiatans', 'options', 'sort'));
     }
 
     public function create(Kegiatan $kegiatan): View|RedirectResponse
