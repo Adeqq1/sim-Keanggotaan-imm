@@ -78,10 +78,10 @@ test('kader can view ekta preview', function () {
         ->assertSee('ekta-card__swoop', false)
         ->assertSee('ekta-card__photo-frame', false)
         ->assertSee('ekta-card__top-note', false)
-        ->assertSee(route('kader.ekta.download'), false)
-        ->assertSeeText('Unduh KTA (PDF)')
         ->assertSee('class="btn btn-primary btn-ui py-3 ekta-print-button"', false)
         ->assertSeeText('Cetak Kartu')
+        ->assertDontSee(route('kader.ekta.download'), false)
+        ->assertDontSeeText('Unduh KTA (PDF)')
         ->assertDontSeeText('Unduh KTA Lengkap (PDF 2 Halaman)');
 
     expect($anggota->fresh()->nama_lengkap)->toBe('Aisyah Kader Login');
