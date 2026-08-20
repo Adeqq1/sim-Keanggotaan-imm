@@ -9,14 +9,14 @@
         @method('patch')
 
         <div class="mb-4 text-center">
-            @php
-                $foto = $user->anggota && $user->anggota->foto_profil ? Storage::url($user->anggota->foto_profil) : null;
-            @endphp
-            @if($foto)
-                <img src="{{ $foto }}" class="rounded-circle border border-3 border-light shadow-sm mb-3" width="100" height="100" style="object-fit: cover;">
+            @if($user->profile_photo_url)
+                <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" class="rounded-circle border border-3 border-light shadow-sm mb-3" width="100" height="100" style="object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="rounded-circle bg-light align-items-center justify-content-center text-primary fs-1 fw-bold mx-auto mb-3 shadow-sm" style="display: none; width: 100px; height: 100px;">
+                    {{ $user->initials }}
+                </div>
             @else
                 <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-primary fs-1 fw-bold mx-auto mb-3 shadow-sm" style="width: 100px; height: 100px;">
-                    {{ substr($user->name, 0, 1) }}
+                    {{ $user->initials }}
                 </div>
             @endif
             @if($user->anggota)

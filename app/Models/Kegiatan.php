@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable(['nama_kegiatan', 'deskripsi', 'tanggal_waktu', 'lokasi', 'thumbnail'])]
 class Kegiatan extends Model
@@ -40,10 +41,12 @@ class Kegiatan extends Model
     }
 
     /**
-     * Get the URL of the activity's thumbnail, falling back to a lightweight placeholder image.
+     * Get the URL of the activity's thumbnail, falling back to a placeholder image.
      */
     public function getThumbnailUrlAttribute(): string
     {
-        return $this->thumbnail ? asset('storage/'.$this->thumbnail) : asset('images/placeholder-kegiatan.png');
+        return filled($this->thumbnail) && Storage::disk('public')->exists($this->thumbnail)
+            ? asset('storage/'.$this->thumbnail)
+            : asset('images/placeholder-kegiatan.png');
     }
 }

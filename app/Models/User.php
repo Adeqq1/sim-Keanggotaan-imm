@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 #[Fillable(['name', 'email', 'password', 'role'])]
 #[Hidden(['password', 'remember_token'])]
@@ -64,6 +66,22 @@ class User extends Authenticatable
     public function getRoleColorAttribute(): string
     {
         return RoleEnum::badgeClassFor($this->role);
+    }
+
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        $path = $this->anggota?->foto_profil;
+
+        return filled($path) && Storage::disk('public')->exists($path)
+            ? asset('storage/'.$path)
+            : null;
+    }
+
+    public function getInitialsAttribute(): string
+    {
+        $words = preg_split('/\s+/', trim($this->name ?: 'User')) ?: ['User'];
+
+        return Str::upper(collect($words)->take(2)->map(fn (string $word) => mb_substr($word, 0, 1))->implode(''));
     }
 
     /**

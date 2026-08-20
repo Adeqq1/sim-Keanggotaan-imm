@@ -28,9 +28,9 @@
                 <div class="mb-4">
                     <label class="form-label fw-bold">Foto Profil</label>
                     
-                    @if($anggota->foto_profil)
+                    @if($anggota->foto_profil_url)
                         <div class="mb-2">
-                            <img src="{{ Storage::url($anggota->foto_profil) }}" class="rounded shadow-sm" width="100" height="100" style="object-fit: cover;">
+                            <img src="{{ $anggota->foto_profil_url }}" alt="{{ $anggota->nama_lengkap }}" class="rounded shadow-sm" width="100" height="100" style="object-fit: cover;" onerror="this.onerror=null; this.src='{{ asset('images/placeholder-kegiatan.png') }}';">
                         </div>
                     @endif
                     

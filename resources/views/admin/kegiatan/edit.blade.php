@@ -49,9 +49,9 @@
 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Thumbnail Kegiatan</label>
-                    @if($kegiatan->thumbnail)
+                    @if($kegiatan->thumbnail_url)
                         <div class="mb-2">
-                            <img src="{{ asset('storage/' . $kegiatan->thumbnail) }}" alt="Gambar mini kegiatan" class="img-thumbnail" style="max-height: 150px;">
+                            <img src="{{ $kegiatan->thumbnail_url }}" alt="Gambar mini kegiatan" class="img-thumbnail" style="max-height: 150px;" onerror="this.onerror=null; this.src='{{ asset('images/placeholder-kegiatan.png') }}';">
                         </div>
                     @endif
                     <input type="file" name="thumbnail" class="form-control @error('thumbnail') is-invalid @enderror" accept="image/*">

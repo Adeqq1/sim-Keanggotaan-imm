@@ -74,8 +74,8 @@ return [
 
         'foto_profil' => [
             'driver' => 'local',
-            'root' => storage_path('app/public/foto-profil'),
-            'url' => env('APP_URL').'/storage/foto-profil',
+            'root' => storage_path('app/public/foto_profil'),
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage/foto_profil',
             'visibility' => 'public',
             'throw' => false,
         ],

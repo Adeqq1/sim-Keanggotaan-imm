@@ -30,7 +30,7 @@
     <body class="antialiased">
         @php
             $user = auth()->user();
-            $profilePhoto = $user->anggota?->foto_profil;
+            $profilePhoto = $user->profile_photo_url;
         @endphp
 
         {{-- ============================================================
@@ -195,11 +195,12 @@
             {{-- Footer user info --}}
             <div class="sidebar-footer">
                 <div class="d-flex align-items-center gap-2">
-                    <div class="sidebar-user-avatar">
+                    <div class="sidebar-user-avatar d-flex align-items-center justify-content-center overflow-hidden">
                         @if($profilePhoto)
-                            <img src="{{ Storage::url($profilePhoto) }}" alt="" width="36" height="36" style="object-fit: cover;">
+                            <img src="{{ $profilePhoto }}" alt="{{ $user->name }}" width="36" height="36" style="object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                            <span style="display: none;">{{ $user->initials }}</span>
                         @else
-                            {{ substr($user->name, 0, 1) }}
+                            {{ $user->initials }}
                         @endif
                     </div>
                     <div class="overflow-hidden flex-1">
@@ -227,9 +228,12 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h1 class="h5 mb-0 fw-bold">{{ $header ?? config('app.name') }}</h1>
                     <div class="dropdown">
-                        <button class="btn btn-link text-white p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Buka menu pengguna">
+                        <button class="btn btn-link text-white p-0 d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Buka menu pengguna">
                             @if($profilePhoto)
-                                <img src="{{ Storage::url($profilePhoto) }}" alt="" width="28" height="28" class="rounded-circle me-1" style="object-fit: cover;">
+                                <img src="{{ $profilePhoto }}" alt="{{ $user->name }}" width="28" height="28" class="rounded-circle me-1" style="object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+                                <span class="rounded-circle bg-white bg-opacity-25 text-white fw-bold align-items-center justify-content-center me-1" style="display: none; width: 28px; height: 28px; font-size: 0.7rem;">{{ $user->initials }}</span>
+                            @else
+                                <span class="rounded-circle bg-white bg-opacity-25 text-white fw-bold d-inline-flex align-items-center justify-content-center me-1" style="width: 28px; height: 28px; font-size: 0.7rem;">{{ $user->initials }}</span>
                             @endif
                             <i class="bi bi-three-dots-vertical fs-5"></i>
                         </button>
@@ -256,9 +260,10 @@
                     <button class="user-menu-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <div class="user-avatar-sm">
                             @if($profilePhoto)
-                                <img src="{{ Storage::url($profilePhoto) }}" alt="" width="28" height="28" class="rounded-circle" style="object-fit: cover;">
+                                <img src="{{ $profilePhoto }}" alt="{{ $user->name }}" width="28" height="28" class="rounded-circle" style="object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                                <span style="display: none;">{{ $user->initials }}</span>
                             @else
-                                {{ substr($user->name, 0, 1) }}
+                                {{ $user->initials }}
                             @endif
                         </div>
                         <span>{{ $user->name }}</span>
