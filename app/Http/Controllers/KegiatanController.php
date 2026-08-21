@@ -76,7 +76,9 @@ class KegiatanController extends Controller
         }
 
         try {
-            $kegiatan->update($data);
+            DB::transaction(function () use ($kegiatan, $data) {
+                $kegiatan->update($data);
+            });
         } catch (Throwable $exception) {
             $this->deleteFile('public', $newThumbnailPath, 'thumbnail kegiatan baru');
 
