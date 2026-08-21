@@ -93,7 +93,7 @@ class ProfileController extends Controller
             throw $exception;
         }
 
-        $this->deleteReplacedPhoto($oldPhotoPath, $newPhotoPath, $anggotaId);
+        $this->deleteReplacedPhoto($oldPhotoPath, $newPhotoPath);
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
@@ -108,10 +108,12 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+        $photoPath = $user->anggota?->foto_profil;
 
         Auth::logout();
 
         $user->delete();
+        $this->deletePhoto($photoPath);
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -134,20 +136,29 @@ class ProfileController extends Controller
         }
     }
 
-    private function deleteReplacedPhoto(?string $oldPath, ?string $newPath, ?int $anggotaId): void
+    private function deleteReplacedPhoto(?string $oldPath, ?string $newPath): void
     {
-        if ($oldPath === null || $newPath === null || $oldPath === $newPath || $anggotaId === null) {
+        if ($oldPath === null || $oldPath === $newPath) {
+            return;
+        }
+
+        $this->deletePhoto($oldPath);
+    }
+
+    private function deletePhoto(?string $path): void
+    {
+        if ($path === null) {
             return;
         }
 
         try {
             $disk = Storage::disk('public');
 
-            if ($disk->exists($oldPath) && ! $disk->delete($oldPath)) {
-                report(new RuntimeException("Foto profil lama gagal dihapus untuk anggota {$anggotaId}: {$oldPath}"));
+            if ($disk->exists($path) && ! $disk->delete($path)) {
+                report(new RuntimeException("Foto profil gagal dihapus: {$path}"));
             }
         } catch (Throwable $exception) {
-            report(new RuntimeException("Foto profil lama gagal dihapus untuk anggota {$anggotaId}: {$oldPath}", 0, $exception));
+            report(new RuntimeException("Foto profil gagal dihapus: {$path}", previous: $exception));
         }
     }
 }

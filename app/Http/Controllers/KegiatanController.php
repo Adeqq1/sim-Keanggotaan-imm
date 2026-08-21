@@ -44,19 +44,21 @@ class KegiatanController extends Controller
     public function store(KegiatanRequest $request)
     {
         $data = $request->validated();
+        $newThumbnailPath = null;
 
         if ($request->hasFile('thumbnail')) {
-            $file = $request->file('thumbnail');
-            $path = 'kegiatan_thumbnails/'.$file->hashName();
-            $stream = fopen($file->getPathname(), 'r');
-            Storage::disk('public')->put($path, $stream);
-            if (is_resource($stream)) {
-                fclose($stream);
-            }
-            $data['thumbnail'] = $path;
+            $newThumbnailPath = $request->file('thumbnail')->store('kegiatan_thumbnails', 'public');
+            $data['thumbnail'] = $newThumbnailPath;
         }
 
-        Kegiatan::create($data);
+        try {
+            Kegiatan::create($data);
+        } catch (Throwable $exception) {
+            $this->deleteFile('public', $newThumbnailPath, 'thumbnail kegiatan baru');
+
+            throw $exception;
+        }
+
         Cache::forget('kegiatan.terbaru');
 
         return redirect()->route('admin.kegiatan.index')->with('success', 'Kegiatan berhasil ditambahkan.');
@@ -70,22 +72,28 @@ class KegiatanController extends Controller
     public function update(KegiatanRequest $request, Kegiatan $kegiatan)
     {
         $data = $request->validated();
+        $oldThumbnailPath = $kegiatan->thumbnail;
+        $newThumbnailPath = null;
 
         if ($request->hasFile('thumbnail')) {
-            if ($kegiatan->thumbnail) {
-                Storage::disk('public')->delete($kegiatan->thumbnail);
-            }
-            $file = $request->file('thumbnail');
-            $path = 'kegiatan_thumbnails/'.$file->hashName();
-            $stream = fopen($file->getPathname(), 'r');
-            Storage::disk('public')->put($path, $stream);
-            if (is_resource($stream)) {
-                fclose($stream);
-            }
-            $data['thumbnail'] = $path;
+            $newThumbnailPath = $request->file('thumbnail')->store('kegiatan_thumbnails', 'public');
+            $data['thumbnail'] = $newThumbnailPath;
         }
 
-        $kegiatan->update($data);
+        try {
+            DB::transaction(function () use ($kegiatan, $data) {
+                $kegiatan->update($data);
+            });
+        } catch (Throwable $exception) {
+            $this->deleteFile('public', $newThumbnailPath, 'thumbnail kegiatan baru');
+
+            throw $exception;
+        }
+
+        if ($newThumbnailPath !== null && $oldThumbnailPath !== $newThumbnailPath) {
+            $this->deleteFile('public', $oldThumbnailPath, "thumbnail kegiatan {$kegiatan->id}");
+        }
+
         Cache::forget('kegiatan.terbaru');
 
         return redirect()->route('admin.kegiatan.index')->with('success', 'Kegiatan berhasil diupdate.');
