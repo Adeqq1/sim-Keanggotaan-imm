@@ -108,10 +108,12 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+        $photoPath = $user->anggota?->foto_profil;
 
         Auth::logout();
 
         $user->delete();
+        $this->deletePhoto($photoPath);
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -148,6 +150,23 @@ class ProfileController extends Controller
             }
         } catch (Throwable $exception) {
             report(new RuntimeException("Foto profil lama gagal dihapus untuk anggota {$anggotaId}: {$oldPath}", 0, $exception));
+        }
+    }
+
+    private function deletePhoto(?string $path): void
+    {
+        if ($path === null) {
+            return;
+        }
+
+        try {
+            $disk = Storage::disk('public');
+
+            if ($disk->exists($path) && ! $disk->delete($path)) {
+                report(new RuntimeException("Foto profil gagal dihapus: {$path}"));
+            }
+        } catch (Throwable $exception) {
+            report(new RuntimeException("Foto profil gagal dihapus: {$path}", previous: $exception));
         }
     }
 }
