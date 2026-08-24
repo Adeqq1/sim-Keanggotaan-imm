@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Models\Kegiatan;
+use Illuminate\Validation\Rule;
 
 class KegiatanRequest extends FormRequest
 {
@@ -12,7 +14,7 @@ class KegiatanRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return in_array($this->user()?->role, ['admin', 'instruktur'], true);
     }
 
     /**
@@ -28,6 +30,24 @@ class KegiatanRequest extends FormRequest
             'tanggal_waktu' => ['required', 'date'],
             'lokasi' => ['required', 'string', 'max:255'],
             'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            'jenis_pelaksanaan' => ['required', Rule::in([Kegiatan::SATU_SESI, Kegiatan::MULTI_SESI])],
+            'minimum_sesi_terverifikasi' => ['required', 'integer', 'min:1', 'max:255'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->input('jenis_pelaksanaan') === Kegiatan::SATU_SESI) {
+            $this->merge(['minimum_sesi_terverifikasi' => 1]);
+        }
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator): void {
+            if ($this->input('jenis_pelaksanaan') === Kegiatan::MULTI_SESI && (int) $this->input('minimum_sesi_terverifikasi') < 3) {
+                $validator->errors()->add('minimum_sesi_terverifikasi', 'Ambang multi-sesi minimal 3.');
+            }
+        });
     }
 }

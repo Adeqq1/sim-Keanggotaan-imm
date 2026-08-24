@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PresensiRequest;
+use App\Http\Requests\VerifikasiPresensiRequest;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\Presensi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Support\SortParams;
 
 class PresensiController extends Controller
@@ -30,30 +32,64 @@ class PresensiController extends Controller
 
     public function create(Request $request, Kegiatan $kegiatan)
     {
+        if (! $kegiatan->sesiKegiatans()->exists()) {
+            return redirect()->route('admin.kegiatan.sesi.index', $kegiatan)->withErrors(['sesi' => 'Tambahkan sesi kegiatan terlebih dahulu.']);
+        }
+
+        $sesiKegiatan = $kegiatan->sesiKegiatans()->first();
+
+        return redirect()->route('admin.presensi.sesi.show', [$kegiatan, $sesiKegiatan]);
+    }
+
+    public function showSession(Request $request, Kegiatan $kegiatan, \App\Models\SesiKegiatan $sesiKegiatan)
+    {
         $options = ['nama' => 'Nama', 'nia' => 'NIA'];
         $sort = SortParams::resolve($request, array_keys($options), 'nama', 'asc');
         $anggotas = Anggota::where('status_aktif', true)
             ->orderBy(['nama' => 'nama_lengkap', 'nia' => 'nia'][$sort['key']], $sort['direction'])->orderByDesc('id')->get();
-        $presensis = $kegiatan->presensi;
+        $presensis = $sesiKegiatan->presensis()->with('pemeriksa')->get();
         $canManagePresensi = auth()->user()->role === 'instruktur';
 
-        return view('admin.kegiatan.presensi', compact('kegiatan', 'anggotas', 'presensis', 'canManagePresensi', 'options', 'sort'));
+        return view('admin.kegiatan.presensi', compact('kegiatan', 'sesiKegiatan', 'anggotas', 'presensis', 'canManagePresensi', 'options', 'sort'));
     }
 
-    public function store(PresensiRequest $request, Kegiatan $kegiatan)
+    public function store(PresensiRequest $request, Kegiatan $kegiatan, \App\Models\SesiKegiatan $sesiKegiatan)
     {
-        foreach ($request->validated('presensi') as $data) {
-            $status = $data['status_kehadiran'];
+        DB::transaction(function () use ($request, $kegiatan, $sesiKegiatan): void {
+            $sesiKegiatan = \App\Models\SesiKegiatan::query()->lockForUpdate()->findOrFail($sesiKegiatan->id);
+            foreach ($request->validated('presensi') as $data) {
+                $status = $data['status_kehadiran'];
+                $presensi = Presensi::firstOrNew(['sesi_kegiatan_id' => $sesiKegiatan->id, 'anggota_id' => $data['anggota_id']]);
+                $attributes = ['kegiatan_id' => $kegiatan->id, 'status_kehadiran' => $status];
+                if ($status === 'hadir') {
+                    $attributes['waktu_hadir'] = $presensi->exists && $presensi->status_kehadiran === 'hadir' ? $presensi->waktu_hadir : now();
+                } else {
+                    $attributes += ['waktu_hadir' => null, 'status_verifikasi' => 'pending', 'pemeriksa_id' => null, 'diperiksa_pada' => null];
+                }
+                $presensi->fill($attributes)->save();
+            }
+        });
 
-            Presensi::updateOrCreate(
-                ['kegiatan_id' => $kegiatan->id, 'anggota_id' => $data['anggota_id']],
-                [
-                    'status_kehadiran' => $status,
-                    'waktu_hadir' => $status === 'hadir' ? now() : null,
-                ]
-            );
+        return redirect()->route('admin.presensi.sesi.show', [$kegiatan, $sesiKegiatan])->with('success', 'Presensi berhasil disimpan.');
+    }
+
+    public function updateVerification(VerifikasiPresensiRequest $request, Kegiatan $kegiatan, \App\Models\SesiKegiatan $sesiKegiatan, Presensi $presensi)
+    {
+        $status = $request->validated('status_verifikasi');
+        if ($status !== 'pending' && $presensi->status_kehadiran !== 'hadir') {
+            return back()->withErrors(['status_verifikasi' => 'Hanya presensi hadir yang dapat diverifikasi atau ditolak.']);
         }
 
-        return redirect()->route('admin.kegiatan.index')->with('success', 'Presensi berhasil disimpan.');
+        if ($status === $presensi->status_verifikasi && $status !== 'pending') {
+            return back()->with('success', 'Keputusan verifikasi sudah tersimpan.');
+        }
+
+        $presensi->update([
+            'status_verifikasi' => $status,
+            'pemeriksa_id' => $status === 'pending' ? null : auth()->id(),
+            'diperiksa_pada' => $status === 'pending' ? null : now(),
+        ]);
+
+        return back()->with('success', 'Keputusan verifikasi berhasil disimpan.');
     }
 }
