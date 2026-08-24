@@ -37,6 +37,9 @@
                         <li><a class="dropdown-item py-2" href="{{ route('admin.kegiatan.show', $kegiatan) }}"><i class="bi bi-eye me-2 text-primary"></i> Lihat Detail</a></li>
                          <li><a class="dropdown-item py-2" href="{{ route('admin.presensi.show', $kegiatan) }}"><i class="bi bi-check2-square me-2 text-success"></i> {{ auth()->user()->role === 'instruktur' ? 'Kelola Presensi' : 'Lihat Presensi' }}</a></li>
                          <li><a class="dropdown-item py-2" href="{{ route('admin.kegiatan.sesi.index', $kegiatan) }}"><i class="bi bi-calendar2-week me-2 text-primary"></i> Kelola Sesi</a></li>
+                         @if($kegiatan->jenis_pelaksanaan === \App\Models\Kegiatan::MULTI_SESI)
+                             <li><a class="dropdown-item py-2" href="{{ route('admin.kegiatan.penilaian.index', $kegiatan) }}"><i class="bi bi-star me-2 text-warning"></i> {{ auth()->user()->role === 'instruktur' ? 'Kelola Penilaian' : 'Lihat Penilaian' }}</a></li>
+                         @endif
                         @if(auth()->user()->role === 'instruktur')
                             <li><a class="dropdown-item py-2" href="{{ route('admin.kegiatan.materi-kegiatan.index', $kegiatan) }}"><i class="bi bi-journal-text me-2 text-primary"></i> Kelola Materi</a></li>
                         @endif

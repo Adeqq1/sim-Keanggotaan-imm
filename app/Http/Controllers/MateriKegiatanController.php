@@ -6,7 +6,7 @@ use App\Http\Requests\MateriKegiatanRequest;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\MateriKegiatan;
-use App\Models\Presensi;
+use App\Services\VerifiedAttendance;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
@@ -198,22 +198,18 @@ class MateriKegiatanController extends Controller
 
     private function accessibleQuery(Anggota $anggota): Builder
     {
+        $eligibleKegiatanIds = app(VerifiedAttendance::class)->eligibleKegiatanIds($anggota);
+
         return MateriKegiatan::query()
             ->with('kegiatan')
-            ->whereHas('kegiatan.presensi', fn ($query) => $query
-                ->where('anggota_id', $anggota->id)
-                ->where('status_kehadiran', 'hadir'));
+            ->whereIn('kegiatan_id', $eligibleKegiatanIds);
     }
 
     private function authorizedMember(MateriKegiatan $materiKegiatan): Anggota
     {
         $anggota = auth()->user()->anggota;
 
-        if (! $anggota || ! Presensi::query()
-            ->where('anggota_id', $anggota->id)
-            ->where('kegiatan_id', $materiKegiatan->kegiatan_id)
-            ->where('status_kehadiran', 'hadir')
-            ->exists()) {
+        if (! $anggota || ! app(VerifiedAttendance::class)->meetsRequirement($materiKegiatan->kegiatan, $anggota)) {
             abort(403, 'Anda tidak memiliki akses ke materi ini.');
         }
 

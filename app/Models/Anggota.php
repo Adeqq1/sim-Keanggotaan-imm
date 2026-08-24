@@ -47,6 +47,11 @@ class Anggota extends Model
         return $this->hasMany(Presensi::class);
     }
 
+    public function penilaianKegiatans(): HasMany
+    {
+        return $this->hasMany(PenilaianKegiatan::class);
+    }
+
     public function jumlahKegiatanHadir(): int
     {
         return $this->presensi()

@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 use Illuminate\Http\Request;
 use App\Support\SortParams;
+use Illuminate\Database\Query\Expression;
 
 class LaporanKegiatanController extends Controller
 {
@@ -28,10 +29,10 @@ class LaporanKegiatanController extends Controller
         $kegiatans = Kegiatan::query()
             ->with('laporanKegiatan')
             ->withCount([
-                'presensi',
-                'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir'),
-                'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin'),
-                'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa'),
+                'presensi as presensi_count' => fn ($query) => $query->select(new Expression('count(distinct anggota_id)')),
+                'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir')->select(new Expression('count(distinct anggota_id)')),
+                'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin')->select(new Expression('count(distinct anggota_id)')),
+                'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa')->select(new Expression('count(distinct anggota_id)')),
             ])
             ->withExists('laporanKegiatan as laporan_exists')
             ->orderBy(['nama' => 'nama_kegiatan', 'tanggal' => 'tanggal_waktu', 'laporan' => 'laporan_exists', 'peserta' => 'presensi_count', 'hadir' => 'hadir_count', 'izin' => 'izin_count', 'alfa' => 'alfa_count'][$sort['key']], $sort['direction'])
@@ -92,10 +93,10 @@ class LaporanKegiatanController extends Controller
     public function show(LaporanKegiatan $laporanKegiatan): View
     {
         $laporanKegiatan->load(['kegiatan' => fn ($query) => $query->withCount([
-            'presensi',
-            'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir'),
-            'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin'),
-            'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa'),
+            'presensi as presensi_count' => fn ($query) => $query->select(new Expression('count(distinct anggota_id)')),
+            'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir')->select(new Expression('count(distinct anggota_id)')),
+            'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin')->select(new Expression('count(distinct anggota_id)')),
+            'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa')->select(new Expression('count(distinct anggota_id)')),
         ])]);
 
         return view('admin.kegiatan.laporan.show', compact('laporanKegiatan'));
@@ -171,10 +172,10 @@ class LaporanKegiatanController extends Controller
     public function downloadPdf(LaporanKegiatan $laporanKegiatan): mixed
     {
         $laporanKegiatan->load(['kegiatan' => fn ($query) => $query->withCount([
-            'presensi',
-            'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir'),
-            'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin'),
-            'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa'),
+            'presensi as presensi_count' => fn ($query) => $query->select(new Expression('count(distinct anggota_id)')),
+            'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir')->select(new Expression('count(distinct anggota_id)')),
+            'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin')->select(new Expression('count(distinct anggota_id)')),
+            'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa')->select(new Expression('count(distinct anggota_id)')),
         ])]);
 
         $kegiatan = $laporanKegiatan->kegiatan;

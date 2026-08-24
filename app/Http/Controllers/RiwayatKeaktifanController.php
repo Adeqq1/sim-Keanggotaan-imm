@@ -7,6 +7,7 @@ use App\Models\Sertifikat;
 use App\Models\Kegiatan;
 use Illuminate\Http\Request;
 use App\Support\SortParams;
+use App\Services\VerifiedAttendance;
 
 class RiwayatKeaktifanController extends Controller
 {
@@ -22,7 +23,7 @@ class RiwayatKeaktifanController extends Controller
         $options = ['kegiatan' => 'Nama Kegiatan', 'tanggal_kegiatan' => 'Tanggal Kegiatan', 'status' => 'Status', 'waktu_hadir' => 'Waktu Hadir', 'created' => 'Waktu Ditambahkan'];
         $sort = SortParams::resolve($request, array_keys($options), 'created');
 
-        $presensiQuery = (clone $presensiQuery)->with('kegiatan');
+        $presensiQuery = (clone $presensiQuery)->with(['kegiatan', 'sesiKegiatan']);
         $presensis = $presensiQuery
             ->when(in_array($sort['key'], ['kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy(
                 Kegiatan::select($sort['key'] === 'kegiatan' ? 'nama_kegiatan' : 'tanggal_waktu')->whereColumn('kegiatan.id', 'presensi.kegiatan_id'), $sort['direction']
@@ -41,9 +42,10 @@ class RiwayatKeaktifanController extends Controller
             'izin' => (clone $presensiQuery)->where('status_kehadiran', 'izin')->count(),
             'alfa' => (clone $presensiQuery)->where('status_kehadiran', 'alfa')->count(),
         ];
-        $jumlahKegiatanHadir = $anggota->jumlahKegiatanHadir();
-        $canClaimSertifikat = $jumlahKegiatanHadir >= Sertifikat::MINIMUM_KEGIATAN_HADIR;
-        $minimumKegiatanHadir = Sertifikat::MINIMUM_KEGIATAN_HADIR;
+        $eligibleKegiatanIds = app(VerifiedAttendance::class)->eligibleKegiatanIds($anggota);
+        $jumlahKegiatanHadir = $eligibleKegiatanIds->count();
+        $canClaimSertifikat = $jumlahKegiatanHadir > 0;
+        $minimumKegiatanHadir = 1;
 
         return view('kader.riwayat.index', compact(
             'presensis',
@@ -51,6 +53,7 @@ class RiwayatKeaktifanController extends Controller
             'stats',
             'jumlahKegiatanHadir',
             'canClaimSertifikat',
+            'eligibleKegiatanIds',
             'minimumKegiatanHadir',
             'options', 'sort',
         ));

@@ -75,7 +75,7 @@ class DashboardController extends Controller
             ->pluck('total', 'month');
 
         $presensiCounts = Presensi::selectRaw("$presensiSelect as month, count(*) as total")
-            ->where('status_kehadiran', 'hadir')
+            ->terverifikasi()
             ->where('waktu_hadir', '>=', $startLimit)
             ->groupBy('month')
             ->pluck('total', 'month');
@@ -125,7 +125,7 @@ class DashboardController extends Controller
         }
 
         $stats = [
-            'total_kehadiran' => Presensi::where('anggota_id', $anggota->id)->where('status_kehadiran', 'hadir')->count(),
+            'total_kehadiran' => Presensi::where('anggota_id', $anggota->id)->terverifikasi()->count(),
             'total_sertifikat' => Sertifikat::where('anggota_id', $anggota->id)->count(),
         ];
 

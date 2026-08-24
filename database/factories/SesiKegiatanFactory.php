@@ -16,7 +16,7 @@ class SesiKegiatanFactory extends Factory
         $mulaiPada = fake()->dateTimeBetween('-30 days', '+30 days');
 
         return [
-            'kegiatan_id' => Kegiatan::factory()->withoutDefaultSession(),
+            'kegiatan_id' => Kegiatan::factory(),
             'urutan' => 1,
             'nama_sesi' => 'Sesi 1',
             'mulai_pada' => $mulaiPada,

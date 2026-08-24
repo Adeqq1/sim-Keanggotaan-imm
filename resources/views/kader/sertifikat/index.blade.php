@@ -27,7 +27,7 @@
                 </div>
             </div>
             <div class="pt-3 mt-auto border-top index-card__actions">
-                @if($canDownloadSertifikat && $kegiatanHadirIds->contains($cert->kegiatan_id))
+                @if($canDownloadSertifikat && $eligibleKegiatanIds->contains($cert->kegiatan_id))
                     <a href="{{ route('kader.sertifikat.download', $cert) }}" class="btn btn-outline-success btn-ui btn-ui-sm" aria-label="Unduh sertifikat {{ $cert->kegiatan->nama_kegiatan }}" title="Unduh sertifikat">
                         <i class="bi bi-download"></i>
                     </a>

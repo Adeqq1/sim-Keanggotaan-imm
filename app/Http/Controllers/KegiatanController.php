@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use Illuminate\Database\Query\Expression;
 use App\Support\SortParams;
 use RuntimeException;
 use Throwable;
@@ -32,10 +33,10 @@ class KegiatanController extends Controller
     public function show(Kegiatan $kegiatan)
     {
         $kegiatan->load('laporanKegiatan')->loadCount([
-            'presensi',
-            'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir'),
-            'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin'),
-            'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa'),
+            'presensi as presensi_count' => fn ($query) => $query->select(new Expression('count(distinct anggota_id)')),
+            'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir')->select(new Expression('count(distinct anggota_id)')),
+            'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin')->select(new Expression('count(distinct anggota_id)')),
+            'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa')->select(new Expression('count(distinct anggota_id)')),
         ]);
 
         return view('admin.kegiatan.show', compact('kegiatan'));
@@ -52,12 +53,14 @@ class KegiatanController extends Controller
         }
 
         try {
-        $kegiatan = Kegiatan::create($data);
-        $kegiatan->sesiKegiatans()->create([
-            'urutan' => 1,
-            'nama_sesi' => 'Sesi 1',
-            'mulai_pada' => $kegiatan->tanggal_waktu,
-        ]);
+            DB::transaction(function () use ($data, &$kegiatan): void {
+                $kegiatan = Kegiatan::create($data);
+                $kegiatan->sesiKegiatans()->create([
+                    'urutan' => 1,
+                    'nama_sesi' => 'Sesi 1',
+                    'mulai_pada' => $kegiatan->tanggal_waktu,
+                ]);
+            });
         } catch (Throwable $exception) {
             $this->deleteFile('public', $newThumbnailPath, 'thumbnail kegiatan baru');
 

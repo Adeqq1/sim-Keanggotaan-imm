@@ -7,6 +7,7 @@ use App\Http\Requests\VerifikasiPresensiRequest;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\Presensi;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Support\SortParams;
@@ -19,10 +20,10 @@ class PresensiController extends Controller
         $sort = SortParams::resolve($request, array_keys($options), 'tanggal');
         $kegiatans = Kegiatan::query()
             ->withCount([
-                'presensi',
-                'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir'),
-                'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin'),
-                'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa'),
+                'presensi as presensi_count' => fn ($query) => $query->select(new Expression('count(distinct anggota_id)')),
+                'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir')->select(new Expression('count(distinct anggota_id)')),
+                'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin')->select(new Expression('count(distinct anggota_id)')),
+                'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa')->select(new Expression('count(distinct anggota_id)')),
             ])
             ->orderBy(['nama' => 'nama_kegiatan', 'tanggal' => 'tanggal_waktu', 'lokasi' => 'lokasi', 'peserta' => 'presensi_count', 'hadir' => 'hadir_count', 'izin' => 'izin_count', 'alfa' => 'alfa_count'][$sort['key']], $sort['direction'])
             ->orderByDesc('kegiatan.id')->paginate(12)->withQueryString();
@@ -53,8 +54,14 @@ class PresensiController extends Controller
         return view('admin.kegiatan.presensi', compact('kegiatan', 'sesiKegiatan', 'anggotas', 'presensis', 'canManagePresensi', 'options', 'sort'));
     }
 
-    public function store(PresensiRequest $request, Kegiatan $kegiatan, \App\Models\SesiKegiatan $sesiKegiatan)
+    public function store(PresensiRequest $request, Kegiatan $kegiatan, ?\App\Models\SesiKegiatan $sesiKegiatan = null)
     {
+        $legacyRoute = $sesiKegiatan === null;
+        $sesiKegiatan ??= $kegiatan->sesiKegiatans()->firstOrCreate(
+            ['urutan' => 1],
+            ['nama_sesi' => 'Sesi 1', 'mulai_pada' => $kegiatan->tanggal_waktu],
+        );
+
         DB::transaction(function () use ($request, $kegiatan, $sesiKegiatan): void {
             $sesiKegiatan = \App\Models\SesiKegiatan::query()->lockForUpdate()->findOrFail($sesiKegiatan->id);
             foreach ($request->validated('presensi') as $data) {
@@ -70,7 +77,7 @@ class PresensiController extends Controller
             }
         });
 
-        return redirect()->route('admin.presensi.sesi.show', [$kegiatan, $sesiKegiatan])->with('success', 'Presensi berhasil disimpan.');
+        return redirect()->route($legacyRoute ? 'admin.kegiatan.index' : 'admin.presensi.sesi.show', $legacyRoute ? [] : [$kegiatan, $sesiKegiatan])->with('success', 'Presensi berhasil disimpan.');
     }
 
     public function updateVerification(VerifikasiPresensiRequest $request, Kegiatan $kegiatan, \App\Models\SesiKegiatan $sesiKegiatan, Presensi $presensi)

@@ -34,7 +34,16 @@ class PresensiFactory extends Factory
     public function configure(): static
     {
         return $this->afterMaking(function (Presensi $presensi): void {
-            $presensi->kegiatan_id = SesiKegiatan::query()->findOrFail($presensi->sesi_kegiatan_id)->kegiatan_id;
+            $sesi = SesiKegiatan::query()->findOrFail($presensi->sesi_kegiatan_id);
+            if ($presensi->kegiatan_id && (int) $presensi->kegiatan_id !== (int) $sesi->kegiatan_id) {
+                $sesi = SesiKegiatan::query()->firstOrCreate(
+                    ['kegiatan_id' => $presensi->kegiatan_id, 'urutan' => 1],
+                    ['nama_sesi' => 'Sesi 1', 'mulai_pada' => Kegiatan::findOrFail($presensi->kegiatan_id)->tanggal_waktu],
+                );
+            }
+
+            $presensi->sesi_kegiatan_id = $sesi->id;
+            $presensi->kegiatan_id = $sesi->kegiatan_id;
         })->afterCreating(function (Presensi $presensi): void {
             if ($presensi->status_verifikasi === 'terverifikasi' && ! $presensi->pemeriksa_id) {
                 $presensi->update(['pemeriksa_id' => User::factory()->instruktur()->create()->id]);
