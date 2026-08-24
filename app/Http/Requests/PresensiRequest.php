@@ -5,6 +5,8 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Models\Kegiatan;
+use App\Models\SesiKegiatan;
 
 class PresensiRequest extends FormRequest
 {
@@ -13,7 +15,14 @@ class PresensiRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()?->role === 'instruktur';
+        $kegiatan = $this->route('kegiatan');
+        $sesi = $this->route('sesiKegiatan');
+
+        return $this->user()?->role === 'instruktur'
+            && $kegiatan instanceof Kegiatan
+            && $sesi instanceof SesiKegiatan
+            && $sesi->kegiatan_id === $kegiatan->id
+            && $kegiatan->jenis_pelaksanaan !== Kegiatan::BELUM_DITETAPKAN;
     }
 
     /**

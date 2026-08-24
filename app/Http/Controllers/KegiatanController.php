@@ -52,7 +52,12 @@ class KegiatanController extends Controller
         }
 
         try {
-            Kegiatan::create($data);
+        $kegiatan = Kegiatan::create($data);
+        $kegiatan->sesiKegiatans()->create([
+            'urutan' => 1,
+            'nama_sesi' => 'Sesi 1',
+            'mulai_pada' => $kegiatan->tanggal_waktu,
+        ]);
         } catch (Throwable $exception) {
             $this->deleteFile('public', $newThumbnailPath, 'thumbnail kegiatan baru');
 
@@ -72,6 +77,9 @@ class KegiatanController extends Controller
     public function update(KegiatanRequest $request, Kegiatan $kegiatan)
     {
         $data = $request->validated();
+        if ($kegiatan->presensi()->exists() && ($kegiatan->jenis_pelaksanaan !== $data['jenis_pelaksanaan'] || $kegiatan->minimum_sesi_terverifikasi !== (int) $data['minimum_sesi_terverifikasi'])) {
+            return back()->withErrors(['jenis_pelaksanaan' => 'Kebijakan kegiatan tidak dapat diubah setelah presensi tercatat.'])->withInput();
+        }
         $oldThumbnailPath = $kegiatan->thumbnail;
         $newThumbnailPath = null;
 

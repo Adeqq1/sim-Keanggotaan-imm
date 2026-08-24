@@ -9,12 +9,12 @@
 
     <div class="card p-3 mb-4 border-start border-primary border-4">
         <h6 class="fw-bold mb-1 text-primary">{{ $kegiatan->nama_kegiatan }}</h6>
-        <p class="text-muted small mb-0"><i class="bi bi-calendar-event me-1"></i> {{ $kegiatan->tanggal_waktu->translatedFormat('d F Y, H:i') }}</p>
+        <p class="text-muted small mb-0"><i class="bi bi-calendar-event me-1"></i> Sesi {{ $sesiKegiatan->urutan }}: {{ $sesiKegiatan->nama_sesi }} · {{ $sesiKegiatan->mulai_pada->translatedFormat('d F Y, H:i') }}</p>
     </div>
-    <x-sort-control :action="route('admin.presensi.show', $kegiatan)" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
+    <x-sort-control :action="route('admin.presensi.sesi.show', [$kegiatan, $sesiKegiatan])" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
 
     @if($canManagePresensi)
-        <form action="{{ route('admin.presensi.store', $kegiatan) }}" method="POST">
+        <form action="{{ route('admin.presensi.store', [$kegiatan, $sesiKegiatan]) }}" method="POST">
             @csrf
     @endif
 
@@ -55,7 +55,7 @@
                         <span class="badge bg-secondary rounded-pill px-3">Belum dicatat</span>
                     @else
                         <span class="badge {{ $status === 'hadir' ? 'bg-success' : ($status === 'izin' ? 'bg-warning text-dark' : 'bg-danger') }} rounded-pill px-3">
-                            {{ ucfirst($status) }}
+                            {{ ucfirst($status) }}{{ $presensi->status_verifikasi !== 'pending' ? ' · '.ucfirst($presensi->status_verifikasi) : '' }}
                         </span>
                     @endif
                 @endif
@@ -74,5 +74,20 @@
 
     @if($canManagePresensi)
         </form>
+        <h6 class="fw-bold mt-4">Verifikasi Kehadiran</h6>
+        @foreach($presensis->where('status_kehadiran', 'hadir') as $presensi)
+            <div class="card p-3 mb-2">
+                <div class="d-flex justify-content-between align-items-center gap-2">
+                    <span>{{ $presensi->anggota->nama_lengkap }}: {{ ucfirst($presensi->status_verifikasi) }}</span>
+                    <form method="POST" action="{{ route('admin.presensi.verifikasi.update', [$kegiatan, $sesiKegiatan, $presensi]) }}" class="d-flex gap-2">
+                        @csrf @method('PATCH')
+                        <select name="status_verifikasi" class="form-select form-select-sm" aria-label="Keputusan verifikasi {{ $presensi->anggota->nama_lengkap }}">
+                            @foreach(['pending', 'terverifikasi', 'ditolak'] as $verification)<option value="{{ $verification }}" @selected($presensi->status_verifikasi === $verification)>{{ ucfirst($verification) }}</option>@endforeach
+                        </select>
+                        <button class="btn btn-sm btn-primary">Simpan</button>
+                    </form>
+                </div>
+            </div>
+        @endforeach
     @endif
 </x-app-layout>

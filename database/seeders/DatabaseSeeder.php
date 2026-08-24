@@ -42,6 +42,7 @@ class DatabaseSeeder extends Seeder
             foreach ($anggotas as $anggota) {
                 Presensi::factory()->create([
                     'kegiatan_id' => $kegiatan->id,
+                    'sesi_kegiatan_id' => $kegiatan->sesiKegiatans()->first()->id,
                     'anggota_id' => $anggota->id,
                 ]);
             }

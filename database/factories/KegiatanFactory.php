@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Kegiatan;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\SesiKegiatan;
 
 /**
  * @extends Factory<Kegiatan>
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class KegiatanFactory extends Factory
 {
     protected $model = Kegiatan::class;
+
+    private bool $skipDefaultSession = false;
 
     /**
      * Contoh judul kegiatan IMM/kampus berbahasa Indonesia.
@@ -80,7 +83,29 @@ class KegiatanFactory extends Factory
             'deskripsi' => fake()->randomElement(self::DESKRIPSI),
             'tanggal_waktu' => fake()->dateTimeBetween('+1 day', '+30 days'),
             'lokasi' => fake()->randomElement(self::LOKASI).', '.$kota,
+            'jenis_pelaksanaan' => Kegiatan::SATU_SESI,
+            'minimum_sesi_terverifikasi' => 1,
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Kegiatan $kegiatan): void {
+            if (! $this->skipDefaultSession && ! $kegiatan->sesiKegiatans()->exists()) {
+                SesiKegiatan::factory()->for($kegiatan)->create([
+                    'urutan' => 1,
+                    'nama_sesi' => 'Sesi 1',
+                    'mulai_pada' => $kegiatan->tanggal_waktu,
+                ]);
+            }
+        });
+    }
+
+    public function withoutDefaultSession(): static
+    {
+        $this->skipDefaultSession = true;
+
+        return $this;
     }
 
     /**

@@ -39,6 +39,22 @@
                     @enderror
                 </div>
 
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Jenis Pelaksanaan <span class="text-danger">*</span></label>
+                        <select name="jenis_pelaksanaan" class="form-select @error('jenis_pelaksanaan') is-invalid @enderror" required>
+                            <option value="satu_sesi" @selected(old('jenis_pelaksanaan', $kegiatan->jenis_pelaksanaan) === 'satu_sesi')>Satu sesi</option>
+                            <option value="multi_sesi" @selected(old('jenis_pelaksanaan', $kegiatan->jenis_pelaksanaan) === 'multi_sesi')>Multi-sesi</option>
+                        </select>
+                        @error('jenis_pelaksanaan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Minimum sesi terverifikasi <span class="text-danger">*</span></label>
+                        <input type="number" name="minimum_sesi_terverifikasi" min="1" max="255" value="{{ old('minimum_sesi_terverifikasi', $kegiatan->minimum_sesi_terverifikasi) }}" class="form-control @error('minimum_sesi_terverifikasi') is-invalid @enderror" required>
+                        @error('minimum_sesi_terverifikasi')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label fw-bold">Deskripsi</label>
                     <textarea name="deskripsi" rows="4" class="form-control @error('deskripsi') is-invalid @enderror">{{ old('deskripsi', $kegiatan->deskripsi) }}</textarea>

@@ -14,6 +14,7 @@ use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RiwayatKeaktifanController;
 use App\Http\Controllers\SertifikatController;
+use App\Http\Controllers\SesiKegiatanController;
 use App\Http\Controllers\ValidasiPendaftaranController;
 use Illuminate\Support\Facades\Route;
 
@@ -81,12 +82,18 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         // Modul Presensi
         Route::get('/presensi', [PresensiController::class, 'index'])->name('presensi.index');
         Route::get('/presensi/{kegiatan}', [PresensiController::class, 'create'])->name('presensi.show');
+        Route::get('/presensi/{kegiatan}/sesi/{sesiKegiatan}', [PresensiController::class, 'showSession'])->name('presensi.sesi.show')->scopeBindings();
+        Route::get('/kegiatan/{kegiatan}/sesi', [SesiKegiatanController::class, 'index'])->name('kegiatan.sesi.index');
+        Route::post('/kegiatan/{kegiatan}/sesi', [SesiKegiatanController::class, 'store'])->name('kegiatan.sesi.store');
+        Route::patch('/kegiatan/{kegiatan}/sesi/{sesiKegiatan}', [SesiKegiatanController::class, 'update'])->name('kegiatan.sesi.update')->scopeBindings();
+        Route::delete('/kegiatan/{kegiatan}/sesi/{sesiKegiatan}', [SesiKegiatanController::class, 'destroy'])->name('kegiatan.sesi.destroy')->scopeBindings();
     });
 
     // Hanya instruktur yang dapat mencatat presensi.
     Route::middleware('role:instruktur')->group(function () {
         Route::get('/laporan-kegiatan/{laporanKegiatan}/download', [LaporanKegiatanController::class, 'downloadPdf'])->name('laporan-kegiatan.download');
-        Route::post('/presensi/{kegiatan}', [PresensiController::class, 'store'])->name('presensi.store');
+        Route::post('/presensi/{kegiatan}/sesi/{sesiKegiatan}', [PresensiController::class, 'store'])->name('presensi.store')->scopeBindings();
+        Route::patch('/presensi/{kegiatan}/sesi/{sesiKegiatan}/{presensi}/verifikasi', [PresensiController::class, 'updateVerification'])->name('presensi.verifikasi.update')->scopeBindings();
         Route::resource('kegiatan.materi-kegiatan', MateriKegiatanController::class)
             ->except('show')
             ->scoped();
