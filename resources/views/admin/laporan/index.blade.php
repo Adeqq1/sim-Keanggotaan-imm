@@ -9,7 +9,7 @@
                 <span class="laporan-panel-icon"><i class="bi bi-sliders2"></i></span>
                 <div>
                     <h6 class="fw-bold mb-1">Filter Laporan</h6>
-                    <p class="text-muted small mb-0">Tentukan data dan periode yang ingin Anda unduh.</p>
+                    <p class="text-muted small mb-0">Tentukan data dan periode yang ingin Anda unduh. <br><br></p>
                 </div>
             </div>
 
