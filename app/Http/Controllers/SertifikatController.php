@@ -104,10 +104,16 @@ class SertifikatController extends Controller
         $validated = $request->validated();
         $kegiatan = Kegiatan::with([])->findOrFail($validated['kegiatan_id']);
         $instruktur = User::where('role', 'instruktur')->first()?->name ?? 'Pimpinan Cabang';
+        $anggotaIds = $validated['anggota_ids'];
+        $anggotas = Anggota::with('user')->whereIn('id', $anggotaIds)->get()->keyBy('id');
 
-        foreach ($validated['anggota_ids'] as $anggotaId) {
-            $anggota = Anggota::with('user')->findOrFail($anggotaId);
-            abort_unless(app(CertificateEligibility::class)->eligible($kegiatan, $anggota), 422);
+        abort_unless($anggotas->count() === count($anggotaIds), 422);
+
+        $eligibility = app(CertificateEligibility::class);
+        abort_unless($anggotas->every(fn (Anggota $anggota): bool => $eligibility->eligible($kegiatan, $anggota)), 422);
+
+        foreach ($anggotaIds as $anggotaId) {
+            $anggota = $anggotas->get($anggotaId);
             GenerateCertificateJob::dispatch(null, $kegiatan, $anggota, $instruktur);
         }
 

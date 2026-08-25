@@ -18,6 +18,11 @@ class DemoDataFiles
      */
     public function provisionFiles(): array
     {
+        $approvedClaims = Presensi::query()
+            ->where('status_klaim', 'disetujui')
+            ->where('bukti_kehadiran', 'like', 'bukti_kehadiran/demo/%')
+            ->get(['id', 'bukti_kehadiran']);
+
         $this->cleanDemoNamespaces();
 
         $stats = [
@@ -69,6 +74,11 @@ class DemoDataFiles
             $pendingClaim->update(['bukti_kehadiran' => $path]);
             $stats['public_files']++;
             $stats['records_updated']++;
+        }
+
+        foreach ($approvedClaims as $claim) {
+            $this->copyImageToPublic($claim->bukti_kehadiran);
+            $stats['public_files']++;
         }
 
         // 5. Keep historical claim artifacts without issuing certificates.

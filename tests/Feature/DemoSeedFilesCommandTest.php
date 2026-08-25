@@ -118,6 +118,29 @@ test('command provisions files and updates database paths correctly', function (
     Storage::disk('public')->assertMissing($arsip->file_arsip); // Must not be public
 });
 
+test('command preserves approved claim evidence across reruns without issuing certificates', function () {
+    $this->seed(DatabaseSeeder::class);
+    $kegiatan = Kegiatan::first();
+    $anggota = Anggota::first();
+    $certificateCount = Sertifikat::count();
+    $approved = Presensi::updateOrCreate([
+        'kegiatan_id' => $kegiatan->id,
+        'anggota_id' => $anggota->id,
+    ], [
+        'status_kehadiran' => 'hadir',
+        'status_klaim' => 'disetujui',
+        'bukti_kehadiran' => 'bukti_kehadiran/demo/approved-'.$anggota->id.'.png',
+    ]);
+
+    $path = $approved->bukti_kehadiran;
+    $this->artisan('demo:seed-files')->assertSuccessful();
+    $this->artisan('demo:seed-files')->assertSuccessful();
+
+    expect($approved->fresh()->bukti_kehadiran)->toBe($path)
+        ->and(Sertifikat::count())->toBe($certificateCount);
+    Storage::disk('public')->assertExists($path);
+});
+
 test('command is idempotent and handles cleanup', function () {
     $this->seed(DatabaseSeeder::class);
 
