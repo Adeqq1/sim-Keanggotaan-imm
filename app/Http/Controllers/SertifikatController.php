@@ -17,6 +17,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Bus;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\Format;
 use Intervention\Image\ImageManager;
@@ -131,12 +132,58 @@ class SertifikatController extends Controller
         $eligibility = app(CertificateEligibility::class);
         abort_unless($anggotas->every(fn (Anggota $anggota): bool => $eligibility->eligible($kegiatan, $anggota)), 422);
 
-        foreach ($anggotaIds as $anggotaId) {
-            $anggota = $anggotas->get($anggotaId);
-            GenerateCertificateJob::dispatch(null, $kegiatan, $anggota, $instruktur);
+        $jobs = collect($anggotaIds)->map(function (int $anggotaId) use ($anggotas, $kegiatan, $instruktur) {
+            return new GenerateCertificateJob(null, $kegiatan, $anggotas->get($anggotaId), $instruktur);
+        })->all();
+        $batch = Bus::batch($jobs)
+            ->name('sertifikat-generation:user-'.auth()->id())
+            ->withOption('user_id', auth()->id())
+            ->withOption('kegiatan_id', $kegiatan->id)
+            ->withOption('anggota_ids', array_values($anggotaIds))
+            ->allowFailures()
+            ->dispatch();
+
+        return redirect()->route('admin.sertifikat.index', ['generation' => $batch->id])->with('success', 'Sertifikat sedang dibuat di latar belakang.');
+    }
+
+    public function generationStatus(string $batchId)
+    {
+        $batch = Bus::findBatch($batchId);
+        $ownedByCurrentAdmin = $batch && (
+            (int) ($batch->options['user_id'] ?? 0) === (int) auth()->id()
+            || $batch->name === 'sertifikat-generation:user-'.auth()->id()
+        );
+        abort_unless($ownedByCurrentAdmin, 404);
+
+        $requestedIds = collect($batch->options['anggota_ids'] ?? [])->map(fn ($id) => (int) $id);
+        $createdCount = $requestedIds->isEmpty() || ! $batch->options['kegiatan_id']
+            ? 0
+            : Sertifikat::query()
+                ->where('kegiatan_id', $batch->options['kegiatan_id'])
+                ->whereIn('anggota_id', $requestedIds)
+                ->count();
+        $legacyBatch = ! array_key_exists('user_id', $batch->options);
+        $queuedBatchJobs = \Illuminate\Support\Facades\DB::table('jobs')->where('payload', 'like', '%'.$batch->id.'%')->exists();
+        $outputComplete = $requestedIds->isNotEmpty() && $createdCount >= $requestedIds->count();
+        $legacyBatchComplete = $legacyBatch && ! $queuedBatchJobs;
+
+        if (! $batch->finished() && ($outputComplete || $legacyBatchComplete) && $batch->pendingJobs > 0) {
+            app(\Illuminate\Bus\BatchRepository::class)->markAsFinished($batch->id);
+            $batch = $batch->fresh();
         }
 
-        return redirect()->route('admin.sertifikat.index')->with('success', 'Sertifikat sedang dibuat di latar belakang.');
+        $processed = $legacyBatchComplete ? $batch->totalJobs : max($batch->processedJobs(), $createdCount);
+        $finished = $batch->finished() || $outputComplete || $legacyBatchComplete;
+
+        return response()->json([
+            'status' => $finished ? ($batch->failedJobs > 0 ? 'finished_with_failures' : 'finished') : 'processing',
+            'total' => $batch->totalJobs,
+            'processed' => $processed,
+            'pending' => max(0, $batch->totalJobs - $processed),
+            'failed' => $batch->failedJobs,
+            'progress' => $batch->totalJobs > 0 ? min(100, (int) round(($processed / $batch->totalJobs) * 100)) : 0,
+            'finished' => $finished,
+        ])->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 
     public function mySertifikat(Request $request)

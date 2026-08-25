@@ -1664,6 +1664,37 @@ canvas {
     color: rgba(255, 255, 255, 0.75);
 }
 
+.certificate-generation-status {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1rem 1.15rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(128, 0, 0, 0.15);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.certificate-generation-status__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    flex: 0 0 2.4rem;
+    border-radius: 0.65rem;
+    background: rgba(128, 0, 0, 0.08);
+    color: var(--bs-primary);
+}
+
+.certificate-generation-status__content { min-width: 0; flex: 1; }
+.certificate-generation-status__content strong,
+.certificate-generation-status__content span { display: block; }
+.certificate-generation-status__content span { margin-top: 0.2rem; color: #6c757d; font-size: 0.78rem; }
+.certificate-generation-status .progress { height: 0.45rem; margin-top: 0.65rem; }
+.certificate-generation-status__count { color: var(--bs-primary); font-size: 0.85rem; font-weight: 700; }
+.certificate-generation-status.is-complete { border-color: rgba(25, 135, 84, 0.3); }.certificate-generation-status.is-complete .certificate-generation-status__icon { background: rgba(25, 135, 84, 0.1); color: #198754; }.certificate-generation-status.is-warning { border-color: rgba(255, 193, 7, 0.45); }
+
 .certificate-activity-tip .btn {
     display: none;
 }

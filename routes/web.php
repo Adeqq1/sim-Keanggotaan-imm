@@ -56,6 +56,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::get('/sertifikat/settings', [SertifikatController::class, 'settings'])->name('sertifikat.settings');
         Route::post('/sertifikat/settings', [SertifikatController::class, 'updateSettings'])->name('sertifikat.settings.update');
         Route::post('/sertifikat/generate', [SertifikatController::class, 'generate'])->name('sertifikat.generate');
+        Route::get('/sertifikat/generation/{batchId}', [SertifikatController::class, 'generationStatus'])->name('sertifikat.generation.status');
         Route::get('/sertifikat/{sertifikat}/download', [SertifikatController::class, 'download'])->name('sertifikat.download');
 
         // Modul Laporan

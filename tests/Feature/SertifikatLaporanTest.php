@@ -150,7 +150,7 @@ test('admin can generate sertifikat for selected kader', function () {
             'anggota_ids' => [$anggota1->id, $anggota2->id],
         ]);
 
-    $response->assertRedirect(route('admin.sertifikat.index'));
+    $response->assertRedirectContains(route('admin.sertifikat.index').'?generation=');
 
     $this->assertDatabaseHas('sertifikat', [
         'kegiatan_id' => $kegiatan->id,
@@ -161,6 +161,30 @@ test('admin can generate sertifikat for selected kader', function () {
         'kegiatan_id' => $kegiatan->id,
         'anggota_id' => $anggota2->id,
     ]);
+});
+
+test('admin can read owned certificate generation batch status', function () {
+    Queue::fake();
+    $admin = User::factory()->admin()->create();
+    $kegiatan = Kegiatan::factory()->create();
+    $anggota = Anggota::factory()->create();
+    $sesi = SesiKegiatan::factory()->for($kegiatan)->create();
+    Presensi::factory()->terverifikasi()->create(['kegiatan_id' => $kegiatan->id, 'sesi_kegiatan_id' => $sesi->id, 'anggota_id' => $anggota->id]);
+
+    $response = $this->actingAs($admin)->post(route('admin.sertifikat.generate'), [
+        'kegiatan_id' => $kegiatan->id,
+        'anggota_ids' => [$anggota->id],
+    ]);
+    $batchId = last(explode('generation=', $response->headers->get('Location')));
+
+    $this->actingAs($admin)
+        ->get(route('admin.sertifikat.generation.status', $batchId))
+        ->assertOk()
+        ->assertJsonPath('total', 1)
+        ->assertJsonPath('finished', false);
+
+    $otherAdmin = User::factory()->admin()->create();
+    $this->actingAs($otherAdmin)->get(route('admin.sertifikat.generation.status', $batchId))->assertNotFound();
 });
 
 test('admin can export laporan pdf', function () {
@@ -210,7 +234,7 @@ test('admin bulk certificate generation dispatches GenerateCertificateJob', func
             'anggota_ids' => [$anggota1->id, $anggota2->id],
         ]);
 
-    $response->assertRedirect(route('admin.sertifikat.index'));
+    $response->assertRedirectContains(route('admin.sertifikat.index').'?generation=');
     $response->assertSessionHas('success', 'Sertifikat sedang dibuat di latar belakang.');
 
     Queue::assertPushed(GenerateCertificateJob::class, 2);

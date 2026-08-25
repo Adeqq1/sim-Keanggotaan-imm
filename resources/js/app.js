@@ -17,6 +17,62 @@ document.querySelectorAll('[data-auto-submit-sort]').forEach((form) => {
     });
 });
 
+const generationStatus = document.querySelector('[data-certificate-generation]');
+if (generationStatus) {
+    const statusUrl = generationStatus.dataset.statusUrl;
+    const title = generationStatus.querySelector('[data-generation-title]');
+    const message = generationStatus.querySelector('[data-generation-message]');
+    const progress = generationStatus.querySelector('[data-generation-progress]');
+    const count = generationStatus.querySelector('[data-generation-count]');
+    let timerId;
+    const startedAt = Date.now();
+    const maxPollingMs = 5 * 60 * 1000;
+
+    const poll = async () => {
+        if (Date.now() - startedAt > maxPollingMs) {
+            title.textContent = 'Proses belum selesai';
+            message.textContent = 'Worker queue belum menyelesaikan proses. Silakan muat ulang halaman nanti.';
+            generationStatus.classList.add('is-warning');
+            return;
+        }
+
+        try {
+            const response = await fetch(statusUrl, { cache: 'no-store', headers: { Accept: 'application/json' } });
+            if (!response.ok) throw new Error('generation status request failed');
+            const status = await response.json();
+            const percentage = Number(status.progress || 0);
+            progress.style.width = `${percentage}%`;
+            progress.setAttribute('aria-valuenow', percentage);
+            count.textContent = `${percentage}%`;
+            message.textContent = `${status.processed} dari ${status.total} sertifikat selesai diproses.`;
+
+            if (status.finished) {
+                title.textContent = status.failed > 0 ? 'Pembuatan selesai dengan catatan' : 'Sertifikat selesai dibuat';
+                message.textContent = status.failed > 0
+                    ? `${status.processed} berhasil dibuat, ${status.failed} gagal diproses.`
+                    : `${status.processed} sertifikat berhasil dibuat.`;
+                generationStatus.classList.add(status.failed > 0 ? 'is-warning' : 'is-complete');
+                window.clearTimeout(timerId);
+                window.setTimeout(() => window.location.reload(), 1200);
+                return;
+            }
+
+            timerId = window.setTimeout(poll, 2000);
+        } catch (error) {
+            title.textContent = 'Status belum tersedia';
+            message.textContent = 'Akan mencoba memeriksa kembali secara otomatis.';
+            timerId = window.setTimeout(poll, 5000);
+        }
+    };
+
+    const resumePolling = () => {
+        if (document.visibilityState === 'visible') poll();
+    };
+    document.addEventListener('visibilitychange', resumePolling);
+    window.addEventListener('pagehide', () => window.clearTimeout(timerId), { once: true });
+    poll();
+}
+
 document.querySelectorAll('[data-profile-field]').forEach((field) => {
     const input = field.querySelector('input, textarea, select');
     const editButton = field.querySelector('[data-profile-edit]');

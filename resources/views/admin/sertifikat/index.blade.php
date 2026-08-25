@@ -19,7 +19,21 @@
     </div>
     <x-sort-control :action="route('admin.sertifikat.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
 
-    <div class="row g-3 index-card-grid">
+    @if(request()->filled('generation'))
+        <div class="certificate-generation-status" data-certificate-generation data-status-url="{{ route('admin.sertifikat.generation.status', request('generation')) }}">
+            <div class="certificate-generation-status__icon"><span class="spinner-border spinner-border-sm" aria-hidden="true"></span></div>
+            <div class="certificate-generation-status__content">
+                <strong data-generation-title>Membuat sertifikat</strong>
+                <span data-generation-message>Menunggu proses queue dimulai...</span>
+                <div class="progress" role="progressbar" aria-label="Progress pembuatan sertifikat">
+                    <div class="progress-bar" data-generation-progress style="width: 0%"></div>
+                </div>
+            </div>
+            <span class="certificate-generation-status__count" data-generation-count>0%</span>
+        </div>
+    @endif
+
+    <div class="row g-3 index-card-grid" data-certificate-list>
     @forelse($sertifikats as $cert)
         <div class="col-12 col-sm-6">
         <div class="card h-100 p-3 index-card certificate-card d-flex flex-column">
