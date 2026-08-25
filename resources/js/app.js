@@ -77,6 +77,37 @@ document.querySelectorAll('[data-profile-photo-edit]').forEach((editButton) => {
     });
 });
 
+document.querySelectorAll('[data-activity-schedule]').forEach((schedule) => {
+    const dateInput = schedule.querySelector('[data-schedule-date]');
+    const timeInput = schedule.querySelector('[data-schedule-time]');
+    const summary = schedule.querySelector('[data-schedule-summary]');
+
+    if (!dateInput || !timeInput || !summary) return;
+
+    const syncSchedule = () => {
+        if (!dateInput.value || !timeInput.value) {
+            summary.textContent = 'Pilih tanggal dan waktu mulai kegiatan.';
+            return;
+        }
+
+        const date = new Date(`${dateInput.value}T${timeInput.value}:00`);
+        const formattedDate = new Intl.DateTimeFormat('id-ID', {
+            weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+        }).format(date);
+        summary.textContent = `Jadwal kegiatan: ${formattedDate} pukul ${timeInput.value.replace(':', '.')} WIB.`;
+    };
+
+    const syncTimeMinimum = () => {
+        const today = new Date().toISOString().slice(0, 10);
+        timeInput.min = dateInput.value === today ? new Date().toTimeString().slice(0, 5) : '';
+        syncSchedule();
+    };
+
+    dateInput.addEventListener('change', syncTimeMinimum);
+    timeInput.addEventListener('change', syncSchedule);
+    syncTimeMinimum();
+});
+
 // --- Preview Dokumen Modal ---
 document.addEventListener('shown.bs.modal', (event) => {
     if (event.target.id !== 'previewDocumentModal') return;

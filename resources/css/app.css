@@ -400,6 +400,78 @@ canvas {
     overflow-y: auto;
 }
 
+.delete-confirmation-modal {
+    overflow: hidden;
+    border: 0;
+    border-radius: 14px;
+    box-shadow: 0 1rem 3rem rgba(15, 23, 42, 0.2);
+}
+
+.delete-confirmation-header {
+    padding: 1.1rem 1.25rem;
+    border-bottom: 1px solid #eef0f2;
+}
+
+.delete-confirmation-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 2rem;
+    border-radius: 50%;
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.delete-confirmation-body {
+    padding: 1.25rem;
+    color: #6c757d;
+    font-size: 0.875rem;
+    line-height: 1.55;
+}
+
+.delete-confirmation-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    padding: 0.9rem 1.25rem 1.1rem;
+    border-top: 1px solid #eef0f2;
+}
+
+.delete-confirmation-footer form {
+    margin: 0;
+}
+
+.delete-confirmation-footer > * {
+    margin: 0;
+}
+
+.delete-confirmation-dialog {
+    margin: 1rem;
+}
+
+@media (max-width: 991.98px) {
+    .delete-confirmation-footer {
+        display: grid;
+        gap: 0.5rem;
+        justify-content: stretch;
+    }
+
+    .delete-confirmation-footer form,
+    .delete-confirmation-footer .btn {
+        width: 100%;
+    }
+}
+
+@media (min-width: 992px) {
+    .delete-confirmation-dialog {
+        max-width: 480px;
+        margin-right: auto;
+        margin-left: auto;
+    }
+}
+
 @media (min-width: 992px) {
     .preview-document-dialog {
         max-width: 800px;
@@ -804,6 +876,28 @@ canvas {
     border-color: var(--bs-primary);
     background: rgba(128, 0, 0, 0.07);
     color: var(--bs-primary);
+}
+
+.activity-schedule-fields {
+    padding: 0.9rem;
+    border: 1px solid rgba(128, 0, 0, 0.12);
+    border-radius: 0.75rem;
+    background: #fdfafa;
+}
+
+.activity-schedule-fields .form-control {
+    min-height: 46px;
+}
+
+.activity-schedule-fields [data-schedule-summary] {
+    margin-top: 0.65rem;
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+.activity-schedule-fields [data-schedule-summary]:not(:empty) {
+    color: #155d3b;
+    font-weight: 600;
 }
 
 .laporan-page-layout {

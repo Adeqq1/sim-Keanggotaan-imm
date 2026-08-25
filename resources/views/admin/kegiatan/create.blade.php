@@ -22,12 +22,22 @@
                     @enderror
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Tanggal & Waktu <span class="text-danger">*</span></label>
-                    <input type="datetime-local" name="tanggal_waktu" class="form-control @error('tanggal_waktu') is-invalid @enderror" value="{{ old('tanggal_waktu') }}" required>
-                    @error('tanggal_waktu')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                <div class="mb-3 activity-schedule-fields" data-activity-schedule>
+                    <label class="form-label fw-bold">Jadwal Kegiatan <span class="text-danger">*</span></label>
+                    <div class="row g-2">
+                        <div class="col-12 col-sm-7">
+                            <label for="tanggal_kegiatan" class="form-label small text-muted mb-1">Tanggal</label>
+                            <input id="tanggal_kegiatan" type="date" name="tanggal_kegiatan" class="form-control @error('tanggal_kegiatan') is-invalid @enderror" value="{{ old('tanggal_kegiatan') }}" min="{{ now()->toDateString() }}" required data-schedule-date>
+                            @error('tanggal_kegiatan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-12 col-sm-5">
+                            <label for="waktu_mulai" class="form-label small text-muted mb-1">Waktu Mulai (WIB)</label>
+                            <input id="waktu_mulai" type="time" name="waktu_mulai" class="form-control @error('waktu_mulai') is-invalid @enderror" value="{{ old('waktu_mulai') }}" step="300" required data-schedule-time>
+                            @error('waktu_mulai')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                    </div>
+                    <div class="form-text" data-schedule-summary>Pilih tanggal dan waktu mulai kegiatan.</div>
+                    @error('tanggal_waktu')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                 </div>
 
                 <div class="mb-3">

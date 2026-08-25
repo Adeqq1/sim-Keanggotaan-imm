@@ -148,7 +148,7 @@ test('kegiatan requires at least one target member year and stores multiple year
     $this->actingAs($instruktur)
         ->post(route('admin.kegiatan.store'), [
             'nama_kegiatan' => 'Tanpa Target Angkatan',
-            'tanggal_waktu' => '2026-06-10 10:00:00',
+            'tanggal_waktu' => now()->addDays(2)->setTime(10, 0)->format('Y-m-d H:i'),
             'lokasi' => 'Aula IMM',
             'jenis_pelaksanaan' => 'satu_sesi',
             'minimum_sesi_terverifikasi' => 1,
@@ -158,7 +158,7 @@ test('kegiatan requires at least one target member year and stores multiple year
     $this->actingAs($instruktur)
         ->post(route('admin.kegiatan.store'), [
             'nama_kegiatan' => 'Target Dua Angkatan',
-            'tanggal_waktu' => '2026-06-10 10:00:00',
+            'tanggal_waktu' => now()->addDays(2)->setTime(10, 0)->format('Y-m-d H:i'),
             'lokasi' => 'Aula IMM',
             'jenis_pelaksanaan' => 'satu_sesi',
             'minimum_sesi_terverifikasi' => 1,
@@ -168,6 +168,34 @@ test('kegiatan requires at least one target member year and stores multiple year
 
     $kegiatan = Kegiatan::where('nama_kegiatan', 'Target Dua Angkatan')->firstOrFail();
     expect($kegiatan->tahunAngkatans()->pluck('tahun_daftar')->all())->toBe([2025, 2026]);
+});
+
+test('kegiatan rejects past schedules and accepts a future split schedule', function () {
+    $instruktur = User::factory()->instruktur()->create();
+    $payload = [
+        'nama_kegiatan' => 'Jadwal Aman',
+        'lokasi' => 'Aula IMM',
+        'jenis_pelaksanaan' => 'satu_sesi',
+        'minimum_sesi_terverifikasi' => 1,
+        'tahun_angkatan' => [now()->year],
+    ];
+
+    $this->actingAs($instruktur)
+        ->post(route('admin.kegiatan.store'), $payload + [
+            'tanggal_kegiatan' => now()->subDay()->toDateString(),
+            'waktu_mulai' => now()->format('H:i'),
+        ])
+        ->assertSessionHasErrors('tanggal_waktu');
+
+    $this->actingAs($instruktur)
+        ->post(route('admin.kegiatan.store'), $payload + [
+            'tanggal_kegiatan' => now()->addDay()->toDateString(),
+            'waktu_mulai' => '09:00',
+        ])
+        ->assertRedirect(route('admin.kegiatan.index'));
+
+    expect(App\Models\Kegiatan::where('nama_kegiatan', 'Jadwal Aman')->value('tanggal_waktu')->format('Y-m-d H:i'))
+        ->toBe(now()->addDay()->format('Y-m-d').' 09:00');
 });
 
 test('instruktur can update kegiatan and replace thumbnail', function () {
