@@ -3,17 +3,32 @@
         E-Sertifikat Saya
     </x-slot>
 
-    <div class="mb-4">
-        <h2 class="h6 fw-bold mb-1">Koleksi Sertifikat</h2>
-        <p class="text-muted small">Daftar sertifikat kegiatan yang telah Anda ikuti.</p>
-        <p class="text-muted small mb-0">Kehadiran terkonfirmasi: {{ $jumlahKegiatanHadir }} dari {{ $minimumKegiatanHadir }} kegiatan hadir.</p>
+    <div class="certificate-page-heading">
+        <div class="certificate-page-heading__title">
+            <span class="certificate-page-heading__icon"><i class="bi bi-award-fill"></i></span>
+            <div>
+                <h2 class="h5 fw-bold mb-1">Koleksi Sertifikat</h2>
+                <p class="text-muted small mb-0">Daftar sertifikat kegiatan yang telah Anda ikuti.</p>
+            </div>
+        </div>
+        <div class="certificate-page-heading__status">
+            <strong>{{ $sertifikats->total() }}</strong>
+            <span>Sertifikat</span>
+        </div>
+        <p class="certificate-page-heading__attendance text-muted small mb-0">
+            <i class="bi bi-patch-check-fill text-success me-1"></i>
+            Kehadiran terkonfirmasi: <strong>{{ $jumlahKegiatanHadir }} dari {{ $minimumKegiatanHadir }}</strong> kegiatan hadir.
+        </p>
     </div>
-    <x-sort-control :action="route('kader.sertifikat.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
+    <div class="certificate-sort-toolbar {{ $sertifikats->isEmpty() ? 'certificate-sort-toolbar--empty' : '' }}">
+        <span class="certificate-sort-toolbar__label"><i class="bi bi-filter me-1"></i> Urutkan koleksi</span>
+        <x-sort-control :action="route('kader.sertifikat.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
+    </div>
 
-    <div class="row g-3 index-card-grid">
+    <div class="row g-3 index-card-grid certificate-card-grid">
     @forelse($sertifikats as $cert)
         <div class="col-12 col-sm-6">
-        <div class="card h-100 p-3 border-0 shadow-sm index-card certificate-card d-flex flex-column">
+        <div class="card h-100 p-3 border-0 shadow-sm index-card certificate-card certificate-card--kader d-flex flex-column">
             <div class="d-flex align-items-center gap-2 index-card__content">
                 <div class="me-3">
                     <div class="certificate-card__icon" aria-hidden="true">
@@ -32,27 +47,35 @@
                         <i class="bi bi-download" aria-hidden="true"></i><span>Unduh PDF</span>
                     </a>
                 @elseif(! $canDownloadSertifikat)
-                    <span class="small text-muted"><i class="bi bi-lock-fill me-1" aria-hidden="true"></i>Unduh terkunci sampai {{ $minimumKegiatanHadir }} kegiatan hadir.</span>
+                    <span class="certificate-card__locked"><i class="bi bi-lock-fill" aria-hidden="true"></i><span>Unduh terkunci sampai {{ $minimumKegiatanHadir }} kegiatan hadir.</span></span>
                 @else
-                    <span class="small text-muted"><i class="bi bi-lock-fill me-1" aria-hidden="true"></i>Unduh terkunci sampai kehadiran kegiatan terkonfirmasi.</span>
+                    <span class="certificate-card__locked"><i class="bi bi-lock-fill" aria-hidden="true"></i><span>Unduh terkunci sampai kehadiran kegiatan terkonfirmasi.</span></span>
                 @endif
             </div>
         </div>
         </div>
     @empty
-        <div class="col-12"><div class="card p-5 text-center border-0 shadow-sm bg-light" style="border-radius: 20px;">
-            <i class="bi bi-patch-minus display-1 text-muted opacity-25 mb-3"></i>
-            <h6 class="fw-bold text-muted">Belum Ada Sertifikat</h6>
-            <p class="text-muted small mb-0 px-4">Sertifikat yang sudah diterbitkan akan muncul di sini.</p>
+        <div class="col-12"><div class="card certificate-empty-state border-0 shadow-sm bg-light">
+            <div class="certificate-empty-state__icon"><i class="bi bi-patch-minus"></i></div>
+            <div>
+                <h6 class="fw-bold text-muted mb-1">Belum Ada Sertifikat</h6>
+                <p class="text-muted small mb-2">Sertifikat yang sudah diterbitkan oleh admin akan muncul di sini.</p>
+                <a href="{{ route('kader.riwayat.index') }}" class="small text-decoration-none certificate-empty-state__link">
+                    Lihat Riwayat Kehadiran <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
         </div></div>
     @endforelse
     </div>
 
     {{ $sertifikats->links('components.pagination') }}
 
-    <div class="mt-5 p-3 glass-card text-center text-white" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-radius: 15px;">
-        <i class="bi bi-lightbulb fs-3 mb-2 d-block"></i>
-        <h6 class="fw-bold mb-1">Tips Keaktifan</h6>
-        <p class="small mb-0 opacity-75">Ikuti lebih banyak kegiatan organisasi untuk meningkatkan portofolio keaktifan Anda!</p>
+    <div class="mt-5 certificate-activity-tip">
+        <i class="bi bi-lightbulb certificate-activity-tip__icon"></i>
+        <div>
+            <h6 class="fw-bold mb-1">Tips Keaktifan</h6>
+            <p class="small mb-0">Ikuti lebih banyak kegiatan organisasi untuk meningkatkan portofolio keaktifan Anda!</p>
+        </div>
+        <a href="{{ route('kader.riwayat.index') }}" class="btn btn-sm btn-outline-success btn-ui">Lihat Riwayat</a>
     </div>
 </x-app-layout>
