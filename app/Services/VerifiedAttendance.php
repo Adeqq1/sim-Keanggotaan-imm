@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\Presensi;
+use Illuminate\Support\Collection;
 
 class VerifiedAttendance
 {
@@ -24,5 +25,40 @@ class VerifiedAttendance
         return in_array($kegiatan->jenis_pelaksanaan, [Kegiatan::SATU_SESI, Kegiatan::MULTI_SESI], true)
             && $kegiatan->minimum_sesi_terverifikasi !== null
             && $this->countFor($kegiatan, $anggota) >= $kegiatan->minimum_sesi_terverifikasi;
+    }
+
+    public function eligibleAnggotaIdsFor(Kegiatan $kegiatan): Collection
+    {
+        return Presensi::query()
+            ->terverifikasi()
+            ->where('kegiatan_id', $kegiatan->id)
+            ->whereRelation('sesiKegiatan', 'kegiatan_id', $kegiatan->id)
+            ->select('anggota_id')
+            ->selectRaw('COUNT(DISTINCT sesi_kegiatan_id) as verified_sessions')
+            ->groupBy('anggota_id')
+            ->havingRaw('COUNT(DISTINCT sesi_kegiatan_id) >= ?', [$kegiatan->minimum_sesi_terverifikasi])
+            ->pluck('anggota_id');
+    }
+
+    public function eligibleKegiatanIds(Anggota $anggota): Collection
+    {
+        return Presensi::query()
+            ->terverifikasi()
+            ->join('kegiatan', 'kegiatan.id', '=', 'presensi.kegiatan_id')
+            ->join('sesi_kegiatan', 'sesi_kegiatan.id', '=', 'presensi.sesi_kegiatan_id')
+            ->where('presensi.anggota_id', $anggota->id)
+            ->whereIn('kegiatan.jenis_pelaksanaan', [Kegiatan::SATU_SESI, Kegiatan::MULTI_SESI])
+            ->whereColumn('sesi_kegiatan.kegiatan_id', 'kegiatan.id')
+            ->whereNotNull('kegiatan.minimum_sesi_terverifikasi')
+            ->select('presensi.kegiatan_id')
+            ->selectRaw('COUNT(DISTINCT presensi.sesi_kegiatan_id) as verified_sessions')
+            ->groupBy('presensi.kegiatan_id', 'kegiatan.minimum_sesi_terverifikasi')
+            ->havingRaw('COUNT(DISTINCT presensi.sesi_kegiatan_id) >= MAX(kegiatan.minimum_sesi_terverifikasi)')
+            ->pluck('presensi.kegiatan_id');
+    }
+
+    public function countEligibleActivities(Anggota $anggota): int
+    {
+        return $this->eligibleKegiatanIds($anggota)->count();
     }
 }

@@ -11,6 +11,7 @@ use App\Http\Controllers\LaporanKegiatanController;
 use App\Http\Controllers\MateriKegiatanController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\PresensiController;
+use App\Http\Controllers\PenilaianKegiatanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RiwayatKeaktifanController;
 use App\Http\Controllers\SertifikatController;
@@ -79,6 +80,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         // Modul Kegiatan
         Route::resource('kegiatan', KegiatanController::class);
 
+        Route::get('/kegiatan/{kegiatan}/penilaian', [PenilaianKegiatanController::class, 'index'])->name('kegiatan.penilaian.index');
+
         // Modul Presensi
         Route::get('/presensi', [PresensiController::class, 'index'])->name('presensi.index');
         Route::get('/presensi/{kegiatan}', [PresensiController::class, 'create'])->name('presensi.show');
@@ -92,11 +95,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Hanya instruktur yang dapat mencatat presensi.
     Route::middleware('role:instruktur')->group(function () {
         Route::get('/laporan-kegiatan/{laporanKegiatan}/download', [LaporanKegiatanController::class, 'downloadPdf'])->name('laporan-kegiatan.download');
-        Route::post('/presensi/{kegiatan}/sesi/{sesiKegiatan}', [PresensiController::class, 'store'])->name('presensi.store')->scopeBindings();
+        Route::post('/presensi/{kegiatan}/{sesiKegiatan?}', [PresensiController::class, 'store'])->name('presensi.store')->scopeBindings();
         Route::patch('/presensi/{kegiatan}/sesi/{sesiKegiatan}/{presensi}/verifikasi', [PresensiController::class, 'updateVerification'])->name('presensi.verifikasi.update')->scopeBindings();
         Route::resource('kegiatan.materi-kegiatan', MateriKegiatanController::class)
             ->except('show')
             ->scoped();
+        Route::put('/kegiatan/{kegiatan}/penilaian/{anggota}', [PenilaianKegiatanController::class, 'update'])->name('kegiatan.penilaian.update');
     });
 });
 

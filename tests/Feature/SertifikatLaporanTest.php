@@ -3,6 +3,8 @@
 use App\Jobs\GenerateCertificateJob;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
+use App\Models\Presensi;
+use App\Models\SesiKegiatan;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -12,6 +14,9 @@ test('admin can generate sertifikat for selected kader', function () {
     $kegiatan = Kegiatan::factory()->create();
     $anggota1 = Anggota::factory()->create();
     $anggota2 = Anggota::factory()->create();
+    $sesi = SesiKegiatan::factory()->for($kegiatan)->create();
+    Presensi::factory()->terverifikasi()->create(['kegiatan_id' => $kegiatan->id, 'sesi_kegiatan_id' => $sesi->id, 'anggota_id' => $anggota1->id]);
+    Presensi::factory()->terverifikasi()->create(['kegiatan_id' => $kegiatan->id, 'sesi_kegiatan_id' => $sesi->id, 'anggota_id' => $anggota2->id]);
 
     Storage::fake('public');
 
@@ -70,6 +75,9 @@ test('admin bulk certificate generation dispatches GenerateCertificateJob', func
     $kegiatan = Kegiatan::factory()->create();
     $anggota1 = Anggota::factory()->create();
     $anggota2 = Anggota::factory()->create();
+    $sesi = SesiKegiatan::factory()->for($kegiatan)->create();
+    Presensi::factory()->terverifikasi()->create(['kegiatan_id' => $kegiatan->id, 'sesi_kegiatan_id' => $sesi->id, 'anggota_id' => $anggota1->id]);
+    Presensi::factory()->terverifikasi()->create(['kegiatan_id' => $kegiatan->id, 'sesi_kegiatan_id' => $sesi->id, 'anggota_id' => $anggota2->id]);
 
     $response = $this->actingAs($admin)
         ->post(route('admin.sertifikat.generate'), [

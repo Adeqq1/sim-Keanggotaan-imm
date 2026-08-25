@@ -6,7 +6,7 @@ use App\Http\Controllers\SertifikatController;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\Presensi;
-use App\Models\Sertifikat;
+use App\Services\VerifiedAttendance;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -45,10 +45,11 @@ class GenerateCertificateJob implements ShouldBeUnique, ShouldQueue
         if ($this->presensi) {
             $presensi = Presensi::with(['kegiatan', 'anggota'])->find($this->presensi->getKey());
 
-            if (! $presensi
-                || $presensi->status_kehadiran !== 'hadir'
-                || ! $presensi->anggota
-                || $presensi->anggota->jumlahKegiatanHadir() < Sertifikat::MINIMUM_KEGIATAN_HADIR) {
+            if (! $presensi || ! $presensi->anggota || ! app(VerifiedAttendance::class)->meetsRequirement($presensi->kegiatan, $presensi->anggota)) {
+                Log::warning('Certificate generation skipped because attendance is no longer eligible.', [
+                    'kegiatan_id' => $presensi?->kegiatan_id ?? $this->presensi?->kegiatan_id,
+                    'anggota_id' => $presensi?->anggota_id ?? $this->presensi?->anggota_id,
+                ]);
                 return;
             }
 
@@ -59,8 +60,13 @@ class GenerateCertificateJob implements ShouldBeUnique, ShouldQueue
             $anggota = $this->anggota;
         }
 
-        if ($kegiatan && $anggota) {
+        if ($kegiatan && $anggota && app(VerifiedAttendance::class)->meetsRequirement($kegiatan, $anggota)) {
             SertifikatController::generateCertificateFile($kegiatan, $anggota, $this->instruktur);
+        } elseif ($kegiatan && $anggota) {
+            Log::warning('Certificate generation skipped because attendance is no longer eligible.', [
+                'kegiatan_id' => $kegiatan->id,
+                'anggota_id' => $anggota->id,
+            ]);
         }
     }
 

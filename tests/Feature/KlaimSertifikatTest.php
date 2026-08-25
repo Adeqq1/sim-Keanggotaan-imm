@@ -17,7 +17,7 @@ function createHadirPresensi(Anggota $anggota, int $count): Collection
         return collect();
     }
 
-    return collect(range(1, $count))->map(fn () => Presensi::factory()->hadir()->create([
+    return collect(range(1, $count))->map(fn () => Presensi::factory()->terverifikasi()->create([
         'anggota_id' => $anggota->id,
     ]));
 }
@@ -75,7 +75,7 @@ test('riwayat shows attendance progress and only eligible claim forms', function
     $response = $this->actingAs($anggota->user)->get(route('kader.riwayat.index'));
 
     $response->assertSuccessful()
-        ->assertSeeText($count.' dari '.Sertifikat::MINIMUM_KEGIATAN_HADIR.' kegiatan hadir')
+        ->assertSeeText($count.' dari 1 kegiatan hadir')
         ->assertDontSee('type="file"', false)
         ->assertDontSee('multipart/form-data', false)
         ->assertDontSeeText('bukti_kehadiran')
@@ -90,14 +90,21 @@ test('riwayat shows attendance progress and only eligible claim forms', function
     }
 })->with([
     'nol kegiatan hadir' => [0, false],
-    'satu kegiatan hadir' => [1, false],
-    'dua kegiatan hadir' => [2, false],
+    'satu kegiatan hadir' => [1, true],
+    'dua kegiatan hadir' => [2, true],
     'tiga kegiatan hadir' => [3, true],
 ]);
 
-test('manual claim is forbidden below the minimum attendance threshold', function (int $count) {
+test('manual claim is forbidden when the target activity is not eligible', function () {
     $anggota = Anggota::factory()->create();
-    $presensi = createHadirPresensi($anggota, $count)->first();
+    $kegiatan = Kegiatan::factory()->create([
+        'jenis_pelaksanaan' => Kegiatan::MULTI_SESI,
+        'minimum_sesi_terverifikasi' => 3,
+    ]);
+    $presensi = Presensi::factory()->terverifikasi()->create([
+        'anggota_id' => $anggota->id,
+        'kegiatan_id' => $kegiatan->id,
+    ]);
     Queue::fake();
 
     $this->actingAs($anggota->user)
@@ -106,7 +113,7 @@ test('manual claim is forbidden below the minimum attendance threshold', functio
 
     Queue::assertNothingPushed();
     expect(Sertifikat::count())->toBe(0);
-})->with([1, 2]);
+});
 
 test('manual claim rejects an invalid target even when the kader is eligible', function () {
     $anggota = Anggota::factory()->create();
@@ -242,7 +249,7 @@ test('kader certificate list hides downloads until target and threshold are vali
     $locked->assertSuccessful()
         ->assertDontSee(route('kader.sertifikat.download', $sertifikat), false);
 
-    Presensi::factory()->hadir()->create([
+    Presensi::factory()->terverifikasi()->create([
         'anggota_id' => $anggota->id,
         'kegiatan_id' => $kegiatan->id,
     ]);
@@ -260,7 +267,7 @@ test('kader download requires three attended activities including the certificat
     $kegiatan = Kegiatan::factory()->create();
 
     if ($count > 0) {
-        Presensi::factory()->hadir()->create([
+        Presensi::factory()->terverifikasi()->create([
             'anggota_id' => $anggota->id,
             'kegiatan_id' => $kegiatan->id,
         ]);
@@ -282,8 +289,8 @@ test('kader download requires three attended activities including the certificat
     }
 })->with([
     'nol kegiatan hadir' => [0, false],
-    'satu kegiatan hadir' => [1, false],
-    'dua kegiatan hadir' => [2, false],
+    'satu kegiatan hadir' => [1, true],
+    'dua kegiatan hadir' => [2, true],
     'tiga kegiatan hadir' => [3, true],
 ]);
 

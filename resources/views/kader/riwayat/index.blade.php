@@ -49,6 +49,7 @@
                     <div class="min-w-0">
                         <h6 class="mb-0 fw-bold text-break" style="font-size: 0.85rem;">{{ $p->kegiatan->nama_kegiatan }}</h6>
                         <small class="text-muted d-block" style="font-size: 0.7rem;">{{ $p->kegiatan->tanggal_waktu->translatedFormat('d M Y') }}</small>
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">{{ $p->sesiKegiatan?->nama_sesi ?? 'Sesi lama' }}</small>
                     </div>
                 </div>
                 <span class="badge {{ $p->status_kehadiran === 'hadir' ? 'bg-success' : ($p->status_kehadiran === 'izin' ? 'bg-warning' : 'bg-danger') }} rounded-pill px-3" style="font-size: 0.65rem;">
@@ -69,11 +70,11 @@
                     @endif
                 </div>
                 <div>
-                    @if($sertifikat && $canClaimSertifikat && $p->status_kehadiran === 'hadir')
+                    @if($sertifikat && $eligibleKegiatanIds->contains($p->kegiatan_id))
                         <a href="{{ route('kader.sertifikat.download', $sertifikat) }}" class="btn btn-sm btn-outline-success btn-ui btn-ui-sm px-3">
                             <i class="bi bi-download"></i> Unduh
                         </a>
-                    @elseif(! $sertifikat && $canClaimSertifikat && $p->status_kehadiran === 'hadir')
+                    @elseif(! $sertifikat && $eligibleKegiatanIds->contains($p->kegiatan_id))
                         <form action="{{ route('kader.sertifikat.klaim', $p) }}" method="POST">
                             @csrf
                             <button type="submit" class="btn btn-sm btn-outline-primary btn-ui btn-ui-sm px-3">

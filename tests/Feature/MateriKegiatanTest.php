@@ -235,7 +235,7 @@ test('kader hadir melihat dan mengunduh materi dengan header privat', function (
         'judul' => 'Materi Khusus Kader',
         'file_materi' => 'materi_kegiatan/khusus.pdf',
     ]);
-    Presensi::factory()->hadir()->create([
+    Presensi::factory()->terverifikasi()->create([
         'anggota_id' => $anggota->id,
         'kegiatan_id' => $materi->kegiatan_id,
     ]);
@@ -278,7 +278,7 @@ test('presensi kader lain tidak memberi akses', function () {
     [$user] = materiKader();
     [, $anggotaLain] = materiKader();
     $materi = MateriKegiatan::factory()->create();
-    Presensi::factory()->hadir()->create([
+    Presensi::factory()->terverifikasi()->create([
         'anggota_id' => $anggotaLain->id,
         'kegiatan_id' => $materi->kegiatan_id,
     ]);
@@ -290,7 +290,7 @@ test('presensi kader lain tidak memberi akses', function () {
 test('simpan materi idempotent dan tampil pada halaman tersimpan', function () {
     [$user, $anggota] = materiKader();
     $materi = MateriKegiatan::factory()->create();
-    Presensi::factory()->hadir()->create([
+    Presensi::factory()->terverifikasi()->create([
         'anggota_id' => $anggota->id,
         'kegiatan_id' => $materi->kegiatan_id,
     ]);
@@ -307,7 +307,7 @@ test('simpan materi idempotent dan tampil pada halaman tersimpan', function () {
 test('upsert materi tersimpan mempertahankan waktu pertama kali disimpan', function () {
     [$user, $anggota] = materiKader();
     $materi = MateriKegiatan::factory()->create();
-    Presensi::factory()->hadir()->create([
+    Presensi::factory()->terverifikasi()->create([
         'anggota_id' => $anggota->id,
         'kegiatan_id' => $materi->kegiatan_id,
     ]);
@@ -345,7 +345,7 @@ test('file materi yang hilang menghasilkan 404 untuk kader hadir', function () {
     Storage::fake('local');
     [$user, $anggota] = materiKader();
     $materi = MateriKegiatan::factory()->create();
-    Presensi::factory()->hadir()->create([
+    Presensi::factory()->terverifikasi()->create([
         'anggota_id' => $anggota->id,
         'kegiatan_id' => $materi->kegiatan_id,
     ]);

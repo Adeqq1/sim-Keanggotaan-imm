@@ -9,6 +9,7 @@ use App\Models\Kegiatan;
 use App\Models\Presensi;
 use App\Models\Sertifikat;
 use App\Models\User;
+use App\Services\VerifiedAttendance;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use App\Support\SortParams;
@@ -96,31 +97,25 @@ class SertifikatController extends Controller
             ->when(! in_array($sort['key'], ['kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy($columns[$sort['key']], $sort['direction']))
             ->when(in_array($sort['key'], ['kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy(Kegiatan::select($sort['key'] === 'kegiatan' ? 'nama_kegiatan' : 'tanggal_waktu')->whereColumn('kegiatan.id', 'sertifikat.kegiatan_id'), $sort['direction']))
             ->orderByDesc('sertifikat.id')->paginate(6)->withQueryString();
-        $jumlahKegiatanHadir = $anggota->jumlahKegiatanHadir();
-        $canDownloadSertifikat = $jumlahKegiatanHadir >= Sertifikat::MINIMUM_KEGIATAN_HADIR;
-        $kegiatanHadirIds = $anggota->presensi()
-            ->where('status_kehadiran', 'hadir')
-            ->distinct()
-            ->pluck('kegiatan_id');
+        $verifiedAttendance = app(VerifiedAttendance::class);
+        $eligibleKegiatanIds = $verifiedAttendance->eligibleKegiatanIds($anggota);
+        $jumlahKegiatanHadir = $eligibleKegiatanIds->count();
+        $canDownloadSertifikat = $jumlahKegiatanHadir > 0;
 
         return view('kader.sertifikat.index', compact(
             'sertifikats',
             'jumlahKegiatanHadir',
             'canDownloadSertifikat',
-            'kegiatanHadirIds',
+            'eligibleKegiatanIds',
             'options', 'sort',
-        ))->with('minimumKegiatanHadir', Sertifikat::MINIMUM_KEGIATAN_HADIR);
+        ))->with('minimumKegiatanHadir', 1);
     }
 
     public function klaim(Presensi $presensi)
     {
         $anggota = auth()->user()->anggota;
 
-        if (! $anggota || (int) $presensi->anggota_id !== $anggota->id || $presensi->status_kehadiran !== 'hadir') {
-            abort(403);
-        }
-
-        if ($anggota->jumlahKegiatanHadir() < Sertifikat::MINIMUM_KEGIATAN_HADIR) {
+        if (! $anggota || (int) $presensi->anggota_id !== $anggota->id || ! app(VerifiedAttendance::class)->meetsRequirement($presensi->kegiatan, $anggota)) {
             abort(403);
         }
 
@@ -151,16 +146,7 @@ class SertifikatController extends Controller
             abort(403);
         }
 
-        if ($anggota->jumlahKegiatanHadir() < Sertifikat::MINIMUM_KEGIATAN_HADIR) {
-            abort(403);
-        }
-
-        $targetIsAttended = $anggota->presensi()
-            ->where('kegiatan_id', $sertifikat->kegiatan_id)
-            ->where('status_kehadiran', 'hadir')
-            ->exists();
-
-        if (! $targetIsAttended) {
+        if (! app(VerifiedAttendance::class)->meetsRequirement($sertifikat->kegiatan, $anggota)) {
             abort(403);
         }
 

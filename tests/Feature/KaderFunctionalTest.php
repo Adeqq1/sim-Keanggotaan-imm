@@ -336,7 +336,7 @@ test('kader can download sertifikat pdf', function () {
     $kegiatans = Kegiatan::factory()->count(Sertifikat::MINIMUM_KEGIATAN_HADIR)->create();
 
     foreach ($kegiatans as $kegiatan) {
-        Presensi::factory()->hadir()->create([
+        Presensi::factory()->terverifikasi()->create([
             'anggota_id' => $anggota->id,
             'kegiatan_id' => $kegiatan->id,
         ]);
@@ -361,7 +361,7 @@ test('kader can view riwayat keaktifan', function () {
     $anggota = Anggota::factory()->create(['user_id' => $user->id]);
     $kegiatan = Kegiatan::factory()->create();
 
-    Presensi::factory()->hadir()->create([
+    Presensi::factory()->terverifikasi()->create([
         'anggota_id' => $anggota->id,
         'kegiatan_id' => $kegiatan->id,
     ]);
@@ -375,7 +375,7 @@ test('kader history shows progress and an eligible claim form without upload con
     $user = User::factory()->kader()->create();
     $anggota = Anggota::factory()->create(['user_id' => $user->id]);
     $kegiatans = Kegiatan::factory()->count(Sertifikat::MINIMUM_KEGIATAN_HADIR)->create();
-    $presensis = $kegiatans->map(fn ($kegiatan) => Presensi::factory()->hadir()->create([
+    $presensis = $kegiatans->map(fn ($kegiatan) => Presensi::factory()->terverifikasi()->create([
         'anggota_id' => $anggota->id,
         'kegiatan_id' => $kegiatan->id,
     ]));
@@ -383,7 +383,7 @@ test('kader history shows progress and an eligible claim form without upload con
     $response = $this->actingAs($user)->get(route('kader.riwayat.index'));
 
     $response->assertSuccessful()
-        ->assertSeeText(Sertifikat::MINIMUM_KEGIATAN_HADIR.' dari '.Sertifikat::MINIMUM_KEGIATAN_HADIR.' kegiatan hadir')
+        ->assertSeeText(Sertifikat::MINIMUM_KEGIATAN_HADIR.' dari 1 kegiatan hadir')
         ->assertSee(route('kader.sertifikat.klaim', $presensis->first()), false)
         ->assertSeeText('Klaim Sertifikat')
         ->assertDontSee('type="file"', false)

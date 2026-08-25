@@ -30,6 +30,11 @@ class Kegiatan extends Model
         return $this->hasMany(Presensi::class);
     }
 
+    public function penilaianKegiatans(): HasMany
+    {
+        return $this->hasMany(PenilaianKegiatan::class);
+    }
+
     public function sesiKegiatans(): HasMany
     {
         return $this->hasMany(SesiKegiatan::class)->orderBy('urutan');

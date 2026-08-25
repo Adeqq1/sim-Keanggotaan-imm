@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Services\VerifiedAttendance;
 
 test('verified attendance counts only verified present sessions for the target activity', function () {
-    $kegiatan = Kegiatan::factory()->create([
+    $kegiatan = Kegiatan::factory()->withDefaultSession()->create([
         'jenis_pelaksanaan' => Kegiatan::MULTI_SESI,
         'minimum_sesi_terverifikasi' => 3,
     ]);
@@ -27,12 +27,12 @@ test('verified attendance counts only verified present sessions for the target a
 
 test('instruktur can record and verify attendance per session', function () {
     $instruktur = User::factory()->instruktur()->create();
-    $kegiatan = Kegiatan::factory()->create();
+    $kegiatan = Kegiatan::factory()->withDefaultSession()->create();
     $sesi = $kegiatan->sesiKegiatans()->first();
     $anggota = Anggota::factory()->create();
 
     $this->actingAs($instruktur)
-        ->post(route('admin.presensi.store', [$kegiatan, $sesi]), [
+        ->post(route('admin.presensi.store', [$kegiatan->id, $sesi->id]), [
             'presensi' => [['anggota_id' => $anggota->id, 'status_kehadiran' => 'hadir']],
         ])->assertRedirect();
 
@@ -40,7 +40,7 @@ test('instruktur can record and verify attendance per session', function () {
     expect($presensi->status_verifikasi)->toBe('pending');
 
     $this->actingAs($instruktur)
-        ->patch(route('admin.presensi.verifikasi.update', [$kegiatan, $sesi, $presensi]), ['status_verifikasi' => 'terverifikasi'])
+        ->patch(route('admin.presensi.verifikasi.update', [$kegiatan->id, $sesi->id, $presensi->id]), ['status_verifikasi' => 'terverifikasi'])
         ->assertRedirect();
 
     $presensi->refresh();
@@ -50,11 +50,31 @@ test('instruktur can record and verify attendance per session', function () {
 
 test('admin can read but cannot record or verify attendance', function () {
     $admin = User::factory()->admin()->create();
-    $kegiatan = Kegiatan::factory()->create();
+    $kegiatan = Kegiatan::factory()->withDefaultSession()->create();
     $sesi = $kegiatan->sesiKegiatans()->first();
     $anggota = Anggota::factory()->create();
 
     $this->actingAs($admin)
-        ->post(route('admin.presensi.store', [$kegiatan, $sesi]), ['presensi' => [['anggota_id' => $anggota->id, 'status_kehadiran' => 'hadir']]])
+        ->post(route('admin.presensi.store', [$kegiatan->id, $sesi->id]), ['presensi' => [['anggota_id' => $anggota->id, 'status_kehadiran' => 'hadir']]])
         ->assertForbidden();
+});
+
+test('legacy present attendance remains eligible without a fake verifier', function () {
+    $kegiatan = Kegiatan::factory()->withDefaultSession()->create([
+        'jenis_pelaksanaan' => Kegiatan::SATU_SESI,
+        'minimum_sesi_terverifikasi' => 1,
+    ]);
+    $anggota = Anggota::factory()->create();
+    $presensi = Presensi::factory()->hadir()->create([
+        'kegiatan_id' => $kegiatan->id,
+        'sesi_kegiatan_id' => $kegiatan->sesiKegiatans()->first()->id,
+        'anggota_id' => $anggota->id,
+        'status_verifikasi' => 'legacy',
+        'pemeriksa_id' => null,
+        'diperiksa_pada' => null,
+    ]);
+
+    expect(app(VerifiedAttendance::class)->meetsRequirement($kegiatan, $anggota))->toBeTrue()
+        ->and($presensi->pemeriksa_id)->toBeNull()
+        ->and($presensi->diperiksa_pada)->toBeNull();
 });

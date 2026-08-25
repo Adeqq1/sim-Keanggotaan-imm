@@ -45,7 +45,10 @@ class Presensi extends Model
     public function scopeTerverifikasi(Builder $query): Builder
     {
         return $query->where('status_kehadiran', 'hadir')
-            ->where('status_verifikasi', 'terverifikasi')
-            ->whereNotNull('diperiksa_pada');
+            ->where(function (Builder $query): void {
+                $query->where(function (Builder $query): void {
+                    $query->where('status_verifikasi', 'terverifikasi')->whereNotNull('diperiksa_pada');
+                })->orWhere('status_verifikasi', 'legacy');
+            });
     }
 }

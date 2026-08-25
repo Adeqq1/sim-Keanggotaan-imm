@@ -20,8 +20,8 @@ class PresensiRequest extends FormRequest
 
         return $this->user()?->role === 'instruktur'
             && $kegiatan instanceof Kegiatan
-            && $sesi instanceof SesiKegiatan
-            && $sesi->kegiatan_id === $kegiatan->id
+            && ($sesi === null || $sesi instanceof SesiKegiatan)
+            && ($sesi === null || $sesi->kegiatan_id === $kegiatan->id)
             && $kegiatan->jenis_pelaksanaan !== Kegiatan::BELUM_DITETAPKAN;
     }
 

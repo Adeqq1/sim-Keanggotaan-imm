@@ -24,6 +24,7 @@ return new class extends Migration
                     'pemeriksa_id' => null,
                     'diperiksa_pada' => null,
                 ]);
+
             }
         });
     }

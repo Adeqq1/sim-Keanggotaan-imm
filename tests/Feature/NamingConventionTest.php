@@ -5,6 +5,7 @@ use App\Models\Arsip;
 use App\Models\Kegiatan;
 use App\Models\Pendaftaran;
 use App\Models\Presensi;
+use App\Models\PenilaianKegiatan;
 use App\Models\Sertifikat;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -15,7 +16,8 @@ it('uses Indonesian table names for domain models', function () {
         ->and((new Kegiatan)->getTable())->toBe('kegiatan')
         ->and((new Presensi)->getTable())->toBe('presensi')
         ->and((new Sertifikat)->getTable())->toBe('sertifikat')
-        ->and((new Arsip)->getTable())->toBe('arsip');
+        ->and((new Arsip)->getTable())->toBe('arsip')
+        ->and((new PenilaianKegiatan)->getTable())->toBe('penilaian_kegiatan');
 });
 
 it('keeps English framework naming for auth user model and profile routes', function () {
