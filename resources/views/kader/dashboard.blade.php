@@ -67,10 +67,11 @@
                 </div>
                 <div class="col-6">
                     <a href="{{ route('kader.sertifikat.index') }}"
-                       class="card p-3 text-decoration-none h-100 shadow-sm border-0 quick-action-card"
+                       class="card p-3 text-decoration-none h-100 shadow-sm border-0 quick-action-card certificate-dashboard-action"
                        style="border-radius: 15px;">
-                        <i class="bi bi-award text-success display-6 mb-2"></i>
+                        <i class="bi bi-patch-check-fill text-success display-6 mb-2"></i>
                         <span class="small fw-bold text-dark d-block">E-Sertifikat</span>
+                        <small class="text-muted mt-1">{{ $stats['total_sertifikat'] }} tersedia</small>
                     </a>
                 </div>
                 <div class="col-6">
@@ -111,9 +112,12 @@
                     </a>
                 </div>
                 <div class="col-lg-6">
-                    <a href="{{ route('kader.sertifikat.index') }}" class="desktop-quick-action">
-                        <span class="desktop-quick-action__icon text-bg-success-subtle"><i class="bi bi-award text-success"></i></span>
-                        <span class="desktop-quick-action__label">E-Sertifikat</span>
+                    <a href="{{ route('kader.sertifikat.index') }}" class="desktop-quick-action certificate-dashboard-action">
+                        <span class="desktop-quick-action__icon text-bg-success-subtle"><i class="bi bi-patch-check-fill text-success"></i></span>
+                        <span class="desktop-quick-action__label">
+                            E-Sertifikat
+                            <small class="certificate-dashboard-action__meta">{{ $stats['total_sertifikat'] }} tersedia</small>
+                        </span>
                     </a>
                 </div>
                 <div class="col-lg-6">

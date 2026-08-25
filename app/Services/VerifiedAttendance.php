@@ -33,6 +33,13 @@ class VerifiedAttendance
 
     public function eligibleAnggotaIdsFor(Kegiatan $kegiatan): Collection
     {
+        if (! in_array($kegiatan->jenis_pelaksanaan, [Kegiatan::SATU_SESI, Kegiatan::MULTI_SESI], true)
+            || $kegiatan->minimum_sesi_terverifikasi === null
+            || ($kegiatan->jenis_pelaksanaan === Kegiatan::SATU_SESI && (int) $kegiatan->minimum_sesi_terverifikasi !== 1)
+            || ($kegiatan->jenis_pelaksanaan === Kegiatan::MULTI_SESI && (int) $kegiatan->minimum_sesi_terverifikasi < 3)) {
+            return collect();
+        }
+
         return Presensi::query()
             ->terverifikasi()
             ->where('kegiatan_id', $kegiatan->id)

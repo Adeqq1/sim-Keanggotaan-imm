@@ -13,6 +13,7 @@ use App\Services\VerifiedAttendance;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use App\Support\SortParams;
+use Illuminate\Validation\Rule;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -36,12 +37,30 @@ class SertifikatController extends Controller
         return view('admin.sertifikat.index', compact('sertifikats', 'options', 'sort'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $kegiatans = Kegiatan::latest()->get();
-        $anggotas = Anggota::where('status_aktif', true)->get();
+        $selectedKegiatanId = $request->validate([
+            'kegiatan_id' => ['nullable', Rule::exists('kegiatan', 'id')],
+        ])['kegiatan_id'] ?? old('kegiatan_id');
+        $selectedKegiatan = $selectedKegiatanId ? $kegiatans->firstWhere('id', (int) $selectedKegiatanId) : null;
+        $anggotas = collect();
 
-        return view('admin.sertifikat.create', compact('kegiatans', 'anggotas'));
+        if ($selectedKegiatan) {
+            $eligibleIds = app(VerifiedAttendance::class)->eligibleAnggotaIdsFor($selectedKegiatan);
+            $candidates = Anggota::query()
+                ->with('user')
+                ->where('status_aktif', true)
+                ->whereIn('id', $eligibleIds)
+                ->whereHas('user', fn ($query) => $query->where('role', 'kader'))
+                ->whereDoesntHave('sertifikat', fn ($query) => $query->where('kegiatan_id', $selectedKegiatan->id))
+                ->orderBy('nama_lengkap')
+                ->get();
+            $eligibility = app(CertificateEligibility::class);
+            $anggotas = $candidates->filter(fn (Anggota $anggota): bool => $eligibility->eligible($selectedKegiatan, $anggota))->values();
+        }
+
+        return view('admin.sertifikat.create', compact('kegiatans', 'anggotas', 'selectedKegiatan', 'selectedKegiatanId'));
     }
 
     public static function generateCertificateFile(Kegiatan $kegiatan, Anggota $anggota, ?string $instruktur = null): Sertifikat

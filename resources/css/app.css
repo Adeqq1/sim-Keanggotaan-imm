@@ -771,6 +771,66 @@ canvas {
     margin-top: auto;
 }
 
+.app-main-content .certificate-card {
+    border-radius: 12px;
+}
+
+.app-main-content .certificate-card__icon {
+    width: 3rem;
+    height: 3rem;
+    flex: 0 0 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--bs-border-radius-lg);
+    background: rgba(var(--bs-success-rgb), 0.1);
+    color: var(--bs-success);
+    font-size: 1.45rem;
+}
+
+.app-main-content .certificate-card__number {
+    color: var(--bs-primary);
+    font-size: 0.7rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.app-main-content .certificate-card__download {
+    width: 100%;
+}
+
+.app-main-content .certificate-dashboard-action__meta {
+    display: block;
+    margin-top: 0.2rem;
+    color: #6c757d;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.app-main-content .certificate-dashboard-action:hover .certificate-dashboard-action__meta {
+    color: var(--bs-link-color);
+}
+
+.app-main-content .certificate-member-list {
+    max-height: min(20rem, 45vh);
+    overflow-y: auto;
+}
+
+.app-main-content .certificate-member-option {
+    cursor: pointer;
+}
+
+@media (min-width: 576px) {
+    .app-main-content .certificate-card__actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .app-main-content .certificate-card__download {
+        width: auto;
+    }
+}
+
 .app-main-content .anggota-index-actions {
     align-items: center;
     justify-content: flex-end;

@@ -12,6 +12,126 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 
+test('certificate create form renders accessible member selection', function () {
+    $admin = User::factory()->admin()->create();
+    $kegiatan = Kegiatan::factory()->withDefaultSession()->create([
+        'jenis_pelaksanaan' => Kegiatan::SATU_SESI,
+        'minimum_sesi_terverifikasi' => 1,
+    ]);
+    $anggota = Anggota::factory()->create([
+        'nama_lengkap' => 'Ahmad Dahlan',
+        'nia' => 'IMM-001',
+    ]);
+    Presensi::factory()->terverifikasi()->create([
+        'kegiatan_id' => $kegiatan->id,
+        'sesi_kegiatan_id' => $kegiatan->sesiKegiatans()->first()->id,
+        'anggota_id' => $anggota->id,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.sertifikat.create', ['kegiatan_id' => $kegiatan->id]))
+        ->assertSuccessful()
+        ->assertSee('id="kegiatan_id"', false)
+        ->assertSee('method="GET"', false)
+        ->assertSee('onchange="this.form.submit()"', false)
+        ->assertSee('name="anggota_ids[]"', false)
+        ->assertSee('id="anggota-'.$anggota->id.'"', false)
+        ->assertSee('for="anggota-'.$anggota->id.'"', false)
+        ->assertSee('aria-describedby="anggota-help"', false)
+        ->assertSeeText('Ahmad Dahlan')
+        ->assertSeeText('NIA IMM-001');
+});
+
+test('certificate create form restores selected activity and members', function () {
+    $admin = User::factory()->admin()->create();
+    $kegiatan = Kegiatan::factory()->withDefaultSession()->create([
+        'jenis_pelaksanaan' => Kegiatan::SATU_SESI,
+        'minimum_sesi_terverifikasi' => 1,
+    ]);
+    $anggota = Anggota::factory()->create();
+    Presensi::factory()->terverifikasi()->create([
+        'kegiatan_id' => $kegiatan->id,
+        'sesi_kegiatan_id' => $kegiatan->sesiKegiatans()->first()->id,
+        'anggota_id' => $anggota->id,
+    ]);
+
+    $this->actingAs($admin)
+        ->withSession([
+            '_old_input' => [
+                'kegiatan_id' => (string) $kegiatan->id,
+                'anggota_ids' => [(string) $anggota->id],
+            ],
+        ])
+        ->get(route('admin.sertifikat.create'))
+        ->assertSuccessful()
+        ->assertSee('value="'.$kegiatan->id.'" selected', false)
+        ->assertSee('value="'.$anggota->id.'" checked', false);
+});
+
+test('certificate create form only lists eligible kader without an existing certificate', function () {
+    $admin = User::factory()->admin()->create();
+    $kegiatan = Kegiatan::factory()->withDefaultSession()->create([
+        'jenis_pelaksanaan' => Kegiatan::SATU_SESI,
+        'minimum_sesi_terverifikasi' => 1,
+    ]);
+    $eligible = Anggota::factory()->create(['nama_lengkap' => 'Kader Layak Sertifikat']);
+    $noAttendance = Anggota::factory()->create(['nama_lengkap' => 'Kader Belum Hadir']);
+    $nonKader = Anggota::factory()->create([
+        'nama_lengkap' => 'Instruktur Bukan Kader',
+        'user_id' => User::factory()->instruktur(),
+    ]);
+    $alreadyIssued = Anggota::factory()->create(['nama_lengkap' => 'Kader Sudah Terbit']);
+    $sesi = $kegiatan->sesiKegiatans()->first();
+
+    Presensi::factory()->terverifikasi()->create([
+        'kegiatan_id' => $kegiatan->id,
+        'sesi_kegiatan_id' => $sesi->id,
+        'anggota_id' => $eligible->id,
+    ]);
+    Presensi::factory()->terverifikasi()->create([
+        'kegiatan_id' => $kegiatan->id,
+        'sesi_kegiatan_id' => $sesi->id,
+        'anggota_id' => $nonKader->id,
+    ]);
+    Presensi::factory()->terverifikasi()->create([
+        'kegiatan_id' => $kegiatan->id,
+        'sesi_kegiatan_id' => $sesi->id,
+        'anggota_id' => $alreadyIssued->id,
+    ]);
+    Sertifikat::factory()->create([
+        'kegiatan_id' => $kegiatan->id,
+        'anggota_id' => $alreadyIssued->id,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.sertifikat.create', ['kegiatan_id' => $kegiatan->id]))
+        ->assertSuccessful()
+        ->assertSeeText('Kader Layak Sertifikat')
+        ->assertDontSeeText('Kader Belum Hadir')
+        ->assertDontSeeText('Instruktur Bukan Kader')
+        ->assertDontSeeText('Kader Sudah Terbit')
+        ->assertSeeText('1 anggota memenuhi syarat');
+});
+
+test('admin certificate list renders a labeled PDF download action', function () {
+    $admin = User::factory()->admin()->create();
+    $anggota = Anggota::factory()->create(['nama_lengkap' => 'Anggota Sertifikat']);
+    $kegiatan = Kegiatan::factory()->create(['nama_kegiatan' => 'Pelatihan Kader']);
+    $sertifikat = Sertifikat::factory()->create([
+        'anggota_id' => $anggota->id,
+        'kegiatan_id' => $kegiatan->id,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.sertifikat.index'))
+        ->assertSuccessful()
+        ->assertSeeText('Unduh PDF')
+        ->assertSee('certificate-card', false)
+        ->assertSee('certificate-card__download', false)
+        ->assertSee(route('admin.sertifikat.download', $sertifikat), false)
+        ->assertSee('aria-label="Unduh sertifikat Anggota Sertifikat dalam format PDF"', false);
+});
+
 test('admin can generate sertifikat for selected kader', function () {
     $admin = User::factory()->admin()->create();
     $kegiatan = Kegiatan::factory()->create();

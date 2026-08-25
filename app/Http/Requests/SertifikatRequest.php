@@ -57,4 +57,13 @@ class SertifikatRequest extends FormRequest
             }
         });
     }
+
+    public function messages(): array
+    {
+        return [
+            'anggota_ids.required' => 'Pilih minimal satu anggota.',
+            'anggota_ids.array' => 'Pilihan anggota tidak valid.',
+            'anggota_ids.min' => 'Pilih minimal satu anggota.',
+        ];
+    }
 }

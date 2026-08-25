@@ -327,7 +327,9 @@ test('kader can view sertifikat list', function () {
 
     $response = $this->actingAs($user)->get(route('kader.sertifikat.index'));
 
-    $response->assertSuccessful();
+    $response->assertSuccessful()
+        ->assertSee('certificate-card', false)
+        ->assertSee('Unduh terkunci sampai 1 kegiatan hadir.');
 });
 
 test('kader can download sertifikat pdf', function () {
