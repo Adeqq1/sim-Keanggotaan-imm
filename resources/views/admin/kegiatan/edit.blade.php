@@ -28,7 +28,7 @@
                     <div class="row g-2">
                         <div class="col-12 col-sm-7">
                             <label for="tanggal_kegiatan" class="form-label small text-muted mb-1">Tanggal</label>
-                            <input id="tanggal_kegiatan" type="date" name="tanggal_kegiatan" class="form-control @error('tanggal_kegiatan') is-invalid @enderror" value="{{ old('tanggal_kegiatan', $kegiatan->tanggal_waktu->format('Y-m-d')) }}" min="{{ now()->toDateString() }}" required data-schedule-date>
+                            <input id="tanggal_kegiatan" type="date" name="tanggal_kegiatan" class="form-control @error('tanggal_kegiatan') is-invalid @enderror" value="{{ old('tanggal_kegiatan', $kegiatan->tanggal_waktu->format('Y-m-d')) }}" required data-schedule-date>
                             @error('tanggal_kegiatan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-12 col-sm-5">

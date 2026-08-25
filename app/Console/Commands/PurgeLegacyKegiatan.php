@@ -16,7 +16,8 @@ class PurgeLegacyKegiatan extends Command
 {
     public function handle(): int
     {
-        $count = Kegiatan::count();
+        $legacyKegiatans = Kegiatan::query()->whereDoesntHave('tahunAngkatans');
+        $count = (clone $legacyKegiatans)->count();
         if (! $this->option('yes')) {
             $this->warn("This will permanently delete {$count} activities and related records/files.");
             $this->line('Run with --yes after taking a database and storage backup.');
@@ -24,7 +25,7 @@ class PurgeLegacyKegiatan extends Command
         }
 
         $files = [];
-        Kegiatan::with(['materiKegiatans', 'laporanKegiatan', 'sertifikat'])->chunkById(100, function ($kegiatans) use (&$files): void {
+        $legacyKegiatans->with(['materiKegiatans', 'laporanKegiatan', 'sertifikat'])->chunkById(100, function ($kegiatans) use (&$files): void {
             foreach ($kegiatans as $kegiatan) {
                 $files[] = ['disk' => 'public', 'path' => $kegiatan->thumbnail];
                 foreach ($kegiatan->sertifikat as $sertifikat) {
@@ -39,7 +40,7 @@ class PurgeLegacyKegiatan extends Command
             }
         });
 
-        DB::transaction(fn () => Kegiatan::query()->delete());
+        DB::transaction(fn () => $legacyKegiatans->delete());
         foreach ($files as $file) {
             if ($file['path']) {
                 Storage::disk($file['disk'])->delete($file['path']);

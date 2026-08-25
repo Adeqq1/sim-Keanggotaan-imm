@@ -198,6 +198,24 @@ test('kegiatan rejects past schedules and accepts a future split schedule', func
         ->toBe(now()->addDay()->format('Y-m-d').' 09:00');
 });
 
+test('invalid legacy schedule input returns validation errors instead of a server error', function () {
+    $instruktur = User::factory()->instruktur()->create();
+
+    $this->actingAs($instruktur)
+        ->post(route('admin.kegiatan.store'), [
+            'nama_kegiatan' => 'Jadwal Tidak Valid',
+            'tanggal_waktu' => 'definitely-not-a-date',
+            'lokasi' => 'Aula IMM',
+            'tahun_angkatan' => [now()->year],
+            'jenis_pelaksanaan' => 'satu_sesi',
+            'minimum_sesi_terverifikasi' => 1,
+        ])
+        ->assertRedirect()
+        ->assertSessionHasErrors(['tanggal_waktu', 'tanggal_kegiatan', 'waktu_mulai']);
+
+    expect(Kegiatan::where('nama_kegiatan', 'Jadwal Tidak Valid')->exists())->toBeFalse();
+});
+
 test('instruktur can update kegiatan and replace thumbnail', function () {
     Storage::fake('public');
     $instruktur = User::factory()->instruktur()->create();

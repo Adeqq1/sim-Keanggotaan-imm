@@ -53,7 +53,11 @@ if (generationStatus) {
                     : `${status.processed} sertifikat berhasil dibuat.`;
                 generationStatus.classList.add(status.failed > 0 ? 'is-warning' : 'is-complete');
                 window.clearTimeout(timerId);
-                window.setTimeout(() => window.location.reload(), 1200);
+                 window.setTimeout(() => {
+                     const url = new URL(window.location.href);
+                     url.searchParams.delete('generation');
+                     window.location.replace(url.toString());
+                 }, 1200);
                 return;
             }
 
@@ -80,6 +84,12 @@ document.querySelectorAll('[data-profile-field]').forEach((field) => {
     if (!input || !editButton) return;
 
     const initialValue = input.value;
+
+    if (input.classList.contains('is-invalid')) {
+        input.readOnly = false;
+        field.classList.add('is-editing');
+        editButton.textContent = 'Batal';
+    }
 
     editButton.addEventListener('click', () => {
         const isEditing = !input.readOnly;
