@@ -125,7 +125,7 @@ test('instruktur can access kegiatan management and store new kegiatan with thum
     $response = $this->actingAs($instruktur)->post(route('admin.kegiatan.store'), [
         'nama_kegiatan' => 'Latihan Kader',
         'deskripsi' => 'Deskripsi latihan kader',
-        'tanggal_waktu' => '2026-06-10 10:00:00',
+        'tanggal_waktu' => now()->addDays(2)->setTime(10, 0)->format('Y-m-d H:i'),
         'lokasi' => 'Aula IMM',
         'tahun_angkatan' => [now()->year],
         'jenis_pelaksanaan' => 'satu_sesi',
@@ -215,7 +215,7 @@ test('instruktur can update kegiatan and replace thumbnail', function () {
 
     $response = $this->actingAs($instruktur)->put(route('admin.kegiatan.update', $kegiatan), [
         'nama_kegiatan' => 'Latihan Kader Updated',
-        'tanggal_waktu' => '2026-06-12 10:00:00',
+        'tanggal_waktu' => now()->addDays(3)->setTime(10, 0)->format('Y-m-d H:i'),
         'lokasi' => 'Aula IMM Baru',
         'tahun_angkatan' => [now()->year],
         'jenis_pelaksanaan' => 'satu_sesi',
