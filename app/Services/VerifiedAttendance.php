@@ -22,9 +22,13 @@ class VerifiedAttendance
 
     public function meetsRequirement(Kegiatan $kegiatan, Anggota $anggota): bool
     {
-        return in_array($kegiatan->jenis_pelaksanaan, [Kegiatan::SATU_SESI, Kegiatan::MULTI_SESI], true)
-            && $kegiatan->minimum_sesi_terverifikasi !== null
-            && $this->countFor($kegiatan, $anggota) >= $kegiatan->minimum_sesi_terverifikasi;
+        return match ($kegiatan->jenis_pelaksanaan) {
+            Kegiatan::SATU_SESI => $kegiatan->minimum_sesi_terverifikasi === 1 && $this->countFor($kegiatan, $anggota) >= 1,
+            Kegiatan::MULTI_SESI => $kegiatan->minimum_sesi_terverifikasi !== null
+                && $kegiatan->minimum_sesi_terverifikasi >= 3
+                && $this->countFor($kegiatan, $anggota) >= $kegiatan->minimum_sesi_terverifikasi,
+            default => false,
+        };
     }
 
     public function eligibleAnggotaIdsFor(Kegiatan $kegiatan): Collection

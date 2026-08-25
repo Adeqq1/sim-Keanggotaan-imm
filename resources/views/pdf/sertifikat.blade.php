@@ -38,7 +38,7 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #800000; /* Maroon outer border */
+            background-color: #800000;
             font-family: 'Georgia', 'Times New Roman', Times, serif;
             box-sizing: border-box;
             overflow: hidden;
@@ -52,6 +52,10 @@
             background-color: #faf6f0; /* Cream background like reference.jpg */
             overflow: hidden;
             box-sizing: border-box;
+            @if($useBackground ?? false)
+            background-image: url('{{ public_path("images/sertificate-asset/bg-sertificate.jpg") }}');
+            background-size: cover;
+            @endif
         }
         
         /* ==========================================
@@ -209,6 +213,34 @@
             color: #111;
             margin-top: 2px;
         }
+        .second-page {
+            page-break-before: always;
+            position: relative;
+            height: 100%;
+        }
+        .second-page-card {
+            position: absolute;
+            top: 25px;
+            bottom: 25px;
+            left: 25px;
+            right: 25px;
+            background-color: #faf6f0;
+            overflow: hidden;
+            box-sizing: border-box;
+            @if($useBackground ?? false)
+            background-image: url('{{ public_path("images/sertificate-asset/bg-sertificate.jpg") }}');
+            background-size: cover;
+            @endif
+        }
+        .second-page-content {
+            position: absolute;
+            top: 120px;
+            left: 80px;
+            right: 80px;
+            text-align: center;
+        }
+        .second-page h2 { color: #b45309; font-size: 24pt; }
+        .second-page p { font-family: 'Montserrat', 'Helvetica', sans-serif; font-size: 16pt; }
     </style>
 </head>
 <body>
@@ -257,7 +289,7 @@
                         <div class="sig-title">Pimpinan Komisariat</div>
                     </td>
                     <td class="sig-cell">
-                        <div style="font-size: 8.5pt; color: #555; margin-bottom: 45px;">Bungo, {{ now()->translatedFormat('d F Y') }}</div>
+                        <div style="font-size: 8.5pt; color: #555; margin-bottom: 45px;">Bungo, {{ $issuedAt->translatedFormat('d F Y') }}</div>
                         <div class="sig-line"></div>
                         <div class="sig-name">{{ $instruktur }}</div>
                         <div class="sig-title">Instruktur Pendamping</div>
@@ -266,5 +298,22 @@
             </table>
         </div>
     </div>
+    @if(($tipe_sertifikat ?? null) === 'multi_sesi')
+        <div class="second-page">
+            <div class="second-page-card">
+                <div class="decor-top-right"></div>
+                <div class="decor-top-right-line"></div>
+                <div class="decor-left-bar"></div>
+                <div class="decor-left-circle-outer"></div>
+                <div class="decor-left-circle-inner"></div>
+                <div class="decor-bottom-right-triangle"></div>
+                <div class="second-page-content">
+                    <img class="logo" src="{{ public_path('images/sertificate-asset/logo.png') }}" alt="Logo IMM" />
+                    <h2>Penilaian Akhir Instruktur</h2>
+                    <p>{{ $nilai_snapshot }} - {{ $label_nilai }}</p>
+                </div>
+            </div>
+        </div>
+    @endif
 </body>
 </html>

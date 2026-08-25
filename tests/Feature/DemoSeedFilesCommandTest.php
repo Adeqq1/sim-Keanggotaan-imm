@@ -106,17 +106,39 @@ test('command provisions files and updates database paths correctly', function (
     expect($pendingClaim)->not->toBeNull();
     Storage::disk('public')->assertExists($pendingClaim->bukti_kehadiran);
 
-    // 5. Sertifikat — command calls generateCertificateFile which uses updateOrCreate
-    // so only the certificates for approved claims will have real paths on disk.
-    $sertifikat = Sertifikat::where('file_sertifikat', 'not like', '%dummy%')->first();
-    expect($sertifikat)->not->toBeNull('Command should have created/updated at least one real certificate');
-    Storage::disk('public')->assertExists($sertifikat->file_sertifikat);
+    // 5. Approved claims retain historical evidence but do not issue certificates.
+    $approvedClaim = Presensi::where('status_klaim', 'disetujui')->first();
+    expect($approvedClaim)->not->toBeNull();
+    expect(Sertifikat::count())->toBe($sertifikatsCountBefore);
 
     // Verify Private artifacts
     $arsip = Arsip::where('judul_dokumen', 'like', 'Dokumen Arsip Demo%')->first();
     expect($arsip)->not->toBeNull();
     Storage::disk('local')->assertExists($arsip->file_arsip);
     Storage::disk('public')->assertMissing($arsip->file_arsip); // Must not be public
+});
+
+test('command preserves approved claim evidence across reruns without issuing certificates', function () {
+    $this->seed(DatabaseSeeder::class);
+    $kegiatan = Kegiatan::first();
+    $anggota = Anggota::first();
+    $certificateCount = Sertifikat::count();
+    $approved = Presensi::updateOrCreate([
+        'kegiatan_id' => $kegiatan->id,
+        'anggota_id' => $anggota->id,
+    ], [
+        'status_kehadiran' => 'hadir',
+        'status_klaim' => 'disetujui',
+        'bukti_kehadiran' => 'bukti_kehadiran/demo/approved-'.$anggota->id.'.png',
+    ]);
+
+    $path = $approved->bukti_kehadiran;
+    $this->artisan('demo:seed-files')->assertSuccessful();
+    $this->artisan('demo:seed-files')->assertSuccessful();
+
+    expect($approved->fresh()->bukti_kehadiran)->toBe($path)
+        ->and(Sertifikat::count())->toBe($certificateCount);
+    Storage::disk('public')->assertExists($path);
 });
 
 test('command is idempotent and handles cleanup', function () {

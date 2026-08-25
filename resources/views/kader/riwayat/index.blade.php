@@ -75,16 +75,9 @@
                             <i class="bi bi-download"></i> Unduh
                         </a>
                     @elseif(! $sertifikat && $eligibleKegiatanIds->contains($p->kegiatan_id))
-                        <form action="{{ route('kader.sertifikat.klaim', $p) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn btn-sm btn-outline-primary btn-ui btn-ui-sm px-3">
-                                <i class="bi bi-award"></i> Klaim Sertifikat
-                            </button>
-                        </form>
-                    @elseif(! $sertifikat && ! $canClaimSertifikat)
-                        <span class="small text-muted">Klaim tersedia setelah {{ $minimumKegiatanHadir }} kegiatan hadir</span>
+                        <span class="small text-muted">Sertifikat diterbitkan oleh admin</span>
                     @elseif(! $sertifikat)
-                        <span class="small text-muted">Klaim tidak tersedia untuk status {{ ucfirst($p->status_kehadiran) }}</span>
+                        <span class="small text-muted">Belum memenuhi syarat penerbitan</span>
                     @elseif($sertifikat)
                         <span class="small text-muted">Unduh terkunci</span>
                     @endif

@@ -2,13 +2,11 @@
 
 namespace App\Services;
 
-use App\Http\Controllers\SertifikatController;
 use App\Models\Anggota;
 use App\Models\Arsip;
 use App\Models\Kegiatan;
 use App\Models\Pendaftaran;
 use App\Models\Presensi;
-use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,6 +18,11 @@ class DemoDataFiles
      */
     public function provisionFiles(): array
     {
+        $approvedClaims = Presensi::query()
+            ->where('status_klaim', 'disetujui')
+            ->where('bukti_kehadiran', 'like', 'bukti_kehadiran/demo/%')
+            ->get(['id', 'bukti_kehadiran']);
+
         $this->cleanDemoNamespaces();
 
         $stats = [
@@ -73,29 +76,18 @@ class DemoDataFiles
             $stats['records_updated']++;
         }
 
-        // 5. Provision generated certificates for approved claims
-        $approvedClaims = Presensi::where('status_klaim', 'disetujui')->with(['kegiatan', 'anggota'])->take(2)->get();
-        $adminForSignature = User::where('role', 'admin')->first() ?? User::first();
+        foreach ($approvedClaims as $claim) {
+            $this->copyImageToPublic($claim->bukti_kehadiran);
+            $stats['public_files']++;
+        }
 
-        // Make sure background exists for generation if it's missing in development
+        // 5. Keep historical claim artifacts without issuing certificates.
         if (! Storage::disk('local')->exists('sertifikat_settings.json')) {
             Storage::disk('local')->put('sertifikat_settings.json', json_encode([
                 'use_background' => true,
             ]));
         }
 
-        $sertifikatController = app(SertifikatController::class);
-        foreach ($approvedClaims as $claim) {
-            $path = 'bukti_kehadiran/demo/bukti-'.$claim->id.'.png';
-            $this->copyImageToPublic($path);
-            $claim->update(['bukti_kehadiran' => $path]);
-            $stats['public_files']++;
-
-            // Trigger the real application generation logic
-            $sertifikatController->generateCertificateFile($claim->kegiatan, $claim->anggota, $adminForSignature->nama_lengkap ?? 'Admin');
-            $stats['public_files']++;
-            $stats['records_updated']+=2; // claim proof + certificate creation
-        }
 
         // 6. Provision private archives (Arsip)
         // Find kader members to assign private archives

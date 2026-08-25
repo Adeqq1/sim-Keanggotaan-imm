@@ -4,8 +4,11 @@ use App\Jobs\GenerateCertificateJob;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\Presensi;
+use App\Models\PenilaianKegiatan;
+use App\Models\Sertifikat;
 use App\Models\SesiKegiatan;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 
@@ -70,6 +73,7 @@ test('admin can export laporan excel', function () {
 
 test('admin bulk certificate generation dispatches GenerateCertificateJob', function () {
     Queue::fake();
+    Storage::disk('public')->deleteDirectory('sertifikat');
 
     $admin = User::factory()->admin()->create();
     $kegiatan = Kegiatan::factory()->create();
@@ -95,6 +99,78 @@ test('admin bulk certificate generation dispatches GenerateCertificateJob', func
     Queue::assertPushed(GenerateCertificateJob::class, function ($job) use ($kegiatan, $anggota2) {
         return $job->kegiatan->id === $kegiatan->id && $job->anggota->id === $anggota2->id;
     });
+});
+
+test('certificate snapshots and PDF page count follow the activity policy', function () {
+    Storage::fake('public');
+    Storage::fake('local');
+    Storage::disk('local')->put('sertifikat_settings.json', json_encode(['use_background' => false]));
+
+    $anggota = Anggota::factory()->create();
+    $kegiatan = Kegiatan::factory()->create([
+        'jenis_pelaksanaan' => Kegiatan::MULTI_SESI,
+        'minimum_sesi_terverifikasi' => 3,
+    ]);
+
+    foreach (range(1, 3) as $urutan) {
+        $sesi = SesiKegiatan::factory()->for($kegiatan)->create(['urutan' => $urutan]);
+        Presensi::factory()->terverifikasi()->create([
+            'kegiatan_id' => $kegiatan->id,
+            'sesi_kegiatan_id' => $sesi->id,
+            'anggota_id' => $anggota->id,
+        ]);
+    }
+    PenilaianKegiatan::factory()->create([
+        'kegiatan_id' => $kegiatan->id,
+        'anggota_id' => $anggota->id,
+        'nilai' => 'B',
+    ]);
+
+    $sertifikat = \App\Http\Controllers\SertifikatController::generateCertificateFile($kegiatan, $anggota);
+    $pdf = Pdf::loadView('pdf.sertifikat', [
+        'kegiatan' => $kegiatan,
+        'anggota' => $anggota,
+        'nomorSertifikat' => $sertifikat->nomor_sertifikat,
+        'role' => 'Kader',
+        'instruktur' => 'Instruktur',
+        'issuedAt' => $sertifikat->created_at,
+        'useBackground' => false,
+        'tipe_sertifikat' => $sertifikat->tipe_sertifikat,
+        'nilai_snapshot' => $sertifikat->nilai_snapshot,
+        'label_nilai' => PenilaianKegiatan::NILAI_LABELS[$sertifikat->nilai_snapshot],
+    ]);
+    $pdf->render();
+
+    expect($sertifikat->tipe_sertifikat)->toBe(Sertifikat::MULTI_SESI)
+        ->and($sertifikat->nilai_snapshot)->toBe('B')
+        ->and($pdf->getDomPDF()->getCanvas()->get_page_count())->toBe(2);
+    Storage::disk('public')->assertExists($sertifikat->file_sertifikat);
+});
+
+test('admin rejects the whole certificate batch before dispatching any job', function () {
+    Queue::fake();
+
+    $admin = User::factory()->admin()->create();
+    $kegiatan = Kegiatan::factory()->create();
+    $eligible = Anggota::factory()->create();
+    $ineligible = Anggota::factory()->inactive()->create();
+    $sesi = SesiKegiatan::factory()->for($kegiatan)->create();
+    Presensi::factory()->terverifikasi()->create([
+        'kegiatan_id' => $kegiatan->id,
+        'sesi_kegiatan_id' => $sesi->id,
+        'anggota_id' => $eligible->id,
+    ]);
+
+    $this->actingAs($admin)
+        ->post(route('admin.sertifikat.generate'), [
+            'kegiatan_id' => $kegiatan->id,
+            'anggota_ids' => [$eligible->id, $ineligible->id],
+        ])
+        ->assertSessionHasErrors('anggota_ids');
+
+    Queue::assertNothingPushed();
+    expect(\App\Models\Sertifikat::count())->toBe(0);
+    Storage::disk('public')->assertDirectoryEmpty('sertifikat');
 });
 
 test('admin laporan page renders semantic form without alert', function () {

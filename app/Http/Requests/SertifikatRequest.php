@@ -4,7 +4,8 @@ namespace App\Http\Requests;
 
 use App\Models\Anggota;
 use App\Models\Kegiatan;
-use App\Services\VerifiedAttendance;
+use App\Models\Sertifikat;
+use App\Services\CertificateEligibility;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -15,7 +16,7 @@ class SertifikatRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->role === 'admin';
     }
 
     /**
@@ -27,25 +28,29 @@ class SertifikatRequest extends FormRequest
     {
         return [
             'kegiatan_id' => ['required', 'exists:kegiatan,id'],
-            'anggota_ids' => ['required', 'array'],
-            'anggota_ids.*' => ['required', 'exists:anggota,id'],
+            'anggota_ids' => ['required', 'array', 'min:1'],
+            'anggota_ids.*' => ['required', 'integer', 'distinct', 'exists:anggota,id'],
         ];
     }
 
     public function withValidator($validator): void
     {
         $validator->after(function ($validator): void {
-            $kegiatan = Kegiatan::find($this->input('kegiatan_id'));
-            if (! $kegiatan) {
+            if ($validator->errors()->isNotEmpty()) {
                 return;
             }
 
+            $kegiatan = Kegiatan::find($this->integer('kegiatan_id'));
+            if (! $kegiatan) return;
+
             $invalid = Anggota::query()
-                ->whereIn('id', $this->input('anggota_ids', []))
-                ->get()
-                ->filter(fn (Anggota $anggota): bool => ! $anggota->status_aktif
-                    || $anggota->user?->role !== 'kader'
-                    || ! app(VerifiedAttendance::class)->meetsRequirement($kegiatan, $anggota));
+                ->with('user')
+                ->whereIn('id', $this->input('anggota_ids'))
+                ->get();
+
+            $eligibility = app(CertificateEligibility::class);
+            $invalid = $invalid->filter(fn (Anggota $anggota): bool => ! $eligibility->eligible($kegiatan, $anggota)
+                || Sertifikat::where('kegiatan_id', $kegiatan->id)->where('anggota_id', $anggota->id)->exists());
 
             if ($invalid->isNotEmpty()) {
                 $validator->errors()->add('anggota_ids', 'Anggota berikut tidak memenuhi syarat: '.$invalid->pluck('nama_lengkap')->implode(', '));

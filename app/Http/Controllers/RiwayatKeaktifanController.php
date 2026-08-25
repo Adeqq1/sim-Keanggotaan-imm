@@ -44,7 +44,6 @@ class RiwayatKeaktifanController extends Controller
         ];
         $eligibleKegiatanIds = app(VerifiedAttendance::class)->eligibleKegiatanIds($anggota);
         $jumlahKegiatanHadir = $eligibleKegiatanIds->count();
-        $canClaimSertifikat = $jumlahKegiatanHadir > 0;
         $minimumKegiatanHadir = 1;
 
         return view('kader.riwayat.index', compact(
@@ -52,7 +51,6 @@ class RiwayatKeaktifanController extends Controller
             'sertifikats',
             'stats',
             'jumlahKegiatanHadir',
-            'canClaimSertifikat',
             'eligibleKegiatanIds',
             'minimumKegiatanHadir',
             'options', 'sort',
