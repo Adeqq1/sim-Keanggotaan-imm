@@ -22,7 +22,7 @@
     </div>
     <div class="certificate-sort-toolbar {{ $sertifikats->isEmpty() ? 'certificate-sort-toolbar--empty' : '' }}">
         <span class="certificate-sort-toolbar__label"><i class="bi bi-filter me-1"></i> Urutkan koleksi</span>
-        <x-sort-control :action="route('kader.sertifikat.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
+        <x-sort-control :action="route('kader.sertifikat.index')" :options="$options" :selected-sort="$sort['key']" />
     </div>
 
     <div class="row g-3 index-card-grid certificate-card-grid">

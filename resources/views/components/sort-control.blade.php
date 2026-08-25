@@ -2,7 +2,6 @@
     'action',
     'options',
     'selectedSort',
-    'selectedDirection',
     'preservedInputs' => [],
 ])
 
@@ -20,13 +19,6 @@
             @foreach($options as $key => $label)
                 <option value="{{ $key }}" @selected($selectedSort === $key)>{{ $label }}</option>
             @endforeach
-        </select>
-    </div>
-    <div class="col-12 col-md-2">
-        <label for="{{ $controlId }}-direction" class="form-label small fw-bold">Arah</label>
-        <select id="{{ $controlId }}-direction" name="direction" class="form-select">
-            <option value="asc" @selected($selectedDirection === 'asc')>Terlama</option>
-            <option value="desc" @selected($selectedDirection === 'desc')>Terbaru</option>
         </select>
     </div>
 </form>

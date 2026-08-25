@@ -57,7 +57,7 @@
             </div>
         </div>
     </form>
-    <x-sort-control :action="route('admin.anggota.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" :preserved-inputs="['search' => $search, 'role' => $selectedRole, 'komisariat' => $selectedKomisariat]" />
+            <x-sort-control :action="route('admin.anggota.index')" :options="$options" :selected-sort="$sort['key']" :preserved-inputs="['search' => $search, 'role' => $selectedRole, 'komisariat' => $selectedKomisariat]" />
 
     <div class="row g-3 index-card-grid">
     @forelse($anggotas as $anggota)

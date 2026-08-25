@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">Materi Kegiatan</x-slot>
     <x-kegiatan-submenu />
-    <x-sort-control :action="route('admin.materi-kegiatan.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
+    <x-sort-control :action="route('admin.materi-kegiatan.index')" :options="$options" :selected-sort="$sort['key']" />
 
     <div class="row g-3 index-card-grid">
         @forelse($materis as $materi)

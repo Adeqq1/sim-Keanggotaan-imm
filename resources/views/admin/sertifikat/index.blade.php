@@ -17,7 +17,7 @@
             </a>
         </div>
     </div>
-    <x-sort-control :action="route('admin.sertifikat.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
+    <x-sort-control :action="route('admin.sertifikat.index')" :options="$options" :selected-sort="$sort['key']" />
 
     @if(request()->filled('generation'))
         <div class="certificate-generation-status" data-certificate-generation data-status-url="{{ route('admin.sertifikat.generation.status', request('generation')) }}">

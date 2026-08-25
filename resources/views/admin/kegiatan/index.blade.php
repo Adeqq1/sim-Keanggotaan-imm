@@ -16,7 +16,7 @@
             <i class="bi bi-plus-lg"></i> Tambah
         </a>
     </div>
-    <x-sort-control :action="route('admin.kegiatan.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
+    <x-sort-control :action="route('admin.kegiatan.index')" :options="$options" :selected-sort="$sort['key']" />
 
     @php
         $renderKegiatanCard = function ($kegiatan, string $statusLabel, string $statusClass) {

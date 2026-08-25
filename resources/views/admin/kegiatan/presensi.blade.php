@@ -70,8 +70,8 @@
     </section>
 
     <div class="attendance-actions">
-        @if($canManagePresensi)<button type="submit" class="btn btn-primary btn-ui py-3"><i class="bi bi-save me-2"></i>Simpan Presensi</button>@endif
-        <a href="{{ route('admin.kegiatan.index') }}" class="btn btn-outline-secondary btn-ui">Kembali</a>
+        @if($canManagePresensi)<button type="submit" class="btn btn-primary btn-ui btn-ui-sm"><i class="bi bi-save"></i>Simpan Presensi</button>@endif
+        <a href="{{ route('admin.kegiatan.index') }}" class="btn btn-outline-secondary btn-ui btn-ui-sm">Kembali</a>
     </div>
 
     @if($canManagePresensi)

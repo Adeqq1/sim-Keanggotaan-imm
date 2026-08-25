@@ -3,7 +3,7 @@
         Halo, {{ auth()->user()->name }}
     </x-slot>
 
-    <x-sort-control :action="route('kader.dashboard')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
+    <x-sort-control :action="route('kader.dashboard')" :options="$options" :selected-sort="$sort['key']" />
     {{-- Desktop: 2 kolom (Hero Card | Quick Actions), Mobile: 1 kolom --}}
     <div class="row g-4 mb-4">
 

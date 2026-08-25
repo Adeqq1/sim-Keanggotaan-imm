@@ -4,7 +4,7 @@
     @if(auth()->user()->role === 'admin')
         <x-kegiatan-submenu />
     @endif
-    <x-sort-control :action="route('admin.presensi.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
+    <x-sort-control :action="route('admin.presensi.index')" :options="$options" :selected-sort="$sort['key']" />
 
     <div class="row g-3 index-card-grid">
         @forelse($kegiatans as $kegiatan)
