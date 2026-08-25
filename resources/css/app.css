@@ -765,6 +765,159 @@ canvas {
     width: 100%;
 }
 
+.pendaftaran-detail-topbar {
+    display: none;
+}
+
+.pendaftaran-detail-panel-heading,
+.pendaftaran-detail-section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.pendaftaran-detail-panel-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: 0 0 2.25rem;
+    border-radius: 0.65rem;
+    background: rgba(128, 0, 0, 0.08);
+    color: var(--bs-primary);
+}
+
+.pendaftaran-detail-section-heading {
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.pendaftaran-detail-panel-heading + .pendaftaran-detail-fields {
+    margin-top: 1.5rem;
+}
+
+.pendaftaran-detail-fields small,
+.pendaftaran-detail-documents small {
+    margin-bottom: 0.25rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.01em;
+}
+
+.pendaftaran-detail-fields span.fw-bold,
+.pendaftaran-detail-documents span.fw-bold {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.pendaftaran-detail-bottom-back {
+    display: block;
+}
+
+@media (min-width: 992px) {
+    .pendaftaran-detail-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .pendaftaran-detail-topbar h2 {
+        margin: 0.25rem 0 0;
+        color: #1a1a2e;
+        font-size: 1.5rem;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+    }
+
+    .pendaftaran-detail-eyebrow {
+        color: #6c757d;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .pendaftaran-detail-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.65fr) minmax(300px, 0.85fr);
+        align-items: start;
+        gap: 1.25rem;
+    }
+
+    .pendaftaran-detail-layout > * {
+        min-width: 0;
+    }
+
+    .pendaftaran-detail-panel {
+        margin-bottom: 0 !important;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 14px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .pendaftaran-detail-fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem !important;
+        margin: 1.5rem 0 0 !important;
+    }
+
+    .pendaftaran-detail-fields > [class*="col-"] {
+        width: 100%;
+        padding: 0;
+    }
+
+    .pendaftaran-detail-fields > .col-12:nth-child(1),
+    .pendaftaran-detail-fields > .col-12:nth-child(2),
+    .pendaftaran-detail-fields > .col-12:nth-child(8),
+    .pendaftaran-detail-fields > .col-12:nth-child(9) {
+        grid-column: 1 / -1;
+    }
+
+    .pendaftaran-detail-action-panel {
+        position: sticky;
+        top: 5.5rem;
+    }
+
+    .pendaftaran-detail-action-panel form {
+        margin-top: 1.5rem;
+    }
+
+    .pendaftaran-detail-action-panel form + form {
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .pendaftaran-detail-action-panel .pendaftaran-detail-control,
+    .pendaftaran-detail-documents .pendaftaran-detail-control {
+        width: 100%;
+    }
+
+    .pendaftaran-detail-documents {
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .pendaftaran-detail-documents .d-flex {
+        display: grid !important;
+        gap: 0.625rem !important;
+    }
+
+    .pendaftaran-detail-status-panel {
+        min-height: 170px;
+        margin: 0;
+        border-radius: 14px;
+        padding: 1.5rem;
+    }
+
+    .pendaftaran-detail-bottom-back {
+        display: none;
+    }
+}
+
 .app-main-content .index-card {
     min-width: 0;
 }
