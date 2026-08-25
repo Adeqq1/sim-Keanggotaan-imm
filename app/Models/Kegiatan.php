@@ -64,4 +64,10 @@ class Kegiatan extends Model
             ? asset('storage/'.$this->thumbnail)
             : asset('images/placeholder-kegiatan.png');
     }
+
+    public function tahunAngkatans(): HasMany
+    {
+        return $this->hasMany(KegiatanTahunAngkatan::class)->orderBy('tahun_daftar');
+    }
+
 }

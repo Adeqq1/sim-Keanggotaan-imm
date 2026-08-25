@@ -41,6 +41,8 @@ class PenilaianKegiatanRequest extends FormRequest
                 $validator->errors()->add('nilai', 'Kegiatan ini tidak menyediakan penilaian.');
             } elseif (! $anggota instanceof Anggota || ! $anggota->status_aktif || $anggota->user?->role !== 'kader' || ! app(VerifiedAttendance::class)->meetsRequirement($kegiatan, $anggota)) {
                 $validator->errors()->add('nilai', 'Anggota tidak memenuhi syarat penilaian.');
+            } elseif (! $kegiatan->tahunAngkatans()->where('tahun_daftar', $anggota->tahun_daftar)->exists()) {
+                $validator->errors()->add('nilai', 'Anggota tidak termasuk target angkatan kegiatan.');
             }
         }];
     }

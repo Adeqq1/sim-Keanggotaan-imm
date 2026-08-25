@@ -323,17 +323,18 @@ test('admin must provide catatan admin when rejecting pendaftaran', function () 
 
 test('admin can view presensi but cannot store it', function () {
     $admin = User::factory()->admin()->create();
-    $kegiatan = Kegiatan::factory()->create();
-    $anggota1 = Anggota::factory()->create();
-    $anggota2 = Anggota::factory()->create();
+    $kegiatan = Kegiatan::factory()->withDefaultSession()->create();
+    $anggota1 = Anggota::factory()->create(['tahun_daftar' => now()->year]);
+    $anggota2 = Anggota::factory()->create(['tahun_daftar' => now()->year]);
     $presensi = Presensi::create([
         'kegiatan_id' => $kegiatan->id,
+        'sesi_kegiatan_id' => $kegiatan->sesiKegiatans()->first()->id,
         'anggota_id' => $anggota1->id,
         'status_kehadiran' => 'hadir',
         'waktu_hadir' => now(),
     ]);
 
-    $response = $this->actingAs($admin)->get(route('admin.presensi.show', $kegiatan));
+    $response = $this->actingAs($admin)->get(route('admin.presensi.sesi.show', [$kegiatan, $kegiatan->sesiKegiatans()->first()]));
 
     $response->assertSuccessful()
         ->assertSeeText($anggota1->nama_lengkap)

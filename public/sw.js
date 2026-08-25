@@ -1,23 +1,26 @@
-const CACHE_NAME = 'sim-imm-cache-v1';
-const urlsToCache = [
-    '/',
-];
+const CACHE_PREFIX = 'sim-imm-cache-';
+const CACHE_NAME = `${CACHE_PREFIX}v3`;
 
 self.addEventListener('install', event => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(urlsToCache))
+        self.skipWaiting()
+    );
+});
+
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys()
+            .then(keys => Promise.all(
+                keys
+                    .filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
+                    .map(key => caches.delete(key))
+            ))
+            .then(() => self.clients.claim())
     );
 });
 
 self.addEventListener('fetch', event => {
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                if (response) {
-                    return response;
-                }
-                return fetch(event.request);
-            })
-    );
+    if (event.request.method === 'GET' && event.request.mode === 'navigate') {
+        event.respondWith(fetch(event.request));
+    }
 });

@@ -46,7 +46,7 @@ test('activity index uses twelve cards per page', function () {
         ->assertDontSee('Kegiatan Grid 01');
 
     $this->actingAs($instruktur)
-        ->get(route('admin.kegiatan.index', ['page' => 2]))
+        ->get(route('admin.kegiatan.index', ['upcoming_page' => 3]))
         ->assertSuccessful()
         ->assertSee('Kegiatan Grid 01');
 });

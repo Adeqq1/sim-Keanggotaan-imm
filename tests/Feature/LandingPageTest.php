@@ -105,6 +105,9 @@ test('activities cache is cleared when activities are added, updated, or deleted
         'deskripsi' => 'Deskripsi baru',
         'tanggal_waktu' => '2026-06-15 10:00:00',
         'lokasi' => 'Aula IMM',
+        'tahun_angkatan' => [now()->year],
+        'jenis_pelaksanaan' => 'satu_sesi',
+        'minimum_sesi_terverifikasi' => 1,
     ]);
     expect(Cache::has('kegiatan.terbaru'))->toBeFalse();
 
@@ -121,6 +124,9 @@ test('activities cache is cleared when activities are added, updated, or deleted
         'nama_kegiatan' => 'Latihan Kader Updated',
         'tanggal_waktu' => '2026-06-15 10:00:00',
         'lokasi' => 'Aula IMM Baru',
+        'tahun_angkatan' => [$kegiatan->tahunAngkatans()->value('tahun_daftar')],
+        'jenis_pelaksanaan' => 'satu_sesi',
+        'minimum_sesi_terverifikasi' => 1,
     ]);
     expect(Cache::has('kegiatan.terbaru'))->toBeFalse();
 

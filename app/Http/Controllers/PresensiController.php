@@ -44,14 +44,32 @@ class PresensiController extends Controller
 
     public function showSession(Request $request, Kegiatan $kegiatan, \App\Models\SesiKegiatan $sesiKegiatan)
     {
+        $kegiatan->load('tahunAngkatans');
         $options = ['nama' => 'Nama', 'nia' => 'NIA'];
         $sort = SortParams::resolve($request, array_keys($options), 'nama', 'asc');
+        $targetYears = $kegiatan->tahunAngkatans()->pluck('tahun_daftar');
         $anggotas = Anggota::where('status_aktif', true)
+            ->whereIn('tahun_daftar', $targetYears)
+            ->whereRelation('user', 'role', 'kader')
             ->orderBy(['nama' => 'nama_lengkap', 'nia' => 'nia'][$sort['key']], $sort['direction'])->orderByDesc('id')->get();
-        $presensis = $sesiKegiatan->presensis()->with('pemeriksa')->get();
+        $presensis = $sesiKegiatan->presensis()->with(['anggota', 'pemeriksa'])->get();
+        $presensiByAnggota = $presensis->keyBy('anggota_id');
+        $hadirPresensis = $presensis->where('status_kehadiran', 'hadir');
+        $pendingPresensis = $hadirPresensis->where('status_verifikasi', 'pending')->sortBy(fn ($presensi) => $presensi->anggota->nama_lengkap);
+        $processedPresensis = $hadirPresensis->whereIn('status_verifikasi', ['terverifikasi', 'legacy'])->sortBy(fn ($presensi) => $presensi->anggota->nama_lengkap);
+        $rejectedPresensis = $hadirPresensis->where('status_verifikasi', 'ditolak')->sortBy(fn ($presensi) => $presensi->anggota->nama_lengkap);
+        $presensiStats = [
+            'total' => $anggotas->count(),
+            'hadir' => $hadirPresensis->count(),
+            'izin' => $presensis->where('status_kehadiran', 'izin')->count(),
+            'alfa' => $presensis->where('status_kehadiran', 'alfa')->count(),
+            'pending' => $pendingPresensis->count(),
+            'terverifikasi' => $processedPresensis->count(),
+            'ditolak' => $rejectedPresensis->count(),
+        ];
         $canManagePresensi = auth()->user()->role === 'instruktur';
 
-        return view('admin.kegiatan.presensi', compact('kegiatan', 'sesiKegiatan', 'anggotas', 'presensis', 'canManagePresensi', 'options', 'sort'));
+        return view('admin.kegiatan.presensi', compact('kegiatan', 'sesiKegiatan', 'anggotas', 'presensis', 'presensiByAnggota', 'pendingPresensis', 'processedPresensis', 'rejectedPresensis', 'presensiStats', 'canManagePresensi', 'options', 'sort'));
     }
 
     public function store(PresensiRequest $request, Kegiatan $kegiatan, ?\App\Models\SesiKegiatan $sesiKegiatan = null)

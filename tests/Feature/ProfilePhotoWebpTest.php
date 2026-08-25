@@ -274,6 +274,25 @@ test('profile photo input is hidden and rejected for a user without an anggota',
         ->and(Storage::disk('public')->allFiles('foto_profil'))->toBeEmpty();
 })->with(['admin', 'instruktur']);
 
+test('admin and instruktur can update account details without anggota data', function (string $role) {
+    $user = User::factory()->create([
+        'role' => $role,
+        'name' => 'Nama Lama',
+    ]);
+
+    $response = $this->actingAs($user)
+        ->patch(route('profile.update'), [
+            'name' => 'Nama Baru',
+            'email' => 'baru-'.$role.'@example.com',
+        ]);
+
+    $response->assertRedirect(route('profile.edit'))
+        ->assertSessionHasNoErrors();
+
+    expect($user->refresh()->name)->toBe('Nama Baru')
+        ->and($user->email)->toBe('baru-'.$role.'@example.com');
+})->with(['admin', 'instruktur']);
+
 test('profile photo conversion failure leaves no output file', function () {
     Storage::fake('public');
     $temporaryPath = tempnam(sys_get_temp_dir(), 'invalid-profile-photo-');

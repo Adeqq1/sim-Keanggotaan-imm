@@ -8,9 +8,9 @@
             </p>
         </div>
 
-        <div class="row g-4">
+        <div class="row g-4 kegiatan-mobile-scroll">
             @forelse($kegiatan as $item)
-            <div class="col-md-4">
+            <div class="col-md-4 kegiatan-mobile-item">
                 <div class="card program-card shadow-sm h-100 border-0">
                     <img
                         src="{{ $item->thumbnail_url }}"

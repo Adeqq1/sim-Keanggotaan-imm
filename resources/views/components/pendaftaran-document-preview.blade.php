@@ -1,5 +1,5 @@
 <div class="modal fade" id="previewDocumentModal" tabindex="-1" aria-labelledby="previewDocumentTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-dialog modal-dialog-centered modal-xl preview-document-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="previewDocumentTitle">Preview Dokumen</h5>

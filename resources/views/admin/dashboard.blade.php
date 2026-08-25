@@ -3,45 +3,6 @@
         Dashboard Admin
     </x-slot>
 
-    <x-sort-control :action="route('admin.dashboard')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
-    {{-- Area Statistik Grafik: hanya di desktop --}}
-    <div class="d-none d-lg-block mb-4">
-        <div class="d-flex justify-content-end mb-3">
-            <button class="btn btn-primary btn-ui btn-ui-sm shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#chartCollapse" aria-expanded="false" aria-controls="chartCollapse">
-                <i class="bi bi-graph-up me-1"></i> Tampilkan Grafik Statistik
-            </button>
-        </div>
-        
-        <div class="collapse" id="chartCollapse">
-            <div class="row g-3 mb-4">
-                <div class="col-lg-4">
-                    <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
-                        <h6 class="fw-bold text-muted mb-3"><i class="bi bi-people-fill me-1 text-primary"></i> Anggota per Bulan</h6>
-                        <div style="position: relative; height: 220px;">
-                            <canvas id="anggotaChart" role="img" aria-label="Grafik pendaftaran anggota baru per bulan selama 12 bulan terakhir"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
-                        <h6 class="fw-bold text-muted mb-3"><i class="bi bi-calendar-event-fill me-1 text-success"></i> Kegiatan per Bulan</h6>
-                        <div style="position: relative; height: 220px;">
-                            <canvas id="kegiatanChart" role="img" aria-label="Grafik jumlah kegiatan per bulan selama 12 bulan terakhir"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
-                        <h6 class="fw-bold text-muted mb-3"><i class="bi bi-person-check-fill me-1 text-danger"></i> Kehadiran Anggota</h6>
-                        <div style="position: relative; height: 220px;">
-                            <canvas id="kehadiranChart" role="img" aria-label="Grafik jumlah kehadiran anggota per bulan selama 12 bulan terakhir"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     {{-- Statistik mobile: 2 kolom, hanya <992px --}}
     <div class="row g-3 mb-4 d-lg-none">
         <div class="col-6">
@@ -75,7 +36,7 @@
     </div>
 
     {{-- Ringkasan statistik desktop: hanya ≥992px, tanpa mengubah grid mobile --}}
-    <div class="row g-3 mb-4 d-none d-lg-flex desktop-stat-grid">
+    <div class="row g-3 mb-4 d-none d-lg-flex">
         <div class="col-lg-3">
             <div class="desktop-stat-card">
                 <span class="desktop-stat-icon text-bg-primary-subtle"><i class="bi bi-people-fill text-primary"></i></span>
@@ -109,6 +70,45 @@
                 <div class="desktop-stat-body">
                     <div class="desktop-stat-value">{{ $stats['total_arsip'] }}</div>
                     <div class="desktop-stat-label">Total Arsip</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="d-flex justify-content-start">
+                <button class="btn btn-primary btn-ui btn-ui-sm shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#chartCollapse" aria-expanded="false" aria-controls="chartCollapse">
+                    <i class="bi bi-graph-up me-1"></i> Tampilkan Grafik Statistik
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Area Statistik Grafik: hanya di desktop --}}
+    <div class="d-none d-lg-block mb-4">
+        <div class="collapse" id="chartCollapse">
+            <div class="row g-3 mb-4">
+                <div class="col-lg-4">
+                    <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
+                        <h6 class="fw-bold text-muted mb-3"><i class="bi bi-people-fill me-1 text-primary"></i> Anggota per Bulan</h6>
+                        <div style="position: relative; height: 220px;">
+                            <canvas id="anggotaChart" role="img" aria-label="Grafik pendaftaran anggota baru per bulan selama 12 bulan terakhir"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
+                        <h6 class="fw-bold text-muted mb-3"><i class="bi bi-calendar-event-fill me-1 text-success"></i> Kegiatan per Bulan</h6>
+                        <div style="position: relative; height: 220px;">
+                            <canvas id="kegiatanChart" role="img" aria-label="Grafik jumlah kegiatan per bulan selama 12 bulan terakhir"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card p-3 shadow-sm border-0 h-100" style="border-radius: 12px;">
+                        <h6 class="fw-bold text-muted mb-3"><i class="bi bi-person-check-fill me-1 text-danger"></i> Kehadiran Anggota</h6>
+                        <div style="position: relative; height: 220px;">
+                            <canvas id="kehadiranChart" role="img" aria-label="Grafik jumlah kehadiran anggota per bulan selama 12 bulan terakhir"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

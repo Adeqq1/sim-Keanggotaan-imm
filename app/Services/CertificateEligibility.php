@@ -15,6 +15,10 @@ class CertificateEligibility
             return null;
         }
 
+        if (! $kegiatan->tahunAngkatans()->where('tahun_daftar', $anggota->tahun_daftar)->exists()) {
+            return null;
+        }
+
         $minimum = (int) $kegiatan->minimum_sesi_terverifikasi;
         $type = match ($kegiatan->jenis_pelaksanaan) {
             Kegiatan::SATU_SESI => $minimum === 1 ? Sertifikat::SATU_SESI : null,

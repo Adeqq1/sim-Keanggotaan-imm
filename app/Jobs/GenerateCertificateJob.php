@@ -9,6 +9,7 @@ use App\Services\CertificateEligibility;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Bus\Batchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -16,7 +17,7 @@ use Throwable;
 #[DeleteWhenMissingModels]
 class GenerateCertificateJob implements ShouldBeUnique, ShouldQueue
 {
-    use Queueable;
+    use Batchable, Queueable;
 
     /**
      * Create a new job instance.

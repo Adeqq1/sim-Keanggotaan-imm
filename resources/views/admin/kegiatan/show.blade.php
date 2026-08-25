@@ -14,6 +14,7 @@
                 <span><i class="bi bi-geo-alt me-2"></i>{{ $kegiatan->lokasi }}</span>
             </div>
             <div class="lh-lg">{!! nl2br(e($kegiatan->deskripsi)) !!}</div>
+            <div class="mt-3 small text-muted"><i class="bi bi-people me-2"></i><strong>Angkatan yang berhak:</strong> {{ $kegiatan->tahunAngkatans->pluck('tahun_daftar')->implode(', ') ?: 'Belum ditentukan' }}</div>
         </div>
     </div>
 
