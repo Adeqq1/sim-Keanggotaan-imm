@@ -17,6 +17,66 @@ document.querySelectorAll('[data-auto-submit-sort]').forEach((form) => {
     });
 });
 
+document.querySelectorAll('[data-profile-field]').forEach((field) => {
+    const input = field.querySelector('input, textarea, select');
+    const editButton = field.querySelector('[data-profile-edit]');
+
+    if (!input || !editButton) return;
+
+    const initialValue = input.value;
+
+    editButton.addEventListener('click', () => {
+        const isEditing = !input.readOnly;
+
+        if (isEditing) {
+            input.value = initialValue;
+            input.readOnly = true;
+            field.classList.remove('is-editing');
+            editButton.textContent = 'Edit';
+            editButton.setAttribute('aria-label', `Edit ${input.labels?.[0]?.textContent || 'field'}`);
+            return;
+        }
+
+        input.readOnly = false;
+        field.classList.add('is-editing');
+        editButton.textContent = 'Batal';
+        editButton.setAttribute('aria-label', `Batalkan edit ${input.labels?.[0]?.textContent || 'field'}`);
+        input.focus();
+    });
+});
+
+document.querySelectorAll('[data-profile-photo-edit]').forEach((editButton) => {
+    const input = document.querySelector(`#${editButton.getAttribute('aria-controls')}`);
+    const avatar = editButton.closest('.profile-summary-avatar-wrap')?.querySelector('.profile-summary-avatar');
+    const originalAvatar = avatar?.innerHTML;
+
+    if (!input || !avatar) return;
+
+    editButton.addEventListener('click', () => {
+        if (!input.disabled) {
+            input.value = '';
+            input.disabled = true;
+            avatar.innerHTML = originalAvatar;
+            editButton.innerHTML = '<i class="bi bi-pencil"></i><span>Edit Foto</span>';
+            editButton.setAttribute('aria-label', 'Edit Foto Profil');
+            return;
+        }
+
+        input.disabled = false;
+        input.click();
+    });
+
+    input.addEventListener('change', () => {
+        const file = input.files?.[0];
+        if (!file) return;
+
+        const previewUrl = URL.createObjectURL(file);
+        avatar.innerHTML = `<img src="${previewUrl}" alt="Pratinjau foto profil" width="112" height="112">`;
+        editButton.innerHTML = '<i class="bi bi-x-lg"></i><span>Batal</span>';
+        editButton.setAttribute('aria-label', 'Batalkan edit Foto Profil');
+    });
+});
+
 // --- Preview Dokumen Modal ---
 document.addEventListener('shown.bs.modal', (event) => {
     if (event.target.id !== 'previewDocumentModal') return;
