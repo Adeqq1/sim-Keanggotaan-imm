@@ -20,9 +20,15 @@ class KegiatanController extends Controller
         $options = ['nama' => 'Nama', 'tanggal' => 'Tanggal Kegiatan', 'lokasi' => 'Lokasi', 'created' => 'Waktu Ditambahkan'];
         $sort = SortParams::resolve($request, array_keys($options), 'created');
         $columns = ['nama' => 'nama_kegiatan', 'tanggal' => 'tanggal_waktu', 'lokasi' => 'lokasi', 'created' => 'created_at'];
-        $kegiatans = Kegiatan::with('tahunAngkatans')->orderBy($columns[$sort['key']], $sort['direction'])->orderByDesc('id')->paginate(12)->withQueryString();
+        $baseQuery = Kegiatan::with('tahunAngkatans')
+            ->orderBy($columns[$sort['key']], $sort['direction'])
+            ->orderByDesc('id');
+        $upcomingKegiatans = (clone $baseQuery)->where('tanggal_waktu', '>', now())->paginate(6, ['*'], 'upcoming_page')->withQueryString();
+        $pastKegiatans = (clone $baseQuery)->where('tanggal_waktu', '<=', now())->paginate(6, ['*'], 'past_page')->withQueryString();
 
-        return view('admin.kegiatan.index', compact('kegiatans', 'options', 'sort'));
+        $allKegiatans = $upcomingKegiatans->getCollection()->concat($pastKegiatans->getCollection());
+
+        return view('admin.kegiatan.index', compact('upcomingKegiatans', 'pastKegiatans', 'allKegiatans', 'options', 'sort'));
     }
 
     public function create()
