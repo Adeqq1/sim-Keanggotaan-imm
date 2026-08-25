@@ -21,7 +21,7 @@
                     <label for="kegiatan_id" class="form-label fw-bold">
                         Kegiatan <span class="text-danger" aria-hidden="true">*</span>
                     </label>
-                    <select id="kegiatan_id" class="form-select @error('kegiatan_id') is-invalid @enderror" onchange="this.form.submit()" required>
+                    <select id="kegiatan_id" name="kegiatan_id" class="form-select @error('kegiatan_id') is-invalid @enderror" onchange="this.form.submit()" required>
                         <option value="">Pilih kegiatan</option>
                         @foreach($kegiatans as $kegiatan)
                             <option value="{{ $kegiatan->id }}" @selected((string) $selectedKegiatanId === (string) $kegiatan->id)>
