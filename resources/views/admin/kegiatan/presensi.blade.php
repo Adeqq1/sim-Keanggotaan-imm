@@ -10,6 +10,7 @@
     <div class="card p-3 mb-4 border-start border-primary border-4">
         <h6 class="fw-bold mb-1 text-primary">{{ $kegiatan->nama_kegiatan }}</h6>
         <p class="text-muted small mb-0"><i class="bi bi-calendar-event me-1"></i> Sesi {{ $sesiKegiatan->urutan }}: {{ $sesiKegiatan->nama_sesi }} · {{ $sesiKegiatan->mulai_pada->translatedFormat('d F Y, H:i') }}</p>
+        <p class="text-muted small mb-0"><i class="bi bi-people me-1"></i> Target angkatan: {{ $kegiatan->tahunAngkatans->pluck('tahun_daftar')->implode(', ') ?: 'Belum ditentukan' }}</p>
     </div>
     <x-sort-control :action="route('admin.presensi.sesi.show', [$kegiatan, $sesiKegiatan])" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" />
 

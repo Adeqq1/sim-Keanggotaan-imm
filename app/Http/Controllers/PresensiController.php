@@ -44,9 +44,13 @@ class PresensiController extends Controller
 
     public function showSession(Request $request, Kegiatan $kegiatan, \App\Models\SesiKegiatan $sesiKegiatan)
     {
+        $kegiatan->load('tahunAngkatans');
         $options = ['nama' => 'Nama', 'nia' => 'NIA'];
         $sort = SortParams::resolve($request, array_keys($options), 'nama', 'asc');
+        $targetYears = $kegiatan->tahunAngkatans()->pluck('tahun_daftar');
         $anggotas = Anggota::where('status_aktif', true)
+            ->whereIn('tahun_daftar', $targetYears)
+            ->whereRelation('user', 'role', 'kader')
             ->orderBy(['nama' => 'nama_lengkap', 'nia' => 'nia'][$sort['key']], $sort['direction'])->orderByDesc('id')->get();
         $presensis = $sesiKegiatan->presensis()->with('pemeriksa')->get();
         $canManagePresensi = auth()->user()->role === 'instruktur';

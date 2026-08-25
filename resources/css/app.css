@@ -765,6 +765,47 @@ canvas {
     width: 100%;
 }
 
+.activity-year-option {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    background: #fff;
+    color: #343a40;
+    cursor: pointer;
+    font-weight: 500;
+    transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.activity-year-option:hover {
+    border-color: rgba(128, 0, 0, 0.45);
+    background: #fdf8f8;
+}
+
+.activity-year-option:focus-within {
+    border-color: rgba(128, 0, 0, 0.55);
+    box-shadow: 0 0 0 0.2rem rgba(128, 0, 0, 0.1);
+}
+
+.activity-year-option__input {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex: 0 0 1.1rem;
+    margin: 0;
+    accent-color: var(--bs-primary);
+    cursor: pointer;
+}
+
+.activity-year-option:has(.activity-year-option__input:checked) {
+    border-color: var(--bs-primary);
+    background: rgba(128, 0, 0, 0.07);
+    color: var(--bs-primary);
+}
+
 .laporan-page-layout {
     display: block;
 }

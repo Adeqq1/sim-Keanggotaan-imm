@@ -31,6 +31,18 @@
                 </div>
 
                 <div class="mb-3">
+                    <label class="form-label fw-bold">Angkatan yang Berhak Mengikuti <span class="text-danger">*</span></label>
+                    <div class="row g-2">
+                        @for($tahun = 2016; $tahun <= now()->year; $tahun++)
+                            <div class="col-6 col-sm-4 col-md-3"><label class="activity-year-option"><input class="activity-year-option__input" type="checkbox" name="tahun_angkatan[]" value="{{ $tahun }}" @checked(in_array($tahun, old('tahun_angkatan', [])))><span>{{ $tahun }}</span></label></div>
+                        @endfor
+                    </div>
+                    <small class="text-muted">Hanya anggota aktif dari tahun yang dipilih yang muncul pada presensi.</small>
+                    @error('tahun_angkatan')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    @error('tahun_angkatan.*')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="mb-3">
                     <label class="form-label fw-bold">Lokasi <span class="text-danger">*</span></label>
                     <input type="text" name="lokasi" class="form-control @error('lokasi') is-invalid @enderror" value="{{ old('lokasi') }}" placeholder="Contoh: Aula Gedung A" required>
                     @error('lokasi')

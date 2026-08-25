@@ -7,6 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Models\Kegiatan;
 use App\Models\SesiKegiatan;
+use App\Models\Anggota;
 
 class PresensiRequest extends FormRequest
 {
@@ -43,5 +44,19 @@ class PresensiRequest extends FormRequest
             ],
             'presensi.*.status_kehadiran' => ['required', 'in:hadir,izin,alfa'],
         ];
+    }
+
+    public function after(): array
+    {
+        return [function ($validator): void {
+            $kegiatan = $this->route('kegiatan');
+            $targetYears = $kegiatan instanceof Kegiatan ? $kegiatan->tahunAngkatans()->pluck('tahun_daftar') : collect();
+            foreach ((array) $this->input('presensi', []) as $index => $data) {
+                $anggota = isset($data['anggota_id']) ? Anggota::find($data['anggota_id']) : null;
+                if ($anggota && ! $targetYears->contains((int) $anggota->tahun_daftar)) {
+                    $validator->errors()->add("presensi.{$index}.anggota_id", 'Anggota tidak termasuk target angkatan kegiatan.');
+                }
+            }
+        }];
     }
 }

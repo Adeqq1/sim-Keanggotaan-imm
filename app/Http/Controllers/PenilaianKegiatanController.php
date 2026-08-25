@@ -21,6 +21,7 @@ class PenilaianKegiatanController extends Controller
         $anggotas = Anggota::query()
             ->whereIn('id', $eligibleIds)
             ->where('status_aktif', true)
+            ->whereIn('tahun_daftar', $kegiatan->tahunAngkatans()->pluck('tahun_daftar'))
             ->whereRelation('user', 'role', 'kader')
             ->with('user')
             ->with(['penilaianKegiatans' => fn ($query) => $query->where('kegiatan_id', $kegiatan->id)])

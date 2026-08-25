@@ -32,6 +32,8 @@ class KegiatanRequest extends FormRequest
             'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
             'jenis_pelaksanaan' => ['required', Rule::in([Kegiatan::SATU_SESI, Kegiatan::MULTI_SESI])],
             'minimum_sesi_terverifikasi' => ['required', 'integer', 'min:1', 'max:255'],
+            'tahun_angkatan' => ['required', 'array', 'min:1'],
+            'tahun_angkatan.*' => ['required', 'integer', 'distinct', 'between:2016,'.now()->year],
         ];
     }
 

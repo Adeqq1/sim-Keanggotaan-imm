@@ -86,6 +86,13 @@ class KegiatanFactory extends Factory
         ];
     }
 
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Kegiatan $kegiatan): void {
+            $kegiatan->tahunAngkatans()->firstOrCreate(['tahun_daftar' => now()->year]);
+        });
+    }
+
     public function withDefaultSession(): static
     {
         return $this->afterCreating(function (Kegiatan $kegiatan): void {

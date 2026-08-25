@@ -26,6 +26,9 @@ test('activity thumbnails stay isolated and are cleaned up on replacement and de
         'deskripsi' => 'Deskripsi kegiatan',
         'tanggal_waktu' => now()->addDays(3)->format('Y-m-d H:i'),
         'lokasi' => 'Auditorium Kampus',
+        'tahun_angkatan' => [now()->year],
+        'jenis_pelaksanaan' => 'satu_sesi',
+        'minimum_sesi_terverifikasi' => 1,
         'thumbnail' => UploadedFile::fake()->image('banner.jpg'),
     ]);
 
@@ -41,6 +44,9 @@ test('activity thumbnails stay isolated and are cleaned up on replacement and de
         'deskripsi' => $kegiatan->deskripsi,
         'tanggal_waktu' => $kegiatan->tanggal_waktu->format('Y-m-d H:i'),
         'lokasi' => $kegiatan->lokasi,
+        'tahun_angkatan' => [$kegiatan->tahunAngkatans()->value('tahun_daftar')],
+        'jenis_pelaksanaan' => 'satu_sesi',
+        'minimum_sesi_terverifikasi' => 1,
         'thumbnail' => UploadedFile::fake()->image('replacement.jpg'),
     ])->assertRedirect(route('admin.kegiatan.index'));
 

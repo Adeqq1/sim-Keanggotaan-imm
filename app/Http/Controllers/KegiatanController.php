@@ -20,7 +20,7 @@ class KegiatanController extends Controller
         $options = ['nama' => 'Nama', 'tanggal' => 'Tanggal Kegiatan', 'lokasi' => 'Lokasi', 'created' => 'Waktu Ditambahkan'];
         $sort = SortParams::resolve($request, array_keys($options), 'created');
         $columns = ['nama' => 'nama_kegiatan', 'tanggal' => 'tanggal_waktu', 'lokasi' => 'lokasi', 'created' => 'created_at'];
-        $kegiatans = Kegiatan::orderBy($columns[$sort['key']], $sort['direction'])->orderByDesc('id')->paginate(12)->withQueryString();
+        $kegiatans = Kegiatan::with('tahunAngkatans')->orderBy($columns[$sort['key']], $sort['direction'])->orderByDesc('id')->paginate(12)->withQueryString();
 
         return view('admin.kegiatan.index', compact('kegiatans', 'options', 'sort'));
     }
@@ -32,6 +32,7 @@ class KegiatanController extends Controller
 
     public function show(Kegiatan $kegiatan)
     {
+        $kegiatan->load('tahunAngkatans');
         $kegiatan->load('laporanKegiatan')->loadCount([
             'presensi as presensi_count' => fn ($query) => $query->select(new Expression('count(distinct anggota_id)')),
             'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir')->select(new Expression('count(distinct anggota_id)')),
@@ -45,6 +46,8 @@ class KegiatanController extends Controller
     public function store(KegiatanRequest $request)
     {
         $data = $request->validated();
+        $tahunAngkatan = $data['tahun_angkatan'];
+        unset($data['tahun_angkatan']);
         $newThumbnailPath = null;
 
         if ($request->hasFile('thumbnail')) {
@@ -53,8 +56,9 @@ class KegiatanController extends Controller
         }
 
         try {
-            DB::transaction(function () use ($data, &$kegiatan): void {
+            DB::transaction(function () use ($data, $tahunAngkatan, &$kegiatan): void {
                 $kegiatan = Kegiatan::create($data);
+                $kegiatan->tahunAngkatans()->createMany(collect($tahunAngkatan)->map(fn ($tahun) => ['tahun_daftar' => $tahun])->all());
                 $kegiatan->sesiKegiatans()->create([
                     'urutan' => 1,
                     'nama_sesi' => 'Sesi 1',
@@ -74,12 +78,19 @@ class KegiatanController extends Controller
 
     public function edit(Kegiatan $kegiatan)
     {
+        $kegiatan->load('tahunAngkatans');
         return view('admin.kegiatan.edit', compact('kegiatan'));
     }
 
     public function update(KegiatanRequest $request, Kegiatan $kegiatan)
     {
         $data = $request->validated();
+        $tahunAngkatan = collect($data['tahun_angkatan'])->map(fn ($tahun) => (int) $tahun)->sort()->values()->all();
+        unset($data['tahun_angkatan']);
+        $currentTahunAngkatan = $kegiatan->tahunAngkatans()->pluck('tahun_daftar')->map(fn ($tahun) => (int) $tahun)->sort()->values()->all();
+        if ($kegiatan->presensi()->exists() && $currentTahunAngkatan !== $tahunAngkatan) {
+            return back()->withErrors(['tahun_angkatan' => 'Target angkatan tidak dapat diubah setelah presensi tercatat.'])->withInput();
+        }
         if ($kegiatan->presensi()->exists() && ($kegiatan->jenis_pelaksanaan !== $data['jenis_pelaksanaan'] || $kegiatan->minimum_sesi_terverifikasi !== (int) $data['minimum_sesi_terverifikasi'])) {
             return back()->withErrors(['jenis_pelaksanaan' => 'Kebijakan kegiatan tidak dapat diubah setelah presensi tercatat.'])->withInput();
         }
@@ -92,8 +103,10 @@ class KegiatanController extends Controller
         }
 
         try {
-            DB::transaction(function () use ($kegiatan, $data) {
+            DB::transaction(function () use ($kegiatan, $data, $tahunAngkatan) {
                 $kegiatan->update($data);
+                $kegiatan->tahunAngkatans()->delete();
+                $kegiatan->tahunAngkatans()->createMany(collect($tahunAngkatan)->map(fn ($tahun) => ['tahun_daftar' => $tahun])->all());
             });
         } catch (Throwable $exception) {
             $this->deleteFile('public', $newThumbnailPath, 'thumbnail kegiatan baru');

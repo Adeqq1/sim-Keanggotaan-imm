@@ -127,6 +127,9 @@ test('instruktur can access kegiatan management and store new kegiatan with thum
         'deskripsi' => 'Deskripsi latihan kader',
         'tanggal_waktu' => '2026-06-10 10:00:00',
         'lokasi' => 'Aula IMM',
+        'tahun_angkatan' => [now()->year],
+        'jenis_pelaksanaan' => 'satu_sesi',
+        'minimum_sesi_terverifikasi' => 1,
         'thumbnail' => $file,
     ]);
 
@@ -137,6 +140,34 @@ test('instruktur can access kegiatan management and store new kegiatan with thum
     expect($kegiatan->thumbnail)->not->toBeNull();
 
     Storage::disk('public')->assertExists($kegiatan->thumbnail);
+});
+
+test('kegiatan requires at least one target member year and stores multiple years', function () {
+    $instruktur = User::factory()->instruktur()->create();
+
+    $this->actingAs($instruktur)
+        ->post(route('admin.kegiatan.store'), [
+            'nama_kegiatan' => 'Tanpa Target Angkatan',
+            'tanggal_waktu' => '2026-06-10 10:00:00',
+            'lokasi' => 'Aula IMM',
+            'jenis_pelaksanaan' => 'satu_sesi',
+            'minimum_sesi_terverifikasi' => 1,
+        ])
+        ->assertSessionHasErrors('tahun_angkatan');
+
+    $this->actingAs($instruktur)
+        ->post(route('admin.kegiatan.store'), [
+            'nama_kegiatan' => 'Target Dua Angkatan',
+            'tanggal_waktu' => '2026-06-10 10:00:00',
+            'lokasi' => 'Aula IMM',
+            'jenis_pelaksanaan' => 'satu_sesi',
+            'minimum_sesi_terverifikasi' => 1,
+            'tahun_angkatan' => [2025, 2026],
+        ])
+        ->assertRedirect(route('admin.kegiatan.index'));
+
+    $kegiatan = Kegiatan::where('nama_kegiatan', 'Target Dua Angkatan')->firstOrFail();
+    expect($kegiatan->tahunAngkatans()->pluck('tahun_daftar')->all())->toBe([2025, 2026]);
 });
 
 test('instruktur can update kegiatan and replace thumbnail', function () {
@@ -158,6 +189,9 @@ test('instruktur can update kegiatan and replace thumbnail', function () {
         'nama_kegiatan' => 'Latihan Kader Updated',
         'tanggal_waktu' => '2026-06-12 10:00:00',
         'lokasi' => 'Aula IMM Baru',
+        'tahun_angkatan' => [now()->year],
+        'jenis_pelaksanaan' => 'satu_sesi',
+        'minimum_sesi_terverifikasi' => 1,
         'thumbnail' => $newFile,
     ]);
 
@@ -194,12 +228,12 @@ test('instruktur can delete kegiatan and its thumbnail', function () {
 
 test('instruktur can view and store presensi data immediately', function () {
     $instruktur = User::factory()->instruktur()->create();
-    $kegiatan = Kegiatan::factory()->create();
-    $anggota1 = Anggota::factory()->create();
-    $anggota2 = Anggota::factory()->create();
+    $kegiatan = Kegiatan::factory()->withDefaultSession()->create();
+    $anggota1 = Anggota::factory()->create(['tahun_daftar' => now()->year]);
+    $anggota2 = Anggota::factory()->create(['tahun_daftar' => now()->year]);
 
     $this->actingAs($instruktur)
-        ->get(route('admin.presensi.show', $kegiatan))
+        ->get(route('admin.presensi.sesi.show', [$kegiatan, $kegiatan->sesiKegiatans()->first()]))
         ->assertSuccessful()
         ->assertSee('Simpan Presensi')
         ->assertSee('name="presensi['.$anggota1->id.'][status_kehadiran]"', false)
@@ -234,6 +268,30 @@ test('instruktur can view and store presensi data immediately', function () {
         ->and($presensiIzin->status_kehadiran)->toBe('izin')
         ->and($presensiIzin->waktu_hadir)->toBeNull();
     expect(Sertifikat::where('kegiatan_id', $kegiatan->id)->count())->toBe(0);
+});
+
+test('presensi is limited to the activity target member years', function () {
+    $instruktur = User::factory()->instruktur()->create();
+    $kegiatan = Kegiatan::factory()->withDefaultSession()->create();
+    $target = Anggota::factory()->create(['tahun_daftar' => now()->year]);
+    $other = Anggota::factory()->create(['tahun_daftar' => now()->year - 1]);
+    $sesi = $kegiatan->sesiKegiatans()->first();
+
+    $this->actingAs($instruktur)
+        ->get(route('admin.presensi.sesi.show', [$kegiatan, $sesi]))
+        ->assertSee($target->nama_lengkap)
+        ->assertDontSee($other->nama_lengkap);
+
+    $this->actingAs($instruktur)
+        ->post(route('admin.presensi.store', [$kegiatan, $sesi]), [
+            'presensi' => [[
+                'anggota_id' => $other->id,
+                'status_kehadiran' => 'hadir',
+            ]],
+        ])
+        ->assertSessionHasErrors('presensi.0.anggota_id');
+
+    expect(Presensi::where('kegiatan_id', $kegiatan->id)->exists())->toBeFalse();
 });
 
 test('repeated presensi submissions do not create duplicates', function () {

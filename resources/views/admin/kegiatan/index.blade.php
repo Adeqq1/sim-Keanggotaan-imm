@@ -28,6 +28,7 @@
                 <div class="flex-grow-1 min-w-0">
                     <h6 class="fw-bold mb-1 text-break">{{ $kegiatan->nama_kegiatan }}</h6>
                     <small class="text-muted d-block text-break"><i class="bi bi-geo-alt me-1"></i> {{ $kegiatan->lokasi }}</small>
+                    <small class="text-muted d-block text-break"><i class="bi bi-people me-1"></i> Angkatan: {{ $kegiatan->tahunAngkatans->pluck('tahun_daftar')->implode(', ') ?: 'Belum ditentukan' }}</small>
                 </div>
                 <div class="dropdown">
                     <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown" aria-label="Aksi untuk {{ $kegiatan->nama_kegiatan }}">
