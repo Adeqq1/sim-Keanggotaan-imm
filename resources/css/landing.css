@@ -293,3 +293,354 @@ html {
     color: #fff;
     border-color: #fff;
 }
+
+/* --------------------------------------------------------------------------
+   Mobile landing experience (kept isolated from desktop styles)
+   -------------------------------------------------------------------------- */
+@media (max-width: 991.98px) {
+    .public-site {
+        padding-bottom: 0;
+        background: #f8fafc;
+    }
+
+    .public-site .navbar-imm {
+        min-height: 64px;
+    }
+
+    .public-site .navbar-imm .container {
+        padding-inline: 1rem;
+    }
+
+    .public-site .navbar-brand {
+        gap: 0.6rem !important;
+        max-width: calc(100% - 56px);
+    }
+
+    .public-site .navbar-logo-img {
+        width: 34px;
+        height: 42px;
+        object-fit: contain;
+    }
+
+    .public-site .navbar-brand-text {
+        font-size: 1rem;
+        letter-spacing: -0.02em;
+    }
+
+    .public-site .navbar-toggler {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+    }
+
+    .public-site .navbar-collapse {
+        margin: 0.75rem 0 0.25rem;
+        padding: 0.75rem;
+        border: 1px solid rgba(128, 0, 0, 0.08);
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .public-site .navbar-nav {
+        gap: 0.2rem !important;
+    }
+
+    .public-site .navbar-imm .nav-link {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        padding-inline: 0.75rem !important;
+        border-radius: 8px;
+    }
+
+    .public-site .navbar-imm .nav-link:active,
+    .public-site .navbar-imm .nav-link:focus {
+        background: #fef7f7;
+    }
+
+    .public-site .navbar-collapse > .d-flex {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem !important;
+        margin-top: 0.75rem !important;
+        padding-top: 0.75rem;
+        border-top: 1px solid #eef2f7;
+    }
+
+    .public-site .navbar-collapse > .d-flex .btn {
+        min-height: 44px;
+        padding-inline: 0.65rem !important;
+    }
+
+    .public-site .hero-section {
+        min-height: auto;
+        background-position: 62% center;
+    }
+
+    .public-site .hero-section .container {
+        padding-top: 3.75rem !important;
+        padding-bottom: 3.5rem !important;
+    }
+
+    .public-site .hero-section .col-lg-7 {
+        width: 100%;
+    }
+
+    .public-site .hero-badge {
+        max-width: 100%;
+        padding-inline: 0.75rem !important;
+        font-size: 0.72rem !important;
+        line-height: 1.5;
+    }
+
+    .public-site .hero-section h1 {
+        max-width: 22rem;
+        margin-bottom: 1.25rem !important;
+        font-size: clamp(2rem, 9vw, 2.7rem);
+        line-height: 1.12;
+        letter-spacing: -0.04em;
+    }
+
+    .public-site .hero-section .lead {
+        max-width: 31rem !important;
+        margin-bottom: 1.75rem !important;
+        font-size: 0.98rem;
+        line-height: 1.65 !important;
+    }
+
+    .public-site .hero-section .d-flex.flex-wrap {
+        display: grid !important;
+        gap: 0.7rem !important;
+    }
+
+    .public-site .hero-section .d-flex.flex-wrap .btn {
+        width: 100%;
+        min-height: 50px;
+        padding: 0.75rem 1rem !important;
+        font-size: 0.98rem;
+    }
+
+    .public-site .stats-section {
+        background: var(--imm-primary);
+        padding-block: 2rem !important;
+    }
+
+    .public-site .stats-section .container {
+        padding-inline: 1rem;
+    }
+
+    .public-site .stats-section .row {
+        --bs-gutter-x: 0.7rem;
+        --bs-gutter-y: 0.7rem;
+    }
+
+    .public-site .stat-card {
+        height: 100%;
+        padding: 0.85rem 0.65rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-left: 0;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.07);
+    }
+
+    .public-site .stat-card .display-5 {
+        font-size: 1.7rem;
+    }
+
+    .public-site .stat-card .mt-1 {
+        min-height: 2.25rem;
+        font-size: 0.76rem;
+        line-height: 1.35;
+    }
+
+    .public-site .section-padding {
+        padding-top: 3.5rem;
+        padding-bottom: 3.5rem;
+    }
+
+    .public-site .section-padding .container {
+        padding-inline: 1rem;
+    }
+
+    .public-site .section-label {
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+    }
+
+    .public-site .section-title {
+        font-size: clamp(1.7rem, 7vw, 2.15rem);
+        letter-spacing: -0.035em;
+    }
+
+    .public-site #tentang .row.align-items-center {
+        --bs-gutter-y: 2rem;
+    }
+
+    .public-site #tentang img {
+        height: 260px !important;
+        border-radius: 14px !important;
+    }
+
+    .public-site .about-year-badge {
+        max-width: 175px;
+        margin: 0.75rem;
+        padding: 0.7rem 0.8rem;
+        border-radius: 10px;
+    }
+
+    .public-site .about-year-badge .display-6 {
+        font-size: 1.7rem;
+    }
+
+    .public-site #tentang p {
+        font-size: 0.93rem;
+        line-height: 1.7 !important;
+    }
+
+    .public-site #tentang .row.g-3 {
+        --bs-gutter-x: 0.7rem;
+        --bs-gutter-y: 0.8rem;
+    }
+
+    .public-site .pillar-icon-box {
+        padding: 0.45rem;
+        border-radius: 7px;
+    }
+
+    .public-site #kegiatan .text-center.mb-5,
+    .public-site #visi-misi .text-center.mb-5 {
+        margin-bottom: 2rem !important;
+    }
+
+    .public-site #kegiatan .row.g-4,
+    .public-site #visi-misi .row.g-4 {
+        --bs-gutter-x: 0.9rem;
+        --bs-gutter-y: 1rem;
+    }
+
+    .public-site #kegiatan .kegiatan-mobile-scroll {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 0.25rem 1rem 1rem;
+        margin-inline: -1rem;
+        scroll-padding-inline: 1rem;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+    }
+
+    .public-site #kegiatan .kegiatan-mobile-scroll::-webkit-scrollbar {
+        display: none;
+    }
+
+    .public-site #kegiatan .kegiatan-mobile-item {
+        flex: 0 0 84%;
+        width: 84%;
+        scroll-snap-align: start;
+    }
+
+    .public-site .program-card {
+        border-radius: 13px;
+    }
+
+    .public-site .program-card .card-img-top {
+        height: 168px !important;
+    }
+
+    .public-site .program-card .card-body {
+        padding: 1.1rem !important;
+    }
+
+    .public-site .program-card h3 {
+        font-size: 1.05rem;
+    }
+
+    .public-site .program-card p {
+        line-height: 1.6 !important;
+    }
+
+    .public-site .visi-card,
+    .public-site .misi-card {
+        padding: 1.25rem !important;
+        border-radius: 14px;
+    }
+
+    .public-site .visi-card .p-3,
+    .public-site .misi-card .p-3 {
+        padding: 0.7rem !important;
+    }
+
+    .public-site .visi-card p,
+    .public-site .misi-card p {
+        font-size: 0.92rem !important;
+        line-height: 1.65 !important;
+    }
+
+    .public-site .misi-item {
+        padding-left: 0.75rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .public-site .cta-section {
+        background-position: 58% center;
+    }
+
+    .public-site .cta-section h2 {
+        font-size: clamp(1.8rem, 8vw, 2.3rem);
+        line-height: 1.15;
+    }
+
+    .public-site .cta-section .lead {
+        margin-bottom: 1.75rem !important;
+        font-size: 0.95rem;
+        line-height: 1.65;
+    }
+
+    .public-site .cta-section .d-flex.flex-wrap {
+        display: grid !important;
+        gap: 0.7rem !important;
+    }
+
+    .public-site .cta-section .btn {
+        width: 100%;
+        min-height: 50px;
+        padding: 0.75rem 1rem !important;
+        font-size: 0.95rem;
+    }
+
+    .public-site .footer-imm {
+        padding-top: 3rem !important;
+        padding-bottom: 2rem !important;
+    }
+
+    .public-site .footer-imm .row.g-4 {
+        --bs-gutter-y: 2rem;
+        margin-bottom: 2.25rem !important;
+    }
+
+    .public-site .footer-imm .col-6 {
+        width: 50%;
+    }
+
+    .public-site .footer-imm .col-lg-4,
+    .public-site .footer-imm .col-lg-3 {
+        width: 100%;
+    }
+
+    .public-site .footer-imm hr {
+        margin-block: 1.25rem;
+    }
+
+    .public-site .footer-imm > .container > .d-flex:last-child {
+        align-items: flex-start !important;
+    }
+
+    .public-site .footer-imm > .container > .d-flex:last-child p {
+        font-size: 0.72rem;
+        line-height: 1.5;
+    }
+}

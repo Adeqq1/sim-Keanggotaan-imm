@@ -67,7 +67,7 @@
     </script>
     @endverbatim
 </head>
-<body style="font-family:'Inter',sans-serif;">
+<body class="public-site" style="font-family:'Inter',sans-serif;">
 
     @include('public.partials._navbar')
 
