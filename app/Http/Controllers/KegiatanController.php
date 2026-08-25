@@ -35,8 +35,8 @@ class KegiatanController extends Controller
         $kegiatan->load('laporanKegiatan')->loadCount([
             'presensi as presensi_count' => fn ($query) => $query->select(new Expression('count(distinct anggota_id)')),
             'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir')->select(new Expression('count(distinct anggota_id)')),
-            'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin')->select(new Expression('count(distinct anggota_id)')),
-            'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa')->select(new Expression('count(distinct anggota_id)')),
+            'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin')->whereNotExists(fn ($subquery) => $subquery->from('presensi as hadir')->whereColumn('hadir.kegiatan_id', 'presensi.kegiatan_id')->whereColumn('hadir.anggota_id', 'presensi.anggota_id')->where('hadir.status_kehadiran', 'hadir'))->select(new Expression('count(distinct anggota_id)')),
+            'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa')->whereNotExists(fn ($subquery) => $subquery->from('presensi as prior')->whereColumn('prior.kegiatan_id', 'presensi.kegiatan_id')->whereColumn('prior.anggota_id', 'presensi.anggota_id')->whereIn('prior.status_kehadiran', ['hadir', 'izin']))->select(new Expression('count(distinct anggota_id)')),
         ]);
 
         return view('admin.kegiatan.show', compact('kegiatan'));

@@ -46,6 +46,10 @@ class GenerateCertificateJob implements ShouldBeUnique, ShouldQueue
             $presensi = Presensi::with(['kegiatan', 'anggota'])->find($this->presensi->getKey());
 
             if (! $presensi || ! $presensi->anggota || ! app(VerifiedAttendance::class)->meetsRequirement($presensi->kegiatan, $presensi->anggota)) {
+                Log::warning('Certificate generation skipped because attendance is no longer eligible.', [
+                    'kegiatan_id' => $presensi?->kegiatan_id ?? $this->presensi?->kegiatan_id,
+                    'anggota_id' => $presensi?->anggota_id ?? $this->presensi?->anggota_id,
+                ]);
                 return;
             }
 
@@ -58,6 +62,11 @@ class GenerateCertificateJob implements ShouldBeUnique, ShouldQueue
 
         if ($kegiatan && $anggota && app(VerifiedAttendance::class)->meetsRequirement($kegiatan, $anggota)) {
             SertifikatController::generateCertificateFile($kegiatan, $anggota, $this->instruktur);
+        } elseif ($kegiatan && $anggota) {
+            Log::warning('Certificate generation skipped because attendance is no longer eligible.', [
+                'kegiatan_id' => $kegiatan->id,
+                'anggota_id' => $anggota->id,
+            ]);
         }
     }
 

@@ -22,8 +22,8 @@ class PresensiController extends Controller
             ->withCount([
                 'presensi as presensi_count' => fn ($query) => $query->select(new Expression('count(distinct anggota_id)')),
                 'presensi as hadir_count' => fn ($query) => $query->where('status_kehadiran', 'hadir')->select(new Expression('count(distinct anggota_id)')),
-                'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin')->select(new Expression('count(distinct anggota_id)')),
-                'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa')->select(new Expression('count(distinct anggota_id)')),
+                'presensi as izin_count' => fn ($query) => $query->where('status_kehadiran', 'izin')->whereNotExists(fn ($subquery) => $subquery->from('presensi as hadir')->whereColumn('hadir.kegiatan_id', 'presensi.kegiatan_id')->whereColumn('hadir.anggota_id', 'presensi.anggota_id')->where('hadir.status_kehadiran', 'hadir'))->select(new Expression('count(distinct anggota_id)')),
+                'presensi as alfa_count' => fn ($query) => $query->where('status_kehadiran', 'alfa')->whereNotExists(fn ($subquery) => $subquery->from('presensi as prior')->whereColumn('prior.kegiatan_id', 'presensi.kegiatan_id')->whereColumn('prior.anggota_id', 'presensi.anggota_id')->whereIn('prior.status_kehadiran', ['hadir', 'izin']))->select(new Expression('count(distinct anggota_id)')),
             ])
             ->orderBy(['nama' => 'nama_kegiatan', 'tanggal' => 'tanggal_waktu', 'lokasi' => 'lokasi', 'peserta' => 'presensi_count', 'hadir' => 'hadir_count', 'izin' => 'izin_count', 'alfa' => 'alfa_count'][$sort['key']], $sort['direction'])
             ->orderByDesc('kegiatan.id')->paginate(12)->withQueryString();

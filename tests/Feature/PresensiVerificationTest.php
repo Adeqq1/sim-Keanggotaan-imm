@@ -58,3 +58,23 @@ test('admin can read but cannot record or verify attendance', function () {
         ->post(route('admin.presensi.store', [$kegiatan->id, $sesi->id]), ['presensi' => [['anggota_id' => $anggota->id, 'status_kehadiran' => 'hadir']]])
         ->assertForbidden();
 });
+
+test('legacy present attendance remains eligible without a fake verifier', function () {
+    $kegiatan = Kegiatan::factory()->withDefaultSession()->create([
+        'jenis_pelaksanaan' => Kegiatan::SATU_SESI,
+        'minimum_sesi_terverifikasi' => 1,
+    ]);
+    $anggota = Anggota::factory()->create();
+    $presensi = Presensi::factory()->hadir()->create([
+        'kegiatan_id' => $kegiatan->id,
+        'sesi_kegiatan_id' => $kegiatan->sesiKegiatans()->first()->id,
+        'anggota_id' => $anggota->id,
+        'status_verifikasi' => 'legacy',
+        'pemeriksa_id' => null,
+        'diperiksa_pada' => null,
+    ]);
+
+    expect(app(VerifiedAttendance::class)->meetsRequirement($kegiatan, $anggota))->toBeTrue()
+        ->and($presensi->pemeriksa_id)->toBeNull()
+        ->and($presensi->diperiksa_pada)->toBeNull();
+});

@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             'nama_lengkap' => $kader->name,
         ]));
 
-        $kegiatans = Kegiatan::factory()->past()->count(3)->create();
+        $kegiatans = Kegiatan::factory()->past()->count(3)->withDefaultSession()->create();
 
         Pendaftaran::factory()->count(3)->create();
         Pendaftaran::factory()->approved()->create([

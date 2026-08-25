@@ -42,9 +42,19 @@ class VerifiedAttendance
 
     public function eligibleKegiatanIds(Anggota $anggota): Collection
     {
-        return collect(Kegiatan::query()->get()->filter(
-            fn (Kegiatan $kegiatan): bool => $this->meetsRequirement($kegiatan, $anggota)
-        )->modelKeys());
+        return Presensi::query()
+            ->terverifikasi()
+            ->join('kegiatan', 'kegiatan.id', '=', 'presensi.kegiatan_id')
+            ->join('sesi_kegiatan', 'sesi_kegiatan.id', '=', 'presensi.sesi_kegiatan_id')
+            ->where('presensi.anggota_id', $anggota->id)
+            ->whereIn('kegiatan.jenis_pelaksanaan', [Kegiatan::SATU_SESI, Kegiatan::MULTI_SESI])
+            ->whereColumn('sesi_kegiatan.kegiatan_id', 'kegiatan.id')
+            ->whereNotNull('kegiatan.minimum_sesi_terverifikasi')
+            ->select('presensi.kegiatan_id')
+            ->selectRaw('COUNT(DISTINCT presensi.sesi_kegiatan_id) as verified_sessions')
+            ->groupBy('presensi.kegiatan_id', 'kegiatan.minimum_sesi_terverifikasi')
+            ->havingRaw('COUNT(DISTINCT presensi.sesi_kegiatan_id) >= MAX(kegiatan.minimum_sesi_terverifikasi)')
+            ->pluck('presensi.kegiatan_id');
     }
 
     public function countEligibleActivities(Anggota $anggota): int

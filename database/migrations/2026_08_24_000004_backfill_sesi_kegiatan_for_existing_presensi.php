@@ -25,11 +25,6 @@ return new class extends Migration
                     'diperiksa_pada' => null,
                 ]);
 
-                DB::table('kegiatan')->where('id', $kegiatan->id)->update([
-                    'jenis_pelaksanaan' => 'satu_sesi',
-                    'minimum_sesi_terverifikasi' => 1,
-                    'updated_at' => now(),
-                ]);
             }
         });
     }
