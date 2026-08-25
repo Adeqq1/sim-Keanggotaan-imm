@@ -36,6 +36,24 @@ test('admin anggota sorting preserves filters and pagination query strings', fun
         ->assertSee('name="direction"', false)->assertSee('value="asc"', false);
 });
 
+test('admin anggota dapat mengurutkan berdasarkan komisariat', function () {
+    $admin = User::factory()->admin()->create();
+    Anggota::factory()->create(['nama_lengkap' => 'Tanpa Komisariat', 'komisariat_id' => null]);
+    Anggota::factory()->create(['nama_lengkap' => 'Ahmad Komisariat', 'komisariat_id' => 'ahmad-dahlan']);
+    Anggota::factory()->create(['nama_lengkap' => 'Buya Komisariat', 'komisariat_id' => 'buya-hamka']);
+
+    $this->actingAs($admin)
+        ->get(route('admin.anggota.index', ['sort' => 'komisariat', 'direction' => 'asc']))
+        ->assertSuccessful()
+        ->assertSee('<option value="komisariat" selected>Komisariat</option>', false)
+        ->assertSeeInOrder(['Tanpa Komisariat', 'Ahmad Komisariat', 'Buya Komisariat']);
+
+    $this->actingAs($admin)
+        ->get(route('admin.anggota.index', ['sort' => 'komisariat', 'direction' => 'desc']))
+        ->assertSuccessful()
+        ->assertSeeInOrder(['Buya Komisariat', 'Ahmad Komisariat', 'Tanpa Komisariat']);
+});
+
 test('member and archive filters preserve the selected sorting', function () {
     $admin = User::factory()->admin()->create();
     Anggota::factory()->create(['nama_lengkap' => 'Zeta Filter']);

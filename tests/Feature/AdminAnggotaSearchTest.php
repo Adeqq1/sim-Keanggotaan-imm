@@ -10,7 +10,7 @@ describe('Admin Member Search', function () {
     test('admin dapat mencari anggota berdasarkan nama lengkap', function () {
         $admin = User::factory()->admin()->create();
         Anggota::factory()->create([
-            'nama_lengkap' => 'Ahmad Dahlan',
+            'nama_lengkap' => 'Anggota Ahmad',
             'nia' => '24260001',
         ]);
         Anggota::factory()->create([
@@ -19,17 +19,17 @@ describe('Admin Member Search', function () {
         ]);
 
         $response = $this->actingAs($admin)
-            ->get(route('admin.anggota.index', ['search' => 'Ahmad']));
+            ->get(route('admin.anggota.index', ['search' => 'Anggota Ahmad']));
 
         $response->assertSuccessful();
-        $response->assertSee('Ahmad Dahlan');
+        $response->assertSee('Anggota Ahmad');
         $response->assertDontSee('Siti Walidah');
     });
 
     test('admin dapat mencari anggota berdasarkan NIA', function () {
         $admin = User::factory()->admin()->create();
         Anggota::factory()->create([
-            'nama_lengkap' => 'Ahmad Dahlan',
+            'nama_lengkap' => 'Anggota Ahmad',
             'nia' => '24260001',
         ]);
         Anggota::factory()->create([
@@ -42,7 +42,7 @@ describe('Admin Member Search', function () {
 
         $response->assertSuccessful();
         $response->assertSee('Siti Walidah');
-        $response->assertDontSee('Ahmad Dahlan');
+        $response->assertDontSee('Anggota Ahmad');
     });
 
     test('menampilkan empty state jika hasil pencarian tidak ditemukan', function () {
@@ -131,6 +131,53 @@ describe('Admin Member Search', function () {
             ->assertSee('Anggota Admin Target')
             ->assertDontSee('Anggota Kader Target')
             ->assertDontSee('Anggota Instruktur Target');
+    });
+
+    test('admin dapat memfilter anggota berdasarkan komisariat', function () {
+        $admin = User::factory()->admin()->create();
+        $ahmad = Anggota::factory()->create([
+            'nama_lengkap' => 'Anggota Ahmad',
+            'komisariat_id' => 'ahmad-dahlan',
+        ]);
+        Anggota::factory()->create([
+            'nama_lengkap' => 'Anggota Buya',
+            'komisariat_id' => 'buya-hamka',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.anggota.index', ['komisariat' => 'ahmad-dahlan']))
+            ->assertSuccessful()
+            ->assertSee('Anggota Ahmad')
+            ->assertDontSee('Anggota Buya')
+            ->assertSee('<option value="ahmad-dahlan" selected>Ahmad Dahlan</option>', false);
+
+        expect($ahmad->komisariat_id)->toBe('ahmad-dahlan');
+    });
+
+    test('filter komisariat mempertahankan parameter saat sorting', function () {
+        $admin = User::factory()->admin()->create();
+        Anggota::factory()->count(13)->create(['komisariat_id' => 'ahmad-dahlan']);
+
+        $this->actingAs($admin)
+            ->get(route('admin.anggota.index', [
+                'komisariat' => 'ahmad-dahlan',
+                'sort' => 'nama',
+                'direction' => 'asc',
+            ]))
+            ->assertSuccessful()
+            ->assertSee('komisariat=ahmad-dahlan', false)
+            ->assertSee('sort=nama', false)
+            ->assertSee('direction=asc', false);
+    });
+
+    test('komisariat tidak valid ditolak oleh validasi', function () {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->from(route('admin.anggota.index'))
+            ->get(route('admin.anggota.index', ['komisariat' => 'tidak-valid']))
+            ->assertRedirect(route('admin.anggota.index'))
+            ->assertSessionHasErrors('komisariat');
     });
 
     test('dropdown filter tidak menawarkan role admin', function () {

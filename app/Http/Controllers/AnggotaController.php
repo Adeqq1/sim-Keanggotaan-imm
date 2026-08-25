@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\RoleEnum;
 use App\Http\Requests\AnggotaRequest;
 use App\Models\Anggota;
+use App\Models\Pendaftaran;
 use App\Models\User;
 use App\Services\NiaGenerator;
 use App\Services\ProfilePhoto;
@@ -24,11 +25,13 @@ class AnggotaController extends Controller
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:255'],
             'role' => ['nullable', Rule::enum(RoleEnum::class)],
+            'komisariat' => ['nullable', Rule::in(array_keys(Pendaftaran::KOMISARIAT))],
         ]);
 
         $search = trim($filters['search'] ?? '');
         $selectedRole = $filters['role'] ?? null;
-        $options = ['nama' => 'Nama', 'nia' => 'NIA', 'role' => 'Role', 'status' => 'Status', 'created' => 'Waktu Ditambahkan'];
+        $selectedKomisariat = $filters['komisariat'] ?? null;
+        $options = ['nama' => 'Nama', 'nia' => 'NIA', 'role' => 'Role', 'komisariat' => 'Komisariat', 'status' => 'Status', 'created' => 'Waktu Ditambahkan'];
         $sort = SortParams::resolve($request, array_keys($options), 'created');
         $query = Anggota::with('user');
 
@@ -43,16 +46,20 @@ class AnggotaController extends Controller
             $query->whereHas('user', fn ($userQuery) => $userQuery->where('role', $selectedRole));
         }
 
+        if ($selectedKomisariat !== null) {
+            $query->where('komisariat_id', $selectedKomisariat);
+        }
+
         $query->when($sort['key'] === 'role', fn ($query) => $query->orderBy(
             User::select('role')->whereColumn('users.id', 'anggota.user_id'), $sort['direction']
         ))
             ->when($sort['key'] !== 'role', fn ($query) => $query->orderBy([
-                'nama' => 'nama_lengkap', 'nia' => 'nia', 'status' => 'status_aktif', 'created' => 'created_at',
+                'nama' => 'nama_lengkap', 'nia' => 'nia', 'komisariat' => 'komisariat_id', 'status' => 'status_aktif', 'created' => 'created_at',
             ][$sort['key']], $sort['direction']))
             ->orderByDesc('anggota.id');
         $anggotas = $query->paginate(12)->withQueryString();
 
-        return view('admin.anggota.index', compact('anggotas', 'search', 'selectedRole', 'options', 'sort'));
+        return view('admin.anggota.index', compact('anggotas', 'search', 'selectedRole', 'selectedKomisariat', 'options', 'sort'));
     }
 
     public function create()

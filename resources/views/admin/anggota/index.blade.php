@@ -38,17 +38,26 @@
                     @endforeach
                 </select>
             </div>
+            <div class="col-12 col-md-auto">
+                <label for="anggota-komisariat" class="visually-hidden">Filter komisariat anggota</label>
+                <select id="anggota-komisariat" name="komisariat" class="form-select shadow-sm" aria-label="Filter komisariat anggota">
+                    <option value="">Semua komisariat</option>
+                    @foreach (App\Models\Pendaftaran::KOMISARIAT as $komisariatId => $komisariatLabel)
+                        <option value="{{ $komisariatId }}" @selected($selectedKomisariat === $komisariatId)>{{ $komisariatLabel }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="col-12 col-md-auto d-flex gap-2">
                 <button class="btn btn-primary btn-ui flex-grow-1" type="submit">
                     <i class="bi bi-search me-1"></i> Cari
                 </button>
-                @if($search !== '' || $selectedRole !== null)
+                @if($search !== '' || $selectedRole !== null || $selectedKomisariat !== null)
                     <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-secondary btn-ui flex-grow-1 text-nowrap">Atur ulang filter</a>
                 @endif
             </div>
         </div>
     </form>
-    <x-sort-control :action="route('admin.anggota.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" :preserved-inputs="['search' => $search, 'role' => $selectedRole]" />
+    <x-sort-control :action="route('admin.anggota.index')" :options="$options" :selected-sort="$sort['key']" :selected-direction="$sort['direction']" :preserved-inputs="['search' => $search, 'role' => $selectedRole, 'komisariat' => $selectedKomisariat]" />
 
     <div class="row g-3 index-card-grid">
     @forelse($anggotas as $anggota)
@@ -98,7 +107,7 @@
         </div>
     @empty
         <div class="col-12 text-center py-5">
-            @if($search !== '' || $selectedRole !== null)
+            @if($search !== '' || $selectedRole !== null || $selectedKomisariat !== null)
                 <i class="bi bi-search display-4 text-muted opacity-50"></i>
                 <p class="text-muted mt-2">Tidak ada anggota yang sesuai dengan pencarian atau filter yang dipilih.</p>
             @else
