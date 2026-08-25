@@ -400,6 +400,12 @@ canvas {
     overflow-y: auto;
 }
 
+@media (min-width: 992px) {
+    .preview-document-dialog {
+        max-width: 800px;
+    }
+}
+
 .responsive-input-group {
     flex-wrap: wrap;
 }
