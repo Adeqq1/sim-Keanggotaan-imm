@@ -765,6 +765,185 @@ canvas {
     width: 100%;
 }
 
+.laporan-page-layout {
+    display: block;
+}
+
+.laporan-export-panel {
+    display: none;
+}
+
+.laporan-panel-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.laporan-panel-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: 0 0 2.25rem;
+    border-radius: 0.65rem;
+    background: rgba(128, 0, 0, 0.08);
+    color: var(--bs-primary);
+}
+
+.laporan-form-section + .laporan-form-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.laporan-form-section-label {
+    display: block;
+    margin-bottom: 0.75rem;
+    color: #6c757d;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.laporan-export-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.85rem;
+    border: 1px solid transparent;
+    border-radius: 0.75rem;
+    background: #fff;
+    text-align: left;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.laporan-export-option:hover,
+.laporan-export-option:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(15, 23, 42, 0.08);
+}
+
+.laporan-export-option-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: 0 0 2.5rem;
+    border-radius: 0.65rem;
+    font-size: 1.25rem;
+}
+
+.laporan-export-option-copy {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.laporan-export-option-copy strong {
+    font-size: 0.95rem;
+}
+
+.laporan-export-option-copy small {
+    color: #6c757d;
+    font-size: 0.72rem;
+    line-height: 1.35;
+}
+
+.laporan-export-option-arrow {
+    flex-shrink: 0;
+}
+
+.laporan-export-option--pdf {
+    border-color: rgba(128, 0, 0, 0.24);
+    color: #800000;
+}
+
+.laporan-export-option--pdf .laporan-export-option-icon {
+    background: rgba(128, 0, 0, 0.08);
+}
+
+.laporan-export-option--pdf:hover,
+.laporan-export-option--pdf:focus-visible {
+    border-color: #800000;
+}
+
+.laporan-export-option--excel {
+    border-color: rgba(25, 135, 84, 0.28);
+    color: #198754;
+}
+
+.laporan-export-option--excel .laporan-export-option-icon {
+    background: rgba(25, 135, 84, 0.1);
+}
+
+.laporan-export-option--excel:hover,
+.laporan-export-option--excel:focus-visible {
+    border-color: #198754;
+}
+
+@media (min-width: 992px) {
+    .laporan-page-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.7fr) minmax(290px, 0.8fr);
+        align-items: start;
+        gap: 1.25rem;
+    }
+
+    .laporan-panel {
+        margin-bottom: 0 !important;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 14px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .laporan-filter-panel .laporan-panel-heading {
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .laporan-form-section + .laporan-form-section {
+        margin-top: 1.25rem;
+        padding-top: 1.25rem;
+    }
+
+    .laporan-filter-panel .form-label {
+        margin-bottom: 0.5rem;
+    }
+
+    .laporan-filter-panel .form-control,
+    .laporan-filter-panel .form-select {
+        min-height: 48px;
+    }
+
+    .laporan-mobile-export-actions {
+        display: none !important;
+    }
+
+    .laporan-export-panel {
+        display: block;
+        position: sticky;
+        top: 5.5rem;
+    }
+
+    .laporan-export-panel .laporan-panel-heading {
+        padding-bottom: 1rem;
+        margin-bottom: 1.25rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .laporan-export-list {
+        display: grid;
+        gap: 0.75rem;
+    }
+}
+
 .pendaftaran-detail-topbar {
     display: none;
 }

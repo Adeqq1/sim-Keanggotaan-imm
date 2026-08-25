@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'sim-imm-cache-';
-const CACHE_NAME = `${CACHE_PREFIX}v2`;
+const CACHE_NAME = `${CACHE_PREFIX}v3`;
 
 self.addEventListener('install', event => {
     event.waitUntil(
@@ -20,7 +20,7 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-    if (event.request.mode === 'navigate') {
+    if (event.request.method === 'GET' && event.request.mode === 'navigate') {
         event.respondWith(fetch(event.request));
     }
 });
