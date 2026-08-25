@@ -106,11 +106,10 @@ test('command provisions files and updates database paths correctly', function (
     expect($pendingClaim)->not->toBeNull();
     Storage::disk('public')->assertExists($pendingClaim->bukti_kehadiran);
 
-    // 5. Sertifikat — command calls generateCertificateFile which uses updateOrCreate
-    // so only the certificates for approved claims will have real paths on disk.
-    $sertifikat = Sertifikat::where('file_sertifikat', 'not like', '%dummy%')->first();
-    expect($sertifikat)->not->toBeNull('Command should have created/updated at least one real certificate');
-    Storage::disk('public')->assertExists($sertifikat->file_sertifikat);
+    // 5. Approved claims retain historical evidence but do not issue certificates.
+    $approvedClaim = Presensi::where('status_klaim', 'disetujui')->first();
+    expect($approvedClaim)->not->toBeNull();
+    expect(Sertifikat::count())->toBe($sertifikatsCountBefore);
 
     // Verify Private artifacts
     $arsip = Arsip::where('judul_dokumen', 'like', 'Dokumen Arsip Demo%')->first();

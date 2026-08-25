@@ -38,7 +38,7 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #800000; /* Maroon outer border */
+            background-color: #800000;
             font-family: 'Georgia', 'Times New Roman', Times, serif;
             box-sizing: border-box;
             overflow: hidden;
@@ -52,6 +52,10 @@
             background-color: #faf6f0; /* Cream background like reference.jpg */
             overflow: hidden;
             box-sizing: border-box;
+            @if($useBackground ?? false)
+            background-image: url('{{ public_path("images/sertificate-asset/bg-sertificate.jpg") }}');
+            background-size: cover;
+            @endif
         }
         
         /* ==========================================
@@ -209,6 +213,16 @@
             color: #111;
             margin-top: 2px;
         }
+        .second-page {
+            page-break-before: always;
+            position: relative;
+            height: 100%;
+            padding: 180px 120px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .second-page h2 { color: #b45309; font-size: 24pt; }
+        .second-page p { font-family: 'Montserrat', 'Helvetica', sans-serif; font-size: 16pt; }
     </style>
 </head>
 <body>
@@ -257,7 +271,7 @@
                         <div class="sig-title">Pimpinan Komisariat</div>
                     </td>
                     <td class="sig-cell">
-                        <div style="font-size: 8.5pt; color: #555; margin-bottom: 45px;">Bungo, {{ now()->translatedFormat('d F Y') }}</div>
+                        <div style="font-size: 8.5pt; color: #555; margin-bottom: 45px;">Bungo, {{ $issuedAt->translatedFormat('d F Y') }}</div>
                         <div class="sig-line"></div>
                         <div class="sig-name">{{ $instruktur }}</div>
                         <div class="sig-title">Instruktur Pendamping</div>
@@ -266,5 +280,11 @@
             </table>
         </div>
     </div>
+    @if(($tipe_sertifikat ?? null) === 'multi_sesi')
+        <div class="second-page">
+            <h2>Penilaian Akhir Instruktur</h2>
+            <p>{{ $nilai_snapshot }} - {{ $label_nilai }}</p>
+        </div>
+    @endif
 </body>
 </html>

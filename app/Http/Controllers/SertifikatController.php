@@ -6,13 +6,14 @@ use App\Http\Requests\SertifikatRequest;
 use App\Jobs\GenerateCertificateJob;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
-use App\Models\Presensi;
 use App\Models\Sertifikat;
 use App\Models\User;
+use App\Services\CertificateEligibility;
 use App\Services\VerifiedAttendance;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use App\Support\SortParams;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver;
@@ -45,37 +46,68 @@ class SertifikatController extends Controller
 
     public static function generateCertificateFile(Kegiatan $kegiatan, Anggota $anggota, ?string $instruktur = null): Sertifikat
     {
-        $nomorSertifikat = 'CERT-'.$kegiatan->id.'-'.$anggota->id.'-'.now()->format('Ymd');
+        $issuedAt = now();
+        $nomorSertifikat = 'CERT-'.$kegiatan->id.'-'.$anggota->id.'-'.$issuedAt->format('Ymd');
         $role = $anggota->user ? ucfirst($anggota->user->role) : 'Kader';
         $instruktur = $instruktur ?? User::where('role', 'instruktur')->first()?->name ?? 'Pimpinan Cabang';
 
-        // Generate PDF
-        $pdf = Pdf::loadView('pdf.sertifikat', compact('kegiatan', 'anggota', 'nomorSertifikat', 'role', 'instruktur'))
-            ->setPaper('a4', 'landscape');
-        $path = 'sertifikat/'.$nomorSertifikat.'.pdf';
-        $stored = Storage::disk('public')->put($path, $pdf->output());
-
-        if (! $stored) {
-            throw new \RuntimeException('Gagal menyimpan file sertifikat.');
+        $eligibility = app(CertificateEligibility::class)->evaluate($kegiatan, $anggota);
+        if (! $eligibility) {
+            throw new \RuntimeException('Anggota tidak memenuhi syarat sertifikat.');
         }
 
-        return Sertifikat::updateOrCreate(
-            ['kegiatan_id' => $kegiatan->id, 'anggota_id' => $anggota->id],
-            [
+        $useBackground = self::useBackground();
+        $pdf = Pdf::loadView('pdf.sertifikat', compact('kegiatan', 'anggota', 'nomorSertifikat', 'role', 'instruktur', 'issuedAt', 'useBackground') + $eligibility)
+            ->setPaper('a4', 'landscape');
+        $path = 'sertifikat/'.$nomorSertifikat.'-'.(string) \Illuminate\Support\Str::uuid().'.pdf';
+        try {
+            $stored = Storage::disk('public')->put($path, $pdf->output());
+
+            if (! $stored) {
+                throw new \RuntimeException('Gagal menyimpan file sertifikat.');
+            }
+        } catch (\Throwable $exception) {
+            Storage::disk('public')->delete($path);
+            throw $exception;
+        }
+
+        try {
+            return Sertifikat::create([
+                'kegiatan_id' => $kegiatan->id,
+                'anggota_id' => $anggota->id,
                 'nomor_sertifikat' => $nomorSertifikat,
                 'file_sertifikat' => $path,
-            ]
-        );
+                'tipe_sertifikat' => $eligibility['tipe_sertifikat'],
+                'nilai_snapshot' => $eligibility['nilai_snapshot'],
+                'created_at' => $issuedAt,
+                'updated_at' => $issuedAt,
+            ]);
+        } catch (\Throwable $exception) {
+            Storage::disk('public')->delete($path);
+
+            if ($exception instanceof QueryException) {
+                $existing = Sertifikat::where('kegiatan_id', $kegiatan->id)
+                    ->where('anggota_id', $anggota->id)
+                    ->first();
+
+                if ($existing) {
+                    return $existing;
+                }
+            }
+
+            throw $exception;
+        }
     }
 
     public function generate(SertifikatRequest $request)
     {
         $validated = $request->validated();
-        $kegiatan = Kegiatan::findOrFail($validated['kegiatan_id']);
+        $kegiatan = Kegiatan::with([])->findOrFail($validated['kegiatan_id']);
         $instruktur = User::where('role', 'instruktur')->first()?->name ?? 'Pimpinan Cabang';
 
         foreach ($validated['anggota_ids'] as $anggotaId) {
-            $anggota = Anggota::findOrFail($anggotaId);
+            $anggota = Anggota::with('user')->findOrFail($anggotaId);
+            abort_unless(app(CertificateEligibility::class)->eligible($kegiatan, $anggota), 422);
             GenerateCertificateJob::dispatch(null, $kegiatan, $anggota, $instruktur);
         }
 
@@ -111,32 +143,10 @@ class SertifikatController extends Controller
         ))->with('minimumKegiatanHadir', 1);
     }
 
-    public function klaim(Presensi $presensi)
-    {
-        $anggota = auth()->user()->anggota;
-
-        if (! $anggota || (int) $presensi->anggota_id !== $anggota->id || ! app(VerifiedAttendance::class)->meetsRequirement($presensi->kegiatan, $anggota)) {
-            abort(403);
-        }
-
-        $alreadyExists = Sertifikat::where('kegiatan_id', $presensi->kegiatan_id)
-            ->where('anggota_id', $anggota->id)
-            ->exists();
-
-        if ($alreadyExists) {
-            return redirect()->route('kader.riwayat.index')
-                ->with('info', 'Sertifikat untuk kegiatan ini sudah tersedia.');
-        }
-
-        GenerateCertificateJob::dispatch($presensi);
-
-        return redirect()->route('kader.riwayat.index')
-            ->with('success', 'Klaim sertifikat sedang diproses.');
-    }
-
     public function download(Sertifikat $sertifikat)
     {
         if (auth()->user()->role === 'admin') {
+            abort_unless(Storage::disk('public')->exists($sertifikat->file_sertifikat), 404);
             return Storage::disk('public')->download($sertifikat->file_sertifikat);
         }
 
@@ -150,6 +160,7 @@ class SertifikatController extends Controller
             abort(403);
         }
 
+        abort_unless(Storage::disk('public')->exists($sertifikat->file_sertifikat), 404);
         return Storage::disk('public')->download($sertifikat->file_sertifikat);
     }
 

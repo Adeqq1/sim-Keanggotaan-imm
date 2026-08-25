@@ -371,11 +371,11 @@ test('kader can view riwayat keaktifan', function () {
     $response->assertSuccessful();
 });
 
-test('kader history shows progress and an eligible claim form without upload controls', function () {
+test('kader history shows progress without a claim form or upload controls', function () {
     $user = User::factory()->kader()->create();
     $anggota = Anggota::factory()->create(['user_id' => $user->id]);
     $kegiatans = Kegiatan::factory()->count(Sertifikat::MINIMUM_KEGIATAN_HADIR)->create();
-    $presensis = $kegiatans->map(fn ($kegiatan) => Presensi::factory()->terverifikasi()->create([
+    $kegiatans->map(fn ($kegiatan) => Presensi::factory()->terverifikasi()->create([
         'anggota_id' => $anggota->id,
         'kegiatan_id' => $kegiatan->id,
     ]));
@@ -384,8 +384,8 @@ test('kader history shows progress and an eligible claim form without upload con
 
     $response->assertSuccessful()
         ->assertSeeText(Sertifikat::MINIMUM_KEGIATAN_HADIR.' dari 1 kegiatan hadir')
-        ->assertSee(route('kader.sertifikat.klaim', $presensis->first()), false)
-        ->assertSeeText('Klaim Sertifikat')
+        ->assertSeeText('Sertifikat diterbitkan oleh admin')
+        ->assertDontSeeText('Klaim Sertifikat')
         ->assertDontSee('type="file"', false)
         ->assertDontSee('multipart/form-data', false)
         ->assertDontSeeText('bukti_kehadiran')
