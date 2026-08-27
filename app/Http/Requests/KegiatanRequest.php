@@ -89,6 +89,10 @@ class KegiatanRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator): void {
+            if ($this->boolean('thumbnail_selected') && ! $this->hasFile('thumbnail')) {
+                $validator->errors()->add('thumbnail', 'Thumbnail gagal diterima. Pilih ulang file JPG atau PNG maksimal 2MB.');
+            }
+
             if ($this->input('jenis_pelaksanaan') === Kegiatan::MULTI_SESI && (int) $this->input('minimum_sesi_terverifikasi') < 3) {
                 $validator->errors()->add('minimum_sesi_terverifikasi', 'Ambang multi-sesi minimal 3.');
             }

@@ -251,6 +251,23 @@ test('instruktur can update kegiatan and replace thumbnail', function () {
     Storage::disk('public')->assertExists($kegiatan->thumbnail);
 });
 
+test('kegiatan update rejects a selected thumbnail that is missing from the request', function () {
+    $instruktur = User::factory()->instruktur()->create();
+    $kegiatan = Kegiatan::factory()->create();
+
+    $this->actingAs($instruktur)->put(route('admin.kegiatan.update', $kegiatan), [
+        'nama_kegiatan' => $kegiatan->nama_kegiatan,
+        'tanggal_waktu' => $kegiatan->tanggal_waktu->format('Y-m-d H:i'),
+        'lokasi' => $kegiatan->lokasi,
+        'tahun_angkatan' => [now()->year],
+        'jenis_pelaksanaan' => 'satu_sesi',
+        'minimum_sesi_terverifikasi' => 1,
+        'thumbnail_selected' => '1',
+    ])->assertSessionHasErrors('thumbnail');
+
+    expect($kegiatan->refresh()->thumbnail)->toBeNull();
+});
+
 test('instruktur can delete kegiatan and its thumbnail', function () {
     Storage::fake('public');
     $instruktur = User::factory()->instruktur()->create();

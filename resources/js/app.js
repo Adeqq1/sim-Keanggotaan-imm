@@ -143,6 +143,28 @@ document.querySelectorAll('[data-profile-photo-edit]').forEach((editButton) => {
     });
 });
 
+document.querySelectorAll('[data-thumbnail-input]').forEach((input) => {
+    const form = input.form;
+    const preview = form?.querySelector('[data-thumbnail-preview]');
+    const image = preview?.querySelector('img');
+    const selected = form?.querySelector('[data-thumbnail-selected]');
+    let previewUrl;
+
+    if (!preview || !image || !selected) return;
+
+    input.addEventListener('change', () => {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+
+        const file = input.files?.[0];
+        selected.value = file ? '1' : '0';
+        if (!file) return;
+
+        previewUrl = URL.createObjectURL(file);
+        image.src = previewUrl;
+        preview.hidden = false;
+    });
+});
+
 document.querySelectorAll('[data-activity-schedule]').forEach((schedule) => {
     const dateInput = schedule.querySelector('[data-schedule-date]');
     const timeInput = schedule.querySelector('[data-schedule-time]');

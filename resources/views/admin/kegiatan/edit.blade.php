@@ -88,12 +88,11 @@
 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Thumbnail Kegiatan</label>
-                    @if(filled($kegiatan->thumbnail))
-                        <div class="mb-2">
-                            <img src="{{ $kegiatan->thumbnail_url }}" alt="Gambar mini kegiatan" class="img-thumbnail" style="max-height: 150px;" onerror="this.onerror=null; this.src='{{ asset('images/placeholder-kegiatan.png') }}';">
-                        </div>
-                    @endif
-                    <input type="file" name="thumbnail" class="form-control @error('thumbnail') is-invalid @enderror" accept="image/*">
+                    <div class="mb-2" data-thumbnail-preview @if(blank($kegiatan->thumbnail)) hidden @endif>
+                        <img src="{{ $kegiatan->thumbnail_url }}" alt="Pratinjau thumbnail kegiatan" class="img-thumbnail" style="max-height: 150px;" onerror="this.onerror=null; this.src='{{ asset('images/placeholder-kegiatan.png') }}';">
+                    </div>
+                    <input type="hidden" name="thumbnail_selected" value="0" data-thumbnail-selected>
+                    <input type="file" name="thumbnail" class="form-control @error('thumbnail') is-invalid @enderror" accept="image/jpeg,image/png" data-thumbnail-input>
                     <small class="text-muted">Format: jpeg, png, jpg. Maksimal 2MB. Kosongkan jika tidak ingin mengubah.</small>
                     @error('thumbnail')
                         <div class="invalid-feedback">{{ $message }}</div>

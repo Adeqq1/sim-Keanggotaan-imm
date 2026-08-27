@@ -30,7 +30,7 @@ docker compose down
 docker compose logs -f app
 docker compose exec app php artisan migrate
 docker compose exec app php artisan migrate:fresh --seed
-docker compose exec app php artisan demo:seed-files  # Creates real dummy PDFs/images
+docker compose exec --user 1000:1000 app php artisan demo:seed-files  # Creates real dummy PDFs/images
 docker compose exec app composer install
 docker compose exec app bash
 ```

@@ -87,7 +87,11 @@
 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Thumbnail Kegiatan</label>
-                    <input type="file" name="thumbnail" class="form-control @error('thumbnail') is-invalid @enderror" accept="image/*">
+                    <div class="mb-2" data-thumbnail-preview hidden>
+                        <img src="" alt="Pratinjau thumbnail kegiatan" class="img-thumbnail" style="max-height: 150px;">
+                    </div>
+                    <input type="hidden" name="thumbnail_selected" value="0" data-thumbnail-selected>
+                    <input type="file" name="thumbnail" class="form-control @error('thumbnail') is-invalid @enderror" accept="image/jpeg,image/png" data-thumbnail-input>
                     <small class="text-muted">Format: jpeg, png, jpg. Maksimal 2MB. (Opsional)</small>
                     @error('thumbnail')
                         <div class="invalid-feedback">{{ $message }}</div>
