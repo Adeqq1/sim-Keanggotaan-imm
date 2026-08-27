@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\KegiatanRequest;
 use App\Models\Kegiatan;
+use App\Support\SortParams;
+use Illuminate\Database\Query\Expression;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\Request;
-use Illuminate\Database\Query\Expression;
-use App\Support\SortParams;
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Throwable;
 
@@ -57,7 +59,7 @@ class KegiatanController extends Controller
         $newThumbnailPath = null;
 
         if ($request->hasFile('thumbnail')) {
-            $newThumbnailPath = $request->file('thumbnail')->store('kegiatan_thumbnails', 'public');
+            $newThumbnailPath = $this->storeThumbnail($request->file('thumbnail'));
             $data['thumbnail'] = $newThumbnailPath;
         }
 
@@ -85,6 +87,7 @@ class KegiatanController extends Controller
     public function edit(Kegiatan $kegiatan)
     {
         $kegiatan->load('tahunAngkatans');
+
         return view('admin.kegiatan.edit', compact('kegiatan'));
     }
 
@@ -104,7 +107,7 @@ class KegiatanController extends Controller
         $newThumbnailPath = null;
 
         if ($request->hasFile('thumbnail')) {
-            $newThumbnailPath = $request->file('thumbnail')->store('kegiatan_thumbnails', 'public');
+            $newThumbnailPath = $this->storeThumbnail($request->file('thumbnail'));
             $data['thumbnail'] = $newThumbnailPath;
         }
 
@@ -169,5 +172,22 @@ class KegiatanController extends Controller
         } catch (Throwable $exception) {
             report(new RuntimeException("Gagal menghapus {$context}: {$path}", previous: $exception));
         }
+    }
+
+    private function storeThumbnail(UploadedFile $file): string
+    {
+        try {
+            $path = $file->store('kegiatan_thumbnails', 'public');
+
+            if (is_string($path) && $path !== '') {
+                return $path;
+            }
+        } catch (Throwable $exception) {
+            report($exception);
+        }
+
+        throw ValidationException::withMessages([
+            'thumbnail' => 'Thumbnail gagal disimpan. Periksa penyimpanan aplikasi lalu coba lagi.',
+        ]);
     }
 }

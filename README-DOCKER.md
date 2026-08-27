@@ -13,9 +13,10 @@ cp .env.example .env
 cat .env.docker.example >> .env
 
 docker compose up -d --build
-docker compose exec app composer install
-docker compose exec app php artisan key:generate
-docker compose exec app php artisan migrate
+docker compose exec --user appuser app composer install
+docker compose exec --user appuser app php artisan key:generate
+docker compose exec --user appuser app php artisan storage:link
+docker compose exec --user appuser app php artisan migrate
 npm install
 npm run dev
 ```
@@ -28,11 +29,11 @@ Open <http://localhost:8000>.
 docker compose up -d
 docker compose down
 docker compose logs -f app
-docker compose exec app php artisan migrate
-docker compose exec app php artisan migrate:fresh --seed
-docker compose exec --user 1000:1000 app php artisan demo:seed-files  # Creates real dummy PDFs/images
-docker compose exec app composer install
-docker compose exec app bash
+docker compose exec --user appuser app php artisan migrate
+docker compose exec --user appuser app php artisan migrate:fresh --seed
+docker compose exec --user appuser app php artisan demo:seed-files  # Creates real dummy PDFs/images
+docker compose exec --user appuser app composer install
+docker compose exec --user appuser app bash
 ```
 
 The database is stored in Docker's `mariadb-data` volume. `docker compose down` keeps it; `docker compose down -v` permanently deletes it. See `support-for-developer/troubleshooting/SEED_DATA_DUMMY.md` for details on how `demo:seed-files` works.

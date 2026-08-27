@@ -5,12 +5,13 @@ use App\Models\Kegiatan;
 use App\Models\Presensi;
 use App\Models\Sertifikat;
 use App\Models\User;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 function instrukturSidebarXPath(string $content): DOMXPath
 {
-    $dom = new DOMDocument();
+    $dom = new DOMDocument;
     $previous = libxml_use_internal_errors(true);
     $dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR | LIBXML_NOWARNING);
     libxml_use_internal_errors($previous);
@@ -194,7 +195,7 @@ test('kegiatan rejects past schedules and accepts a future split schedule', func
         ])
         ->assertRedirect(route('admin.kegiatan.index'));
 
-    expect(App\Models\Kegiatan::where('nama_kegiatan', 'Jadwal Aman')->value('tanggal_waktu')->format('Y-m-d H:i'))
+    expect(Kegiatan::where('nama_kegiatan', 'Jadwal Aman')->value('tanggal_waktu')->format('Y-m-d H:i'))
         ->toBe(now()->addDay()->format('Y-m-d').' 09:00');
 });
 
@@ -266,6 +267,47 @@ test('kegiatan update rejects a selected thumbnail that is missing from the requ
     ])->assertSessionHasErrors('thumbnail');
 
     expect($kegiatan->refresh()->thumbnail)->toBeNull();
+});
+
+test('thumbnail write failure returns a validation error without creating kegiatan', function () {
+    $disk = Mockery::mock(FilesystemAdapter::class);
+    $disk->shouldReceive('putFileAs')->once()->andThrow(new RuntimeException('storage is not writable'));
+    Storage::shouldReceive('disk')->once()->with('public')->andReturn($disk);
+
+    $this->actingAs(User::factory()->instruktur()->create())
+        ->post(route('admin.kegiatan.store'), [
+            'nama_kegiatan' => 'Kegiatan Gagal Upload',
+            'tanggal_waktu' => now()->addDays(3)->format('Y-m-d H:i'),
+            'lokasi' => 'Aula IMM',
+            'tahun_angkatan' => [now()->year],
+            'jenis_pelaksanaan' => 'satu_sesi',
+            'minimum_sesi_terverifikasi' => 1,
+            'thumbnail' => UploadedFile::fake()->image('thumbnail.jpg'),
+        ])->assertSessionHasErrors('thumbnail');
+
+    expect(Kegiatan::where('nama_kegiatan', 'Kegiatan Gagal Upload')->exists())->toBeFalse();
+});
+
+test('thumbnail write failure keeps existing kegiatan and thumbnail unchanged', function () {
+    $instruktur = User::factory()->instruktur()->create();
+    $kegiatan = Kegiatan::factory()->create(['thumbnail' => 'kegiatan_thumbnails/old.jpg']);
+    $originalName = $kegiatan->nama_kegiatan;
+    $disk = Mockery::mock(FilesystemAdapter::class);
+    $disk->shouldReceive('putFileAs')->once()->andThrow(new RuntimeException('storage is not writable'));
+    Storage::shouldReceive('disk')->once()->with('public')->andReturn($disk);
+
+    $this->actingAs($instruktur)->put(route('admin.kegiatan.update', $kegiatan), [
+        'nama_kegiatan' => 'Nama Tidak Boleh Tersimpan',
+        'tanggal_waktu' => $kegiatan->tanggal_waktu->format('Y-m-d H:i'),
+        'lokasi' => $kegiatan->lokasi,
+        'tahun_angkatan' => [now()->year],
+        'jenis_pelaksanaan' => 'satu_sesi',
+        'minimum_sesi_terverifikasi' => 1,
+        'thumbnail' => UploadedFile::fake()->image('replacement.jpg'),
+    ])->assertSessionHasErrors('thumbnail');
+
+    expect($kegiatan->refresh()->nama_kegiatan)->toBe($originalName)
+        ->and($kegiatan->thumbnail)->toBe('kegiatan_thumbnails/old.jpg');
 });
 
 test('instruktur can delete kegiatan and its thumbnail', function () {

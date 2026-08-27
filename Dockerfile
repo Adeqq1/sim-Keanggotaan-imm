@@ -34,3 +34,7 @@ RUN groupadd --gid 1000 appuser \
         /etc/apache2/envvars
 
 RUN printf 'upload_max_filesize=12M\npost_max_size=13M\nmemory_limit=256M\n' > /usr/local/etc/php/conf.d/production.ini
+
+COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/app-entrypoint
+
+ENTRYPOINT ["app-entrypoint"]

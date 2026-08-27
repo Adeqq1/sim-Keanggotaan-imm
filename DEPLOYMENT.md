@@ -11,9 +11,9 @@ sudo docker compose -f compose.prod.yaml ps
 sudo docker compose -f compose.prod.yaml logs --tail=200 app
 sudo docker compose -f compose.prod.yaml logs --tail=200 queue
 sudo docker compose -f compose.prod.yaml restart queue
-sudo docker compose -f compose.prod.yaml exec app php artisan migrate --force
-sudo docker compose -f compose.prod.yaml exec app php artisan queue:failed
-sudo docker compose -f compose.prod.yaml exec app php artisan queue:retry JOB_ID
+sudo docker compose -f compose.prod.yaml exec --user appuser app php artisan migrate --force
+sudo docker compose -f compose.prod.yaml exec --user appuser app php artisan queue:failed
+sudo docker compose -f compose.prod.yaml exec --user appuser app php artisan queue:retry JOB_ID
 sudo /usr/local/sbin/backup-sim-keanggotaan-imm
 ```
 
@@ -23,7 +23,7 @@ sudo /usr/local/sbin/backup-sim-keanggotaan-imm
 2. Use `php artisan down` when the change risks incompatible requests.
 3. Fetch and checkout the reviewed commit on `features/fedora-workspace`.
 4. Run `npm ci && npm run build`.
-5. Run Composer in the image with `sudo docker compose -f compose.prod.yaml run --rm app composer install --no-dev --prefer-dist --optimize-autoloader`.
+5. Run Composer in the image with `sudo docker compose -f compose.prod.yaml run --rm --user appuser app composer install --no-dev --prefer-dist --optimize-autoloader`.
 6. Run `sudo docker compose -f compose.prod.yaml build && sudo docker compose -f compose.prod.yaml up -d`.
 7. Run migration, `php artisan optimize`, and restart the queue.
 8. Run `php artisan up`, then verify `/up`, login, uploads, and queue logs.
