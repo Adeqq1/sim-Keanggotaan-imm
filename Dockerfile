@@ -38,3 +38,5 @@ RUN printf 'upload_max_filesize=12M\npost_max_size=13M\nmemory_limit=256M\n' > /
 COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/app-entrypoint
 
 ENTRYPOINT ["app-entrypoint"]
+
+CMD ["apache2-foreground"]
