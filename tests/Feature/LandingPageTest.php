@@ -19,6 +19,27 @@ test('landing page contains IMM branding', function () {
         ->assertSee('Visi');
 });
 
+test('landing navigation shows login action to guests', function () {
+    $this->get(route('landing'))
+        ->assertOk()
+        ->assertSee('Masuk')
+        ->assertDontSee('Dashboard');
+});
+
+test('landing navigation links authenticated users to their role dashboard', function (string $role, string $routeName) {
+    $user = User::factory()->create(['role' => $role]);
+
+    $this->actingAs($user)
+        ->get(route('landing'))
+        ->assertOk()
+        ->assertSee('Dashboard')
+        ->assertSee(route($routeName), false);
+})->with([
+    'admin' => ['admin', 'admin.dashboard'],
+    'instruktur' => ['instruktur', 'admin.kegiatan.index'],
+    'kader' => ['kader', 'kader.dashboard'],
+]);
+
 test('landing page has correct route name', function () {
     expect(route('landing'))->toBe(url('/'));
 });
