@@ -5,8 +5,11 @@ namespace App\Services;
 use App\Models\Anggota;
 use App\Models\Arsip;
 use App\Models\Kegiatan;
+use App\Models\LaporanKegiatan;
+use App\Models\MateriKegiatan;
 use App\Models\Pendaftaran;
 use App\Models\Presensi;
+use App\Models\Sertifikat;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
@@ -31,38 +34,30 @@ class DemoDataFiles
             'records_updated' => 0,
         ];
 
-        // 1. Provision profile photos (Anggota)
-        $anggotas = Anggota::take(3)->get();
+        // Only records explicitly owned by the demo namespace are modified.
+        $anggotas = Anggota::where('foto_profil', 'like', 'foto_profil/demo/%')->get();
         foreach ($anggotas as $anggota) {
-            $path = 'foto_profil/demo/anggota-'.$anggota->id.'.png';
+            $path = $anggota->foto_profil;
             $this->copyImageToPublic($path);
-            $anggota->update(['foto_profil' => $path]);
             $stats['public_files']++;
-            $stats['records_updated']++;
         }
 
-        // 2. Provision activity thumbnails (Kegiatan)
-        $kegiatans = Kegiatan::take(3)->get();
+        $kegiatans = Kegiatan::where('thumbnail', 'like', 'kegiatan_thumbnails/demo/%')->get();
         foreach ($kegiatans as $kegiatan) {
-            $path = 'kegiatan_thumbnails/demo/kegiatan-'.$kegiatan->id.'.png';
+            $path = $kegiatan->thumbnail;
             $this->copyImageToPublic($path);
-            $kegiatan->update(['thumbnail' => $path]);
             $stats['public_files']++;
-            $stats['records_updated']++;
         }
         Cache::forget('kegiatan.terbaru');
 
-        // 3. Provision registration document (Pendaftaran - pending)
-        $pendaftaran = Pendaftaran::where('status_validasi', 'pending')->first();
-        if ($pendaftaran) {
-            $path = 'pendaftaran/demo/syarat-'.$pendaftaran->id.'.pdf';
-            $this->createSimplePdfToDisk('local', $path, 'Dokumen Persyaratan: '.$pendaftaran->nama_lengkap);
-            $pendaftaran->update([
-                'file_persyaratan' => $path,
-                'jenis_dokumen_identitas' => 'ktp',
-            ]);
+        foreach (Pendaftaran::where('file_persyaratan', 'like', 'pendaftaran/demo/%')->get() as $pendaftaran) {
+            $path = $pendaftaran->file_persyaratan;
+            if (str_ends_with($path, '.png')) {
+                $this->copyImageToDisk('local', $path);
+            } else {
+                $this->createSimplePdfToDisk('local', $path, 'Dokumen Persyaratan: '.$pendaftaran->nama_lengkap);
+            }
             $stats['private_files']++;
-            $stats['records_updated']++;
         }
 
         // 4. Provision attendance claim states
@@ -81,41 +76,30 @@ class DemoDataFiles
             $stats['public_files']++;
         }
 
-        // 5. Keep historical claim artifacts without issuing certificates.
+        foreach (MateriKegiatan::where('file_materi', 'like', 'materi_kegiatan/demo/%')->get() as $materi) {
+            $this->createSimplePdfToDisk('local', $materi->file_materi, 'Materi: '.$materi->judul);
+            $stats['private_files']++;
+        }
+
+        foreach (LaporanKegiatan::where('file_lampiran', 'like', 'laporan_kegiatan/demo/%')->get() as $laporan) {
+            $this->createSimplePdfToDisk('local', $laporan->file_lampiran, 'Lampiran Laporan: '.$laporan->kegiatan->nama_kegiatan);
+            $stats['private_files']++;
+        }
+
+        foreach (Arsip::where('file_arsip', 'like', 'arsip/demo/%')->get() as $arsip) {
+            $this->createSimplePdfToDisk('local', $arsip->file_arsip, 'Arsip: '.$arsip->judul_dokumen);
+            $stats['private_files']++;
+        }
+
+        foreach (Sertifikat::where('file_sertifikat', 'like', 'sertifikat/demo/%')->get() as $sertifikat) {
+            $this->createSimplePdfToDisk('public', $sertifikat->file_sertifikat, 'Sertifikat: '.$sertifikat->anggota->nama_lengkap);
+            $stats['public_files']++;
+        }
+
         if (! Storage::disk('local')->exists('sertifikat_settings.json')) {
             Storage::disk('local')->put('sertifikat_settings.json', json_encode([
                 'use_background' => true,
             ]));
-        }
-
-
-        // 6. Provision private archives (Arsip)
-        // Find kader members to assign private archives
-        $arsipOwners = Anggota::whereHas('user', fn ($q) => $q->where('role', 'kader'))->take(2)->get();
-
-        foreach ($arsipOwners as $index => $anggota) {
-            $path = 'arsip/demo/arsip-'.$anggota->id.'.pdf';
-            $this->createSimplePdfToDisk('local', $path, 'Arsip Pribadi: '.$anggota->nama_lengkap);
-
-            $arsip = Arsip::where('judul_dokumen', 'Dokumen Arsip Demo '.($index + 1))->first();
-            if ($arsip) {
-                $arsip->update([
-                    'anggota_id' => $anggota->id,
-                    'file_arsip' => $path,
-                ]);
-            } else {
-                Arsip::create([
-                    'nomor_dokumen' => 'DEMO/ARSIP/'.date('Y').'/00'.($index + 1),
-                    'anggota_id' => $anggota->id,
-                    'judul_dokumen' => 'Dokumen Arsip Demo '.($index + 1),
-                    'kategori_arsip' => 'lainnya',
-                    'file_arsip' => $path,
-                    'tanggal_unggah' => now(),
-                ]);
-            }
-
-            $stats['private_files']++;
-            $stats['records_updated']++;
         }
 
         return $stats;
@@ -126,30 +110,34 @@ class DemoDataFiles
         $publicPaths = [
             'foto_profil/demo',
             'kegiatan_thumbnails/demo',
-            'pendaftaran/demo',
             'bukti_kehadiran/demo',
-            'sertifikat/demo' // Any manually created demo certs
+            'sertifikat/demo',
         ];
 
         foreach ($publicPaths as $dir) {
             Storage::disk('public')->deleteDirectory($dir);
         }
 
-        foreach (['arsip/demo', 'pendaftaran/demo'] as $dir) {
+        foreach (['arsip/demo', 'pendaftaran/demo', 'materi_kegiatan/demo', 'laporan_kegiatan/demo'] as $dir) {
             Storage::disk('local')->deleteDirectory($dir);
         }
     }
 
     private function copyImageToPublic(string $destinationPath): void
     {
+        $this->copyImageToDisk('public', $destinationPath);
+    }
+
+    private function copyImageToDisk(string $disk, string $destinationPath): void
+    {
         $sourcePath = public_path('images/placeholder-kegiatan.png');
 
         if (file_exists($sourcePath)) {
-            Storage::disk('public')->put($destinationPath, file_get_contents($sourcePath));
+            Storage::disk($disk)->put($destinationPath, file_get_contents($sourcePath));
         } else {
             // Fallback 1x1 PNG bytes if the placeholder was deleted
             $fallbackPng = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');
-            Storage::disk('public')->put($destinationPath, $fallbackPng);
+            Storage::disk($disk)->put($destinationPath, $fallbackPng);
         }
     }
 
@@ -158,7 +146,7 @@ class DemoDataFiles
         // For CLI environment, a minimal valid PDF byte sequence is faster and safer
         // than invoking domPDF just for generic dummy attachment files.
         // Certificates still use DomPDF.
-        $pdfBytes = "%PDF-1.4\n%âãÏÓ\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>\nendobj\n4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n5 0 obj\n<< /Length 44 >>\nstream\nBT /F1 24 Tf 100 700 Td (" . str_replace(['(', ')', '\\'], ['\\(', '\\)', '\\\\'], $text) . ") Tj ET\nendstream\nendobj\nxref\n0 6\n0000000000 65535 f \n0000000015 00000 n \n0000000064 00000 n \n0000000121 00000 n \n0000000227 00000 n \n0000000315 00000 n \ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n408\n%%EOF\n";
+        $pdfBytes = "%PDF-1.4\n%âãÏÓ\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>\nendobj\n4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n5 0 obj\n<< /Length 44 >>\nstream\nBT /F1 24 Tf 100 700 Td (".str_replace(['(', ')', '\\'], ['\\(', '\\)', '\\\\'], $text).") Tj ET\nendstream\nendobj\nxref\n0 6\n0000000000 65535 f \n0000000015 00000 n \n0000000064 00000 n \n0000000121 00000 n \n0000000227 00000 n \n0000000315 00000 n \ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n408\n%%EOF\n";
 
         Storage::disk($disk)->put($path, $pdfBytes);
     }

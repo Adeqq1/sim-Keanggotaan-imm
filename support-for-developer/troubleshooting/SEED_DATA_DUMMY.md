@@ -2,23 +2,31 @@
 
 Agar halaman detail, download, dan gambar profil tidak rusak (broken link) saat proses development, jalankan command seed untuk mem-provisioning data file dummy (PDF dan gambar) yang deterministik.
 
-Command yang direkomendasikan saat pertama kali setup:
+Command yang direkomendasikan untuk menambahkan dataset demo tanpa menghapus data yang sudah ada:
 
 ```bash
-docker compose exec app php artisan migrate:fresh --seed
-docker compose exec app php artisan demo:seed-files
+docker compose exec -e APP_ENV=local app php artisan db:seed --class=DemoSeeder
 ```
 
-**Penting:** `migrate:fresh --seed` akan menghapus seluruh data database Anda dan menggantinya dengan factory dataset. `demo:seed-files` setelahnya akan melengkapi dataset tersebut dengan file gambar dan PDF sungguhan di disk server.
+`DemoSeeder` idempoten, memprovisikan record beserta file, dan menolak berjalan pada environment `production`. Command dapat dijalankan ulang tanpa menggandakan dataset demo.
 
-Apabila Anda tidak ingin menghapus data database yang ada, Anda dapat menjalankan command files saja, yang secara aman hanya me-refresh file dengan path `demo/`:
+Untuk hanya me-refresh file dengan path `demo/`:
 
 ```bash
-docker compose exec app php artisan demo:seed-files
+docker compose exec -e APP_ENV=local app php artisan demo:seed-files
 ```
 
 Data yang dibuat:
-- **Public disk (`storage/app/public/`)**: foto profil anggota, thumbnail kegiatan, dan bukti kehadiran presensi. Command ini juga meng-generate file sertifikat sungguhan memakai template PDF aplikasi.
-- **Private disk (`storage/app/private/`)**: dokumen identitas pendaftaran pada `pendaftaran/` dan arsip pribadi milik kader pada `arsip/` untuk pengujian hak akses download. Keduanya *tidak* boleh berada di public disk.
+- **Database**: akun tetap, anggota, pendaftaran, kegiatan satu/multi-sesi, target angkatan, presensi, penilaian, materi, laporan, arsip, dan sertifikat eligible.
+- **Public disk (`storage/app/public/`)**: foto profil, thumbnail kegiatan, bukti kehadiran historis, dan sertifikat PDF.
+- **Private disk (`storage/app/private/`)**: dokumen identitas pendaftaran, materi, lampiran laporan, dan arsip kader.
 
-Command ini aman dijalankan ulang (idempoten) dan hanya membersihkan folder namespace `demo/` tanpa menyentuh file hasil upload manual developer. Untuk mengakses file public di browser lokal, pastikan Anda juga telah menjalankan `docker compose exec app php artisan storage:link`.
+Kredensial utama:
+
+| Peran | Email | Password |
+|---|---|---|
+| Admin | `admin@admin.com` | `password` |
+| Instruktur | `instruktur@example.com` | `password` |
+| Kader utama | `kader@example.com` | `password` |
+
+File demo memakai namespace `demo/`; pembersihan tidak menyentuh file upload pengguna. Untuk mengakses file public di browser lokal, jalankan `docker compose exec app php artisan storage:link`.

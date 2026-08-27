@@ -100,6 +100,43 @@ describe('Admin Member Search', function () {
         $detailResponse->assertSee('Ahmad Dahlan');
     });
 
+    test('detail menampilkan informasi lengkap anggota dan akun', function () {
+        $admin = User::factory()->admin()->create();
+        $user = User::factory()->instruktur()->create([
+            'email' => 'instruktur@example.com',
+        ]);
+        $anggota = Anggota::factory()->create([
+            'user_id' => $user->id,
+            'komisariat_id' => 'ahmad-dahlan',
+            'tahun_daftar' => 2025,
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.anggota.show', $anggota))
+            ->assertSuccessful()
+            ->assertSee('instruktur@example.com')
+            ->assertSee('Instruktur')
+            ->assertSee('Terverifikasi')
+            ->assertSee('Ahmad Dahlan')
+            ->assertSee('2025');
+    });
+
+    test('detail menampilkan fallback untuk data anggota lama', function () {
+        $admin = User::factory()->admin()->create();
+        $user = User::factory()->kader()->unverified()->create();
+        $anggota = Anggota::factory()->create([
+            'user_id' => $user->id,
+            'komisariat_id' => null,
+            'tahun_daftar' => null,
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.anggota.show', $anggota))
+            ->assertSuccessful()
+            ->assertSee('Belum Terverifikasi')
+            ->assertSeeTextInOrder(['Komisariat', '-', 'Tahun Daftar', '-']);
+    });
+
     test('admin dapat memfilter anggota berdasarkan setiap role', function () {
         $admin = User::factory()->admin()->create();
         $kader = User::factory()->kader()->create();

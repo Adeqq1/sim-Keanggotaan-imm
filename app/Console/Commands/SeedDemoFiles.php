@@ -20,19 +20,27 @@ class SeedDemoFiles extends Command
      */
     public function handle(DemoDataFiles $service)
     {
+        if (app()->isProduction()) {
+            $this->error('File demo tidak boleh dibuat di environment production.');
+
+            return self::FAILURE;
+        }
+
         $this->info('Starting demo files provisioning...');
 
         // Guard: ensure the baseline seeded database exists
         if (Anggota::count() === 0 || Kegiatan::count() === 0 || Presensi::count() === 0 || Pendaftaran::count() === 0) {
             $this->error('Baseline demo records are missing.');
-            $this->line('Please run <comment>docker compose exec app php artisan migrate:fresh --seed</comment> first to populate the database records before provisioning demo files.');
+            $this->line('Jalankan <comment>php artisan db:seed --class=DemoSeeder</comment> untuk membuat dataset demo lengkap.');
+
             return self::FAILURE;
         }
 
         try {
             $stats = $service->provisionFiles();
         } catch (\Exception $e) {
-            $this->error('Failed to provision files: ' . $e->getMessage());
+            $this->error('Failed to provision files: '.$e->getMessage());
+
             return self::FAILURE;
         }
 

@@ -50,7 +50,35 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label small text-muted fw-bold">Email</label>
-                    <p class="mb-0">{{ $anggota->user->email ?? '-' }}</p>
+                    <p class="mb-0">{{ $anggota->user?->email ?? '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small text-muted fw-bold">Role Akun</label>
+                    <p class="mb-0">
+                        @if($anggota->user)
+                            <span class="badge {{ \App\Enums\RoleEnum::badgeClassFor($anggota->user->role) }}">
+                                {{ \App\Enums\RoleEnum::labelFor($anggota->user->role) }}
+                            </span>
+                        @else
+                            -
+                        @endif
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small text-muted fw-bold">Status Verifikasi Email</label>
+                    <p class="mb-0">
+                        <span class="badge {{ $anggota->user?->email_verified_at ? 'bg-success' : 'bg-secondary' }}">
+                            {{ $anggota->user?->email_verified_at ? 'Terverifikasi' : 'Belum Terverifikasi' }}
+                        </span>
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small text-muted fw-bold">Komisariat</label>
+                    <p class="mb-0">{{ $anggota->komisariat_id ? (\App\Models\Pendaftaran::KOMISARIAT[$anggota->komisariat_id] ?? $anggota->komisariat_id) : '-' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small text-muted fw-bold">Tahun Daftar</label>
+                    <p class="mb-0">{{ $anggota->tahun_daftar ?? '-' }}</p>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label small text-muted fw-bold">Terdaftar Sejak</label>
