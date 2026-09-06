@@ -10,14 +10,17 @@ use App\Models\Sertifikat;
 use App\Models\User;
 use App\Services\CertificateEligibility;
 use App\Services\VerifiedAttendance;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
 use App\Support\SortParams;
-use Illuminate\Validation\Rule;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Bus\BatchRepository;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\Format;
 use Intervention\Image\ImageManager;
@@ -80,7 +83,7 @@ class SertifikatController extends Controller
         $useBackground = self::useBackground();
         $pdf = Pdf::loadView('pdf.sertifikat', compact('kegiatan', 'anggota', 'nomorSertifikat', 'role', 'instruktur', 'issuedAt', 'useBackground') + $eligibility)
             ->setPaper('a4', 'landscape');
-        $path = 'sertifikat/'.$nomorSertifikat.'-'.(string) \Illuminate\Support\Str::uuid().'.pdf';
+        $path = 'sertifikat/'.$nomorSertifikat.'-'.(string) Str::uuid().'.pdf';
         try {
             $stored = Storage::disk('public')->put($path, $pdf->output());
 
@@ -164,12 +167,12 @@ class SertifikatController extends Controller
                 ->whereIn('anggota_id', $requestedIds)
                 ->count();
         $legacyBatch = ! array_key_exists('user_id', $batch->options);
-        $queuedBatchJobs = \Illuminate\Support\Facades\DB::table('jobs')->where('payload', 'like', '%'.$batch->id.'%')->exists();
+        $queuedBatchJobs = DB::table('jobs')->where('payload', 'like', '%'.$batch->id.'%')->exists();
         $outputComplete = $requestedIds->isNotEmpty() && $createdCount >= $requestedIds->count();
         $legacyBatchComplete = $legacyBatch && ! $queuedBatchJobs;
 
         if (! $batch->finished() && ($outputComplete || $legacyBatchComplete) && $batch->pendingJobs > 0) {
-            app(\Illuminate\Bus\BatchRepository::class)->markAsFinished($batch->id);
+            app(BatchRepository::class)->markAsFinished($batch->id);
             $batch = $batch->fresh();
         }
 
@@ -220,6 +223,7 @@ class SertifikatController extends Controller
     {
         if (auth()->user()->role === 'admin') {
             abort_unless(Storage::disk('public')->exists($sertifikat->file_sertifikat), 404);
+
             return Storage::disk('public')->download($sertifikat->file_sertifikat);
         }
 
@@ -234,6 +238,7 @@ class SertifikatController extends Controller
         }
 
         abort_unless(Storage::disk('public')->exists($sertifikat->file_sertifikat), 404);
+
         return Storage::disk('public')->download($sertifikat->file_sertifikat);
     }
 
