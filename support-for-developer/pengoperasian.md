@@ -115,34 +115,35 @@ Setiap materi pelatihan atau perkaderan yang dibagikan oleh instruktur pada kegi
 
 ---
 
-### D. Mengklaim & Mengunduh E-Sertifikat
-Menu: **E-Sertifikat Saya**
+### D. Melihat & Mengunduh E-Sertifikat
+Menu: **E-Sertifikat Saya** (`/kader/sertifikat`)
 
-1. **Syarat Penerbitan Sertifikat**:
-   - Anda berstatus presensi **Hadir** pada kegiatan terkait.
-   - Telah memenuhi syarat keaktifan dasar organisasi (minimal telah menghadiri 3 kegiatan resmi IMM).
-2. **Cara Mengklaim Sertifikat**:
-   - Jika tombol **"Klaim Sertifikat"** muncul pada riwayat kegiatan Anda, klik tombol tersebut.
-   - Sistem akan memproses pembuatan sertifikat resmi Anda di latar belakang.
+1. **Syarat Kelayakan Sertifikat**:
+   - Status anggota aktif dan terdaftar resmi sebagai kader.
+   - Kehadiran pada kegiatan telah diverifikasi oleh Instruktur (`Hadir` & `Terverifikasi`).
+   - Untuk kegiatan perkaderan multi-sesi (seperti DAD): telah memenuhi batas minimum sesi terverifikasi dan lulus penilaian mutu (grade A, B, C, atau D).
+2. **Penerbitan Sertifikat**:
+   - Sertifikat diterbitkan secara resmi oleh Admin melalui antrean sistem (*background job*).
 3. **Mengunduh Sertifikat**:
-   - Masuk ke menu **E-Sertifikat**, klik tombol **"Unduh PDF"** pada sertifikat yang sudah terbit. File PDF beresolusi tinggi dengan nomor sertifikat resmi dan cap digital siap Anda gunakan untuk portofolio atau beasiswa.
+   - Masuk ke menu **E-Sertifikat**, klik tombol **"Unduh PDF"** pada sertifikat yang telah terbit. File PDF resmi beresolusi tinggi dengan nomor sertifikat unik dan cap digital siap Anda gunakan untuk portofolio atau beasiswa.
 
 ---
 
 ### E. Memantau Riwayat Keaktifan
-Menu: **Riwayat Keaktifan**
+Menu: **Riwayat Keaktifan** (`/kader/riwayat`)
 
 Halaman ini mencatat seluruh rekam jejak pengabdian Anda di IMM:
 - Grafik persentase kehadiran (*Hadir, Izin, Alfa*).
-- Riwayat tanggal, lokasi, dan nama kegiatan yang pernah Anda ikuti.
-- Sangat bermanfaat saat Anda membutuhkan surat rekomendasi atau syarat kelulusan jenjang perkaderan selanjutnya (misal: syarat naik ke Darul Arqam Madya).
+- Riwayat tanggal, lokasi, status verifikasi sesi, dan nama kegiatan yang pernah Anda ikuti.
+- Tautan langsung ke unduhan sertifikat yang telah terbit.
+- Bermanfaat sebagai bukti keaktifan untuk rekomendasi jenjang perkaderan selanjutnya (seperti DAM).
 
 ---
 
 ### F. Mengelola E-Arsip Pribadi
-Menu: **E-Arsip**
+Menu: **E-Arsip** (`/kader/arsip`)
 
-Simpan seluruh dokumen berharga organisasi Anda secara aman di awan (*cloud*):
+Simpan seluruh dokumen berharga organisasi Anda secara aman di penyimpanan awan (*cloud* privat):
 1. **Mengunggah Dokumen Baru**:
    - Klik tombol **"Unggah Arsip"**.
    - Masukkan Judul Dokumen (contoh: *Surat Tugas Musycab 2026* atau *Sertifikat Pelatihan Jurnalistik*).
@@ -158,43 +159,52 @@ Simpan seluruh dokumen berharga organisasi Anda secara aman di awan (*cloud*):
 Menu: **Profil Saya** (Klik nama akun di pojok kanan atas -> **Profil**)
 
 - Anda dapat memperbarui Nama Lengkap, Nomor Kontak, Alamat, dan Kata Sandi.
-- Ganti Foto Profil: Sistem akan otomatis mengoptimalkan foto Anda agar tampil jernih di E-KTA dan web.
+- Ganti Foto Profil: Sistem akan otomatis mengoptimalkan foto Anda ke format WebP agar tampil jernih di E-KTA dan web.
 
 ---
 
 ## 4. Panduan Peran: INSTRUKTUR (Pemandu & Fasilitator)
 
-Instruktur adalah ujung tombak mutu perkaderan. Peran ini memiliki hak khusus mengelola agenda kegiatan lapangan dan presensi peserta.
+Instruktur adalah ujung tombak mutu perkaderan. Peran ini memiliki hak khusus mengelola agenda kegiatan, sesi pertemuan, presensi peserta, penilaian kelulusan, dan materi perkaderan.
 
-### A. Mengelola Kegiatan / Pelatihan
+### A. Mengelola Kegiatan & Sesi Pertemuan
 Menu: **Manajemen Kegiatan** (`/admin/kegiatan`)
 
 1. **Membuat Kegiatan Baru**:
    - Klik tombol **"Tambah Kegiatan"**.
    - Masukkan Nama Kegiatan (contoh: *Darul Arqam Dasar (DAD) Angkatan XXIV*).
    - Tentukan Lokasi, Tanggal, dan Waktu Pelaksanaan.
-   - Tulis deskripsi acara dan unggah banner/thumbnail kegiatan yang menarik.
-   - Simpan kegiatan. Kegiatan otomatis tampil di landing page dan dashboard kader.
-2. **Mengubah / Menghapus Kegiatan**: Anda dapat memperbarui informasi jika ada perubahan jadwal atau lokasi.
+   - Tulis deskripsi acara dan unggah banner/thumbnail kegiatan.
+2. **Membuat Sesi Kegiatan**:
+   - Pada kegiatan multi-sesi, buka detail kegiatan lalu kelola sesi pertemuan (misal: *Sesi 1 - Stadium General*, *Sesi 2 - Materi AIK*, *Sesi 3 - FGD*).
 
 ---
 
-### B. Mengisi Presensi Kehadiran Peserta (Otoritas Utama)
-Menu: **Rekap Presensi** -> Pilih Kegiatan -> **Catat Presensi**
+### B. Mengisi Presensi & Verifikasi Kehadiran Peserta (Otoritas Utama)
+Menu: **Rekap Presensi** (`/admin/presensi`)
 
 > ⚠️ **Catatan Penting**: Hanya akun dengan peran **Instruktur** yang berhak mengisi dan menyimpan presensi kehadiran peserta. Admin hanya dapat memantau dalam mode *Read-Only*.
 
-1. Buka kegiatan yang sedang berlangsung.
+1. Buka kegiatan / sesi yang sedang berlangsung.
 2. Pada daftar nama kader aktif, pilih status kehadiran untuk setiap peserta:
    - 🟢 **Hadir**: Peserta hadir mengikuti rangkaian acara.
    - 🟡 **Izin**: Peserta berhalangan dengan keterangan yang sah.
    - 🔴 **Alfa**: Peserta tidak hadir tanpa keterangan.
 3. Klik tombol **"Simpan Presensi"**.
-4. Waktu kehadiran otomatis tercatat secara real-time di sistem dan membuka akses materi serta sertifikat bagi kader yang hadir.
+4. Lakukan **Verifikasi Kehadiran** pada peserta yang telah memenuhi absensi sesi agar tercatat sah sebagai syarat penerbitan sertifikat.
 
 ---
 
-### C. Mengunggah Materi Perkaderan
+### C. Penilaian Peserta Perkaderan (Multi-Sesi)
+Menu: **Kegiatan** -> Pilih Kegiatan -> **Penilaian** (`/admin/kegiatan/{kegiatan}/penilaian`)
+
+1. Buka lembar penilaian peserta kegiatan perkaderan.
+2. Berikan nilai mutu kelulusan (A, B, C, atau D) beserta catatan evaluasi untuk setiap kader.
+3. Nilai ini menjadi salah satu syarat penentu kelayakan penerbitan e-sertifikat kelulusan perkaderan.
+
+---
+
+### D. Mengunggah Materi Perkaderan
 Menu: **Kegiatan** -> Pilih Kegiatan -> **Materi Kegiatan**
 
 1. Klik tombol **"Tambah Materi"**.
@@ -204,7 +214,7 @@ Menu: **Kegiatan** -> Pilih Kegiatan -> **Materi Kegiatan**
 
 ---
 
-### D. Mengunduh Berita Acara & Laporan Kegiatan
+### E. Mengunduh Berita Acara & Laporan Kegiatan
 Menu: **Laporan Kegiatan** (`/admin/laporan-kegiatan`)
 
 Setelah kegiatan selesai, instruktur dapat mengunduh dokumen berita acara / rekap laporan kegiatan resmi berformat PDF yang memuat daftar hadir dan rincian pelaksanaan acara untuk diserahkan ke Pimpinan Cabang.
@@ -223,7 +233,7 @@ Menu: **Validasi Pendaftaran** (`/admin/pendaftaran`)
 3. Periksa kesesuaian data:
    - Buka dokumen identitas (KTP/KTM) dengan tombol **Preview** untuk memastikan calon anggota adalah mahasiswa/kader nyata.
 4. Tentukan Keputusan:
-   - **Setujui (Approve)**: Sistem otomatis membuatkan akun login `User` dan data `Anggota` resmi.
+   - **Setujui (Approve)**: Sistem secara transaksional membuatkan akun login `User` dan data `Anggota` resmi.
    - **Tolak (Reject)**: Berikan alasan penolakan pada kolom catatan admin (misal: *Foto KTP buram, mohon daftar ulang*). Berkas identitas pendaftaran yang ditolak akan otomatis dibersihkan demi menjaga privasi.
 
 ---
@@ -231,7 +241,7 @@ Menu: **Validasi Pendaftaran** (`/admin/pendaftaran`)
 ### B. Mengelola Anggota & Penomoran NIA (Nomor Induk Anggota)
 Menu: **Data Anggota** (`/admin/anggota`)
 
-1. **Mencari & Memfilter Anggota**: Cari berdasarkan nama, NIA, atau filter berdasarkan status aktif, komisariat, dan peran.
+1. **Mencari & Memfilter Anggota**: Cari berdasarkan nama, email, NIA, atau filter berdasarkan status aktif, komisariat, dan peran.
 2. **Menghasilkan NIA (Nomor Induk Anggota)**:
    - **Per Anggota**: Buka detail anggota, klik **"Generate NIA"**.
    - **Massal (Bulk Generate)**: Centang anggota yang belum memiliki NIA, lalu klik tombol **"Generate NIA Massal"**. Sistem otomatis membuatkan nomor induk unik sesuai standar penomoran ikatan.
@@ -248,9 +258,9 @@ Menu: **E-Sertifikat** (`/admin/sertifikat`)
 2. **Generate Sertifikat Massal**:
    - Klik **"Buat Sertifikat"**.
    - Pilih Kegiatan yang telah selesai dilaksanakan.
-   - Sistem akan otomatis menampilkan daftar peserta yang berstatus **Hadir**.
-   - Pilih seluruh atau sebagian peserta, lalu klik **"Generate Sertifikat"**.
-   - Sistem akan memproses pembuatan file sertifikat PDF secara otomatis di latar belakang (*queue job*).
+   - Sistem akan otomatis memfilter dan menampilkan daftar peserta yang memenuhi syarat kelayakan (*Hadir*, *Terverifikasi*, dan *Lulus Penilaian*).
+   - Pilih seluruh atau sebagian peserta yang eligible, lalu klik **"Generate Sertifikat"**.
+   - Sistem memproses pembuatan file sertifikat PDF di latar belakang melalui antrean (*queue job*).
 
 ---
 
@@ -291,14 +301,14 @@ Berikut adalah gambaran bagaimana seluruh peran saling terhubung dalam siklus pe
       │                         ├─ Setujui & Buat Akun ───┼─────────────────────────>│
       │                         │                         │                          │
       │                         │                         ├─ Buat Agenda Kegiatan    │
-      │                         │                         │   (Muncul di Web & App)  │
+      │                         │                         │   (Sesi & Jadwal Acara)  │
       │                         │                         │                          │
-      │                         │                         ├─ Buka Agenda Acara       │
-      │                         │                         ├─ Input Presensi: HADIR ─>│
+      │                         │                         ├─ Input & Verifikasi Presensi
+      │                         │                         ├─ Input Nilai Kelulusan   │
       │                         │                         ├─ Upload Modul / Materi ─>│ (Materi Terbuka)
       │                         │                         │                          │
       │                         ├─ Generate Sertifikat ───┼─────────────────────────>│ (Unduh Sertifikat)
-      │                         │   (Bagi yg Hadir)       │                          │
+      │                         │   (Bagi yg Eligible)    │                          │
       │                         │                         │                          ├─ Unduh E-KTA Resmi
       │                         │                         │                          ├─ Simpan Arsip Dokumen
       │                         │                         │                          │
@@ -311,38 +321,39 @@ Berikut adalah gambaran bagaimana seluruh peran saling terhubung dalam siklus pe
 
 ### 💡 Untuk Kader:
 1. **Simpan E-KTA di Ponsel**: Unduh file PDF E-KTA dan simpan di galeri ponsel Anda. E-KTA ini berlaku sebagai identitas sah saat menghadiri forum resmi seperti Musykom, Musycab, atau perkaderan regional.
-2. **Kumpulkan Materi Perkaderan**: Jangan lupa menandai materi-materi berharga dengan fitur *"Simpan Materi"* agar Anda memiliki perpustakaan digital pribadi ke-IMM-an.
-3. **Amankan Dokumen Berharga**: Gunakan E-Arsip untuk menyimpan scan sertifikat DAD, DAM, surat keputusan mandat, dan berkas penting lainnya agar tidak hilang saat ganti perangkat.
+2. **Kumpulkan Materi Perkaderan**: Tandai materi-materi perkaderan dengan fitur *"Simpan Materi"* agar Anda memiliki perpustakaan digital ke-IMM-an.
+3. **Amankan Dokumen Berharga**: Gunakan E-Arsip untuk menyimpan scan sertifikat DAD, DAM, surat keputusan mandat, dan berkas penting lainnya.
 
 ### 💡 Untuk Instruktur:
-1. **Input Presensi Secara Real-Time**: Lakukan presensi saat agenda berlangsung agar kader dapat langsung mengakses materi dan rekap kehadiran tercatat akurat.
-2. **Unggah Materi Lengkap**: Sertakan modul format PDF yang mudah dibaca peserta dari ponsel.
+1. **Input & Verifikasi Presensi Real-Time**: Lakukan presensi dan verifikasi saat sesi berlangsung agar hak akses materi perkaderan langsung terbuka untuk kader.
+2. **Input Penilaian Tepat Waktu**: Pastikan seluruh nilai kader telah dimasukkan sebelum admin memproses penerbitan sertifikat.
 
 ### 💡 Untuk Admin:
-1. **Periksa Pendaftar Secara Berkala**: Lakukan verifikasi pendaftaran baru minimal 1x seminggu agar calon anggota tidak menunggu lama.
-2. **Manfaatkan Penomoran NIA Massal**: Gunakan fitur *Bulk Generate NIA* setiap kali setelah kegiatan perkaderan utama (seperti DAD) selesai divalidasi.
-3. **Ekspor Data Rutin**: Selalu lakukan ekspor Excel rekapitulasi anggota dan kegiatan sebelum menyusun Laporan Pertanggungjawaban (LPJ) periodik.
+1. **Periksa Pendaftar Secara Berkala**: Lakukan verifikasi pendaftaran baru secara berkala agar calon anggota segera aktif.
+2. **Manfaatkan Penomoran NIA Massal**: Gunakan fitur *Bulk Generate NIA* setelah kegiatan perkaderan utama divalidasi.
+3. **Ekspor Data Rutin**: Selalu lakukan ekspor Excel rekapitulasi anggota dan kegiatan sebelum menyusun Laporan Pertanggungjawaban (LPJ).
 
 ---
 
 ## 8. Tanya Jawab Populer (FAQ & Bantuan)
 
-**Q1: Mengapa tombol "Unduh Sertifikat" belum bisa saya klik?**
-> **Jawab**: Untuk dapat mengunduh sertifikat, Anda wajib tercatat berstatus **Hadir** pada kegiatan tersebut oleh Instruktur dan telah memenuhi syarat keaktifan dasar (minimal menghadiri 3 kegiatan IMM).
+**Q1: Mengapa sertifikat belum muncul di menu "E-Sertifikat Saya"?**
+> **Jawab**: Pastikan kehadiran Anda pada kegiatan telah diverifikasi oleh Instruktur, lulus penilaian (untuk multi-sesi), dan Admin telah memproses penerbitan sertifikat untuk kegiatan tersebut.
 
 **Q2: Mengapa foto profil saya gagal diunggah?**
-> **Jawab**: Pastikan foto berformat JPG, JPEG, atau PNG dengan ukuran file di bawah 2 MB. Hindari foto berformat PDF atau file dokumen.
+> **Jawab**: Pastikan foto berformat JPG, JPEG, atau PNG dengan ukuran file maksimal 2 MB. Sistem akan otomatis mengonversinya menjadi format WebP beresolusi optimal.
 
 **Q3: Apakah data dokumen identitas (KTP/KTM) saya aman?**
-> **Jawab**: Sangat aman. Dokumen identitas disimpan dalam folder privat terenkripsi sistem dan **tidak dapat diakses oleh publik**. Dokumen tersebut hanya bisa dibuka oleh Admin resmi untuk keperluan verifikasi keanggotaan.
+> **Jawab**: Sangat aman. Dokumen identitas disimpan dalam direktori privat terisolasi (`storage/app/private/pendaftaran`) dan **tidak dapat diakses oleh publik**. Dokumen hanya dapat dilihat atau diunduh oleh Admin resmi dengan verifikasi session aktif.
 
 **Q4: Bagaimana cara mengganti peran anggota menjadi Instruktur?**
 > **Jawab**: Perubahan peran dilakukan oleh Admin melalui menu **Data Anggota** -> pilih anggota -> klik **Edit** -> ubah pilihan Role menjadi **Instruktur** -> klik **Simpan**.
 
 **Q5: Ke mana saya harus menghubungi jika mengalami kendala sistem?**
-> **Jawab**: Silakan hubungi Sekretaris / Tim Administrator Pimpinan Cabang IMM melalui kontak resmi yang tertera pada bagian bawah halaman utama website.
+> **Jawab**: Silakan hubungi Tim Administrator / Sekretaris Pimpinan Cabang IMM melalui kontak resmi yang tertera pada bagian bawah landing page website.
 
 ---
 
 *Abadi Perjuangan! Fastabiqul Khairat.*  
 **Dewan Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah**
+
