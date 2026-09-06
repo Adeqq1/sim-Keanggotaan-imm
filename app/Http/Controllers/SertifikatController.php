@@ -10,14 +10,17 @@ use App\Models\Sertifikat;
 use App\Models\User;
 use App\Services\CertificateEligibility;
 use App\Services\VerifiedAttendance;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
 use App\Support\SortParams;
-use Illuminate\Validation\Rule;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Bus\BatchRepository;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\Format;
 use Intervention\Image\ImageManager;
@@ -58,20 +61,21 @@ class SertifikatController extends Controller
                 ->orderBy('nama_lengkap')
                 ->get();
             $eligibility = app(CertificateEligibility::class);
-            $anggotas = $candidates->filter(fn (Anggota $anggota): bool => $eligibility->eligible($selectedKegiatan, $anggota))->values();
+            // eligibleAnggotaIdsFor already verifies attendance and target-year membership.
+            $anggotas = $candidates->filter(fn (Anggota $anggota): bool => $eligibility->evaluate($selectedKegiatan, $anggota, true) !== null)->values();
         }
 
         return view('admin.sertifikat.create', compact('kegiatans', 'anggotas', 'selectedKegiatan', 'selectedKegiatanId'));
     }
 
-    public static function generateCertificateFile(Kegiatan $kegiatan, Anggota $anggota, ?string $instruktur = null): Sertifikat
+    public static function generateCertificateFile(Kegiatan $kegiatan, Anggota $anggota, ?string $instruktur = null, ?array $eligibility = null): Sertifikat
     {
         $issuedAt = now();
         $nomorSertifikat = 'CERT-'.$kegiatan->id.'-'.$anggota->id.'-'.$issuedAt->format('Ymd');
         $role = $anggota->user ? ucfirst($anggota->user->role) : 'Kader';
         $instruktur = $instruktur ?? User::where('role', 'instruktur')->first()?->name ?? 'Pimpinan Cabang';
 
-        $eligibility = app(CertificateEligibility::class)->evaluate($kegiatan, $anggota);
+        $eligibility ??= app(CertificateEligibility::class)->evaluate($kegiatan, $anggota);
         if (! $eligibility) {
             throw new \RuntimeException('Anggota tidak memenuhi syarat sertifikat.');
         }
@@ -79,7 +83,7 @@ class SertifikatController extends Controller
         $useBackground = self::useBackground();
         $pdf = Pdf::loadView('pdf.sertifikat', compact('kegiatan', 'anggota', 'nomorSertifikat', 'role', 'instruktur', 'issuedAt', 'useBackground') + $eligibility)
             ->setPaper('a4', 'landscape');
-        $path = 'sertifikat/'.$nomorSertifikat.'-'.(string) \Illuminate\Support\Str::uuid().'.pdf';
+        $path = 'sertifikat/'.$nomorSertifikat.'-'.(string) Str::uuid().'.pdf';
         try {
             $stored = Storage::disk('public')->put($path, $pdf->output());
 
@@ -163,12 +167,12 @@ class SertifikatController extends Controller
                 ->whereIn('anggota_id', $requestedIds)
                 ->count();
         $legacyBatch = ! array_key_exists('user_id', $batch->options);
-        $queuedBatchJobs = \Illuminate\Support\Facades\DB::table('jobs')->where('payload', 'like', '%'.$batch->id.'%')->exists();
+        $queuedBatchJobs = DB::table('jobs')->where('payload', 'like', '%'.$batch->id.'%')->exists();
         $outputComplete = $requestedIds->isNotEmpty() && $createdCount >= $requestedIds->count();
         $legacyBatchComplete = $legacyBatch && ! $queuedBatchJobs;
 
         if (! $batch->finished() && ($outputComplete || $legacyBatchComplete) && $batch->pendingJobs > 0) {
-            app(\Illuminate\Bus\BatchRepository::class)->markAsFinished($batch->id);
+            app(BatchRepository::class)->markAsFinished($batch->id);
             $batch = $batch->fresh();
         }
 
@@ -219,6 +223,7 @@ class SertifikatController extends Controller
     {
         if (auth()->user()->role === 'admin') {
             abort_unless(Storage::disk('public')->exists($sertifikat->file_sertifikat), 404);
+
             return Storage::disk('public')->download($sertifikat->file_sertifikat);
         }
 
@@ -233,6 +238,7 @@ class SertifikatController extends Controller
         }
 
         abort_unless(Storage::disk('public')->exists($sertifikat->file_sertifikat), 404);
+
         return Storage::disk('public')->download($sertifikat->file_sertifikat);
     }
 

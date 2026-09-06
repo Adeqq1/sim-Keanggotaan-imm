@@ -2,15 +2,17 @@
 
 namespace App\Jobs;
 
+use App\Http\Controllers\SertifikatController;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
 use App\Models\Presensi;
+use App\Models\Sertifikat;
 use App\Services\CertificateEligibility;
-use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
+use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Bus\Batchable;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -46,23 +48,31 @@ class GenerateCertificateJob implements ShouldBeUnique, ShouldQueue
     {
         if ($this->presensi) {
             Log::warning('Legacy certificate claim job skipped.', ['presensi_id' => $this->presensi->getKey()]);
+
             return;
         } else {
             $kegiatan = $this->kegiatan?->fresh();
             $anggota = $this->anggota?->fresh(['user']);
         }
 
-        if (! $kegiatan || ! $anggota || ! app(CertificateEligibility::class)->eligible($kegiatan, $anggota)) {
+        $eligibility = $kegiatan && $anggota
+            ? app(CertificateEligibility::class)->evaluate($kegiatan, $anggota)
+            : null;
+
+        if (! $kegiatan || ! $anggota || ! $eligibility) {
             Log::warning('Certificate generation skipped because attendance is no longer eligible.', [
                 'kegiatan_id' => $kegiatan?->id,
                 'anggota_id' => $anggota?->id,
             ]);
+
             return;
         }
 
-        if (\App\Models\Sertifikat::where('kegiatan_id', $kegiatan->id)->where('anggota_id', $anggota->id)->exists()) return;
+        if (Sertifikat::where('kegiatan_id', $kegiatan->id)->where('anggota_id', $anggota->id)->exists()) {
+            return;
+        }
 
-        \App\Http\Controllers\SertifikatController::generateCertificateFile($kegiatan, $anggota, $this->instruktur);
+        SertifikatController::generateCertificateFile($kegiatan, $anggota, $this->instruktur, $eligibility);
     }
 
     public function failed(?Throwable $exception): void
