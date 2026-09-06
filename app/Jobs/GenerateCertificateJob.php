@@ -52,7 +52,11 @@ class GenerateCertificateJob implements ShouldBeUnique, ShouldQueue
             $anggota = $this->anggota?->fresh(['user']);
         }
 
-        if (! $kegiatan || ! $anggota || ! app(CertificateEligibility::class)->eligible($kegiatan, $anggota)) {
+        $eligibility = $kegiatan && $anggota
+            ? app(CertificateEligibility::class)->evaluate($kegiatan, $anggota)
+            : null;
+
+        if (! $kegiatan || ! $anggota || ! $eligibility) {
             Log::warning('Certificate generation skipped because attendance is no longer eligible.', [
                 'kegiatan_id' => $kegiatan?->id,
                 'anggota_id' => $anggota?->id,
@@ -62,7 +66,7 @@ class GenerateCertificateJob implements ShouldBeUnique, ShouldQueue
 
         if (\App\Models\Sertifikat::where('kegiatan_id', $kegiatan->id)->where('anggota_id', $anggota->id)->exists()) return;
 
-        \App\Http\Controllers\SertifikatController::generateCertificateFile($kegiatan, $anggota, $this->instruktur);
+        \App\Http\Controllers\SertifikatController::generateCertificateFile($kegiatan, $anggota, $this->instruktur, $eligibility);
     }
 
     public function failed(?Throwable $exception): void

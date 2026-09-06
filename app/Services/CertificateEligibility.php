@@ -9,13 +9,14 @@ use App\Models\Sertifikat;
 
 class CertificateEligibility
 {
-    public function evaluate(Kegiatan $kegiatan, Anggota $anggota): ?array
+    public function evaluate(Kegiatan $kegiatan, Anggota $anggota, bool $attendanceAlreadyVerified = false): ?array
     {
         if (! $anggota->status_aktif || $anggota->user?->role !== 'kader') {
             return null;
         }
 
-        if (! $kegiatan->tahunAngkatans()->where('tahun_daftar', $anggota->tahun_daftar)->exists()) {
+        if (! $attendanceAlreadyVerified
+            && ! $kegiatan->tahunAngkatans()->where('tahun_daftar', $anggota->tahun_daftar)->exists()) {
             return null;
         }
 
@@ -30,8 +31,8 @@ class CertificateEligibility
             return null;
         }
 
-        $attendance = app(VerifiedAttendance::class)->countFor($kegiatan, $anggota);
-        if ($attendance < $minimum) {
+        if (! $attendanceAlreadyVerified
+            && app(VerifiedAttendance::class)->countFor($kegiatan, $anggota) < $minimum) {
             return null;
         }
 

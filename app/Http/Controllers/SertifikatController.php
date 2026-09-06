@@ -58,20 +58,21 @@ class SertifikatController extends Controller
                 ->orderBy('nama_lengkap')
                 ->get();
             $eligibility = app(CertificateEligibility::class);
-            $anggotas = $candidates->filter(fn (Anggota $anggota): bool => $eligibility->eligible($selectedKegiatan, $anggota))->values();
+            // eligibleAnggotaIdsFor already verifies attendance and target-year membership.
+            $anggotas = $candidates->filter(fn (Anggota $anggota): bool => $eligibility->evaluate($selectedKegiatan, $anggota, true) !== null)->values();
         }
 
         return view('admin.sertifikat.create', compact('kegiatans', 'anggotas', 'selectedKegiatan', 'selectedKegiatanId'));
     }
 
-    public static function generateCertificateFile(Kegiatan $kegiatan, Anggota $anggota, ?string $instruktur = null): Sertifikat
+    public static function generateCertificateFile(Kegiatan $kegiatan, Anggota $anggota, ?string $instruktur = null, ?array $eligibility = null): Sertifikat
     {
         $issuedAt = now();
         $nomorSertifikat = 'CERT-'.$kegiatan->id.'-'.$anggota->id.'-'.$issuedAt->format('Ymd');
         $role = $anggota->user ? ucfirst($anggota->user->role) : 'Kader';
         $instruktur = $instruktur ?? User::where('role', 'instruktur')->first()?->name ?? 'Pimpinan Cabang';
 
-        $eligibility = app(CertificateEligibility::class)->evaluate($kegiatan, $anggota);
+        $eligibility ??= app(CertificateEligibility::class)->evaluate($kegiatan, $anggota);
         if (! $eligibility) {
             throw new \RuntimeException('Anggota tidak memenuhi syarat sertifikat.');
         }
