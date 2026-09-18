@@ -92,7 +92,7 @@ return [
     'contact' => [
         'address' => 'Kompleks Islamic Center, Jl. Rang Kayo Hitam, Cadika, Rimbo Tengah, Kab.Bungo, Prov.Jambi', // TODO: konfirmasi alamat resmi
         'email' => 'pcimmbungo64@gmail.com',                                // TODO: konfirmasi email resmi
-        'website' => 'https://imm.or.id',
+        'website' => 'https://immbungo.com/',
     ],
 
     'social_links' => [
