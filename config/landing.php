@@ -16,9 +16,9 @@ return [
     */
     'stats' => [
         ['value' => '1000+', 'label' => 'Anggota Aktif'],
-        ['value' => '50+',   'label' => 'Komisariat'],
-        ['value' => '100+',  'label' => 'Kegiatan / Tahun'],
-        ['value' => '60+',   'label' => 'Tahun Berkarya'],
+        ['value' => '2+',   'label' => 'Komisariat'],
+        ['value' => '20+',  'label' => 'Kegiatan / Tahun'],
+        ['value' => '6+',   'label' => 'Tahun Berkarya'],
     ],
 
     /*
