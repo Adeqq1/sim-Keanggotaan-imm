@@ -26,6 +26,18 @@ class SertifikatFactory extends Factory
             'anggota_id' => Anggota::factory(),
             'nomor_sertifikat' => 'CERT-'.fake()->unique()->numerify('####'),
             'file_sertifikat' => 'sertifikat/dummy.pdf',
+            'tipe_sertifikat' => Sertifikat::SATU_SESI,
+            'nilai_snapshot' => null,
         ];
+    }
+
+    public function legacy(): static
+    {
+        return $this->state(['tipe_sertifikat' => null, 'nilai_snapshot' => null]);
+    }
+
+    public function p0(): static
+    {
+        return $this->state(['tipe_sertifikat' => Sertifikat::SATU_SESI, 'nilai_snapshot' => null]);
     }
 }

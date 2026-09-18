@@ -1,0 +1,480 @@
+<?php
+
+use App\Models\Pendaftaran;
+use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+
+beforeEach(function () {
+    Storage::fake('local');
+    Storage::fake('public');
+});
+
+function identityDocumentPayload(array $overrides = []): array
+{
+    $defaults = [
+        'nama_lengkap' => 'Calon Anggota',
+        'email' => 'calon.anggota@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+        'role' => 'kader',
+        'jenis_dokumen_identitas' => 'ktp',
+        'tempat_lahir' => 'Yogyakarta',
+        'tanggal_lahir' => '2000-01-01',
+        'no_telp' => '08123456789',
+        'alamat' => 'Jl. Contoh No. 1',
+        'tahun_daftar' => 2024,
+        'file_persyaratan' => validIdentityPdf(),
+    ];
+
+    if (($overrides['role'] ?? $defaults['role']) === 'kader'
+        && ! array_key_exists('komisariat_id', $overrides)) {
+        $defaults['komisariat_id'] = array_key_first(Pendaftaran::KOMISARIAT);
+    }
+
+    return array_merge($defaults, $overrides);
+}
+
+function validIdentityPdf(string $name = 'identitas.pdf'): UploadedFile
+{
+    return UploadedFile::fake()->createWithContent($name, "%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF");
+}
+
+function identityDocumentXPath(string $content): DOMXPath
+{
+    $dom = new DOMDocument();
+    $previous = libxml_use_internal_errors(true);
+    $dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR | LIBXML_NOWARNING);
+    libxml_use_internal_errors($previous);
+
+    return new DOMXPath($dom);
+}
+
+test('public registration form exposes required identity document fields and roles', function () {
+    $response = $this->get(route('pendaftaran'));
+
+    $response->assertOk()
+        ->assertSee('name="jenis_dokumen_identitas"', false)
+        ->assertSee('value="ktp"', false)
+        ->assertSee('value="ktm"', false)
+        ->assertSee('name="file_persyaratan"', false)
+        ->assertSee('name="file_persyaratan"', false)
+        ->assertSee('accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"', false)
+        ->assertSee('Maksimum 2 MB')
+        ->assertSee('value="kader"', false)
+        ->assertSee('value="instruktur"', false);
+
+    expect($response->getContent())
+        ->not->toContain('Wajib diisi')
+        ->toContain('class="text-danger" aria-hidden="true">*</span>')
+        ->toContain('id="jenis_dokumen_identitas"')
+        ->toContain('id="file_persyaratan"')
+        ->toContain('name="jenis_dokumen_identitas"')
+        ->toContain('required');
+});
+
+test('public registration requires identity type and file', function () {
+    $response = $this->from(route('pendaftaran'))
+        ->post(route('pendaftaran.store'), identityDocumentPayload([
+            'email' => 'missing.identity@example.com',
+            'jenis_dokumen_identitas' => '',
+            'file_persyaratan' => null,
+        ]));
+
+    $response->assertRedirect(route('pendaftaran'))
+        ->assertSessionHasErrors(['jenis_dokumen_identitas', 'file_persyaratan']);
+
+    $this->assertDatabaseMissing('pendaftaran', ['email' => 'missing.identity@example.com']);
+});
+
+test('public registration is limited to five requests per minute per IP', function () {
+    $ip = '203.0.113.10';
+
+    foreach (range(1, 5) as $attempt) {
+        $this->withServerVariables(['REMOTE_ADDR' => $ip])
+            ->post(route('pendaftaran.store'), identityDocumentPayload([
+                'email' => "throttle-{$attempt}@example.com",
+            ]))
+            ->assertRedirect(route('pendaftaran.success'));
+    }
+
+    $blocked = $this->withServerVariables(['REMOTE_ADDR' => $ip])
+        ->post(route('pendaftaran.store'), identityDocumentPayload([
+            'email' => 'throttle-blocked@example.com',
+        ]));
+
+    $blocked->assertTooManyRequests()
+        ->assertHeader('X-RateLimit-Limit', '5')
+        ->assertHeader('X-RateLimit-Remaining', '0')
+        ->assertHeader('Retry-After');
+
+    $this->assertDatabaseMissing('pendaftaran', [
+        'email' => 'throttle-blocked@example.com',
+    ]);
+    expect(Storage::disk('local')->allFiles('pendaftaran'))->toHaveCount(5);
+
+    $this->withServerVariables(['REMOTE_ADDR' => $ip])
+        ->get(route('pendaftaran'))
+        ->assertOk();
+
+    $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.10'])
+        ->post(route('pendaftaran.store'), identityDocumentPayload([
+            'email' => 'throttle-other-ip@example.com',
+        ]))
+        ->assertRedirect(route('pendaftaran.success'));
+});
+
+test('public registration rejects an unknown identity type', function () {
+    $response = $this->from(route('pendaftaran'))
+        ->post(route('pendaftaran.store'), identityDocumentPayload([
+            'email' => 'invalid.identity.type@example.com',
+            'jenis_dokumen_identitas' => 'sim',
+        ]));
+
+    $response->assertRedirect(route('pendaftaran'))
+        ->assertSessionHasErrors('jenis_dokumen_identitas');
+});
+
+test('public registration accepts every supported identity document format', function (UploadedFile $file) {
+    $response = $this->post(route('pendaftaran.store'), identityDocumentPayload([
+        'email' => fake()->unique()->safeEmail(),
+        'file_persyaratan' => $file,
+    ]));
+
+    $response->assertRedirect(route('pendaftaran.success'));
+})->with([
+    'pdf' => fn () => validIdentityPdf(),
+    'jpg' => fn () => UploadedFile::fake()->image('identitas.jpg'),
+    'jpeg' => fn () => UploadedFile::fake()->image('identitas.jpeg'),
+    'png' => fn () => UploadedFile::fake()->image('identitas.png'),
+]);
+
+test('public registration rejects unsupported identity files', function (UploadedFile $file) {
+    $response = $this->from(route('pendaftaran'))
+        ->post(route('pendaftaran.store'), identityDocumentPayload([
+            'email' => fake()->unique()->safeEmail(),
+            'file_persyaratan' => $file,
+        ]));
+
+    $response->assertRedirect(route('pendaftaran'))
+        ->assertSessionHasErrors('file_persyaratan');
+})->with([
+    'text file' => fn () => UploadedFile::fake()->create('identitas.txt', 10, 'text/plain'),
+    'mismatched mime' => fn () => UploadedFile::fake()->create('identitas.pdf', 10, 'text/plain'),
+]);
+
+test('public registration enforces the identity file size limit', function (int $kilobytes, bool $valid) {
+    $email = fake()->unique()->safeEmail();
+    $response = $this->from(route('pendaftaran'))
+        ->post(route('pendaftaran.store'), identityDocumentPayload([
+            'email' => $email,
+            'file_persyaratan' => UploadedFile::fake()->create('identitas.pdf', $kilobytes, 'application/pdf'),
+        ]));
+
+    if ($valid) {
+        $response->assertRedirect(route('pendaftaran.success'));
+        $this->assertDatabaseHas('pendaftaran', ['email' => $email]);
+    } else {
+        $response->assertRedirect(route('pendaftaran'))
+            ->assertSessionHasErrors('file_persyaratan');
+        $this->assertDatabaseMissing('pendaftaran', ['email' => $email]);
+    }
+})->with([
+    '2048 KiB' => [2048, true],
+    '2049 KiB' => [2049, false],
+]);
+
+test('kader and instruktur registrations both require and store identity documents', function (string $role) {
+    $email = fake()->unique()->safeEmail();
+
+    $response = $this->post(route('pendaftaran.store'), identityDocumentPayload([
+        'email' => $email,
+        'role' => $role,
+        'jenis_dokumen_identitas' => 'ktm',
+    ]));
+
+    $response->assertRedirect(route('pendaftaran.success'));
+    $this->assertDatabaseHas('pendaftaran', [
+        'email' => $email,
+        'role' => $role,
+        'jenis_dokumen_identitas' => 'ktm',
+    ]);
+})->with(['kader', 'instruktur']);
+
+test('public registration stores identity documents privately with a generated path', function () {
+    $response = $this->post(route('pendaftaran.store'), identityDocumentPayload([
+        'email' => 'private.identity@example.com',
+        'file_persyaratan' => validIdentityPdf('original-name.pdf'),
+    ]));
+
+    $response->assertRedirect(route('pendaftaran.success'));
+
+    $pendaftaran = Pendaftaran::where('email', 'private.identity@example.com')->firstOrFail();
+
+    expect($pendaftaran->file_persyaratan)
+        ->toStartWith('pendaftaran/')
+        ->not->toContain('original-name');
+
+    Storage::disk('local')->assertExists($pendaftaran->file_persyaratan);
+    Storage::disk('public')->assertMissing($pendaftaran->file_persyaratan);
+});
+
+test('uploaded identity document is cleaned up when database creation fails', function () {
+    Pendaftaran::creating(function () {
+        throw new RuntimeException('Simulated database failure.');
+    });
+
+    expect(fn () => $this->withoutExceptionHandling()->post(
+        route('pendaftaran.store'),
+        identityDocumentPayload(['email' => 'cleanup.identity@example.com'])
+    ))->toThrow(RuntimeException::class, 'Simulated database failure.');
+
+    Pendaftaran::flushEventListeners();
+
+    expect(Storage::disk('local')->allFiles('pendaftaran'))->toBeEmpty();
+    $this->assertDatabaseMissing('pendaftaran', ['email' => 'cleanup.identity@example.com']);
+});
+
+test('admin can see and download an identity document through the private route', function () {
+    $admin = User::factory()->admin()->create();
+    $path = 'pendaftaran/private-identity.pdf';
+    Storage::disk('local')->put($path, '%PDF-1.4 private document');
+    $pendaftaran = Pendaftaran::factory()->create([
+        'file_persyaratan' => $path,
+        'jenis_dokumen_identitas' => 'ktp',
+    ]);
+
+    $detail = $this->actingAs($admin)->get(route('admin.pendaftaran.show', $pendaftaran));
+    $detail->assertOk()
+        ->assertSeeText('Jenis Dokumen Identitas')
+        ->assertSeeText('KTP')
+        ->assertSee(route('admin.pendaftaran.document.download', $pendaftaran), false)
+        ->assertDontSee('/storage/pendaftaran/', false);
+
+    $download = $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.download', $pendaftaran));
+
+    $download->assertSuccessful()
+        ->assertHeader('Cache-Control', 'max-age=0, no-store, private')
+        ->assertHeader('Pragma', 'no-cache')
+        ->assertHeader('X-Content-Type-Options', 'nosniff')
+        ->assertHeader('Content-Disposition', 'attachment; filename=ktp-pendaftaran-'.$pendaftaran->id.'.pdf');
+});
+
+test('admin download returns not found for missing legacy documents', function () {
+    $admin = User::factory()->admin()->create();
+    $legacy = Pendaftaran::factory()->create(['file_persyaratan' => null]);
+    $missing = Pendaftaran::factory()->create(['file_persyaratan' => 'pendaftaran/missing.pdf']);
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.download', $legacy))
+        ->assertNotFound();
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.download', $missing))
+        ->assertNotFound();
+});
+
+test('only admins can download registration identity documents', function () {
+    $path = 'pendaftaran/access-test.pdf';
+    Storage::disk('local')->put($path, '%PDF-1.4 access test');
+    $pendaftaran = Pendaftaran::factory()->create(['file_persyaratan' => $path]);
+    $kader = User::factory()->kader()->create();
+    $instruktur = User::factory()->instruktur()->create();
+
+    $this->get(route('admin.pendaftaran.document.download', $pendaftaran))
+        ->assertRedirect(route('login'));
+
+    $this->actingAs($kader)
+        ->get(route('admin.pendaftaran.document.download', $pendaftaran))
+        ->assertForbidden();
+
+    $this->actingAs($instruktur)
+        ->get(route('admin.pendaftaran.document.download', $pendaftaran))
+        ->assertForbidden();
+});
+
+test('legacy registration detail identifies missing document metadata without a download link', function () {
+    $admin = User::factory()->admin()->create();
+    $pendaftaran = Pendaftaran::factory()->create(['file_persyaratan' => null]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.show', $pendaftaran))
+        ->assertOk()
+        ->assertSeeText('Tidak tercatat (data lama)')
+        ->assertSeeText('Dokumen tidak tersedia pada data lama')
+        ->assertDontSee('admin.pendaftaran.document.download');
+});
+
+test('admin can preview image identity document inline with correct headers', function () {
+    $admin = User::factory()->admin()->create();
+    $path = 'pendaftaran/preview-identity.jpg';
+    $image = UploadedFile::fake()->image('preview-identity.jpg', 100, 100);
+    Storage::disk('local')->put($path, $image->getContent());
+    $pendaftaran = Pendaftaran::factory()->create([
+        'file_persyaratan' => $path,
+        'jenis_dokumen_identitas' => 'ktp',
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.preview', $pendaftaran));
+
+    $response->assertSuccessful()
+        ->assertHeader('Content-Type', 'image/jpeg')
+        ->assertHeader('Content-Disposition', 'inline; filename=ktp-pendaftaran-'.$pendaftaran->id.'.jpg')
+        ->assertHeader('Cache-Control', 'max-age=0, no-store, private')
+        ->assertHeader('Pragma', 'no-cache')
+        ->assertHeader('X-Content-Type-Options', 'nosniff');
+});
+
+test('admin can preview PDF identity document inline', function () {
+    $admin = User::factory()->admin()->create();
+    $path = 'pendaftaran/preview-identity.pdf';
+    Storage::disk('local')->put($path, '%PDF-1.4 content');
+    $pendaftaran = Pendaftaran::factory()->create([
+        'file_persyaratan' => $path,
+        'jenis_dokumen_identitas' => 'ktp',
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.preview', $pendaftaran));
+
+    $response->assertSuccessful()
+        ->assertHeader('Content-Type', 'application/pdf')
+        ->assertHeader('Content-Disposition', 'inline; filename=ktp-pendaftaran-'.$pendaftaran->id.'.pdf');
+});
+
+test('download endpoint remains attachment after preview is added', function () {
+    $admin = User::factory()->admin()->create();
+    $path = 'pendaftaran/download-still-attachment.pdf';
+    Storage::disk('local')->put($path, '%PDF-1.4 attachment test');
+    $pendaftaran = Pendaftaran::factory()->create([
+        'file_persyaratan' => $path,
+        'jenis_dokumen_identitas' => 'ktp',
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.download', $pendaftaran));
+
+    $response->assertSuccessful()
+        ->assertHeader('Content-Disposition', 'attachment; filename=ktp-pendaftaran-'.$pendaftaran->id.'.pdf');
+});
+
+test('preview returns 404 for missing or empty path documents', function () {
+    $admin = User::factory()->admin()->create();
+    $legacy = Pendaftaran::factory()->create(['file_persyaratan' => null]);
+    $missing = Pendaftaran::factory()->create(['file_persyaratan' => 'pendaftaran/missing.pdf']);
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.preview', $legacy))
+        ->assertNotFound();
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.preview', $missing))
+        ->assertNotFound();
+});
+
+test('preview returns 404 for documents with disallowed MIME type', function () {
+    $admin = User::factory()->admin()->create();
+    $path = 'pendaftaran/unknown-type.bin';
+    Storage::disk('local')->put($path, 'binary content');
+    $pendaftaran = Pendaftaran::factory()->create([
+        'file_persyaratan' => $path,
+        'jenis_dokumen_identitas' => 'ktp',
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.preview', $pendaftaran))
+        ->assertNotFound();
+});
+
+test('preview returns 404 for image extension with non-image content', function () {
+    $admin = User::factory()->admin()->create();
+    $path = 'pendaftaran/not-an-image.jpg';
+    Storage::disk('local')->put($path, '<!doctype html><html><body>bukan gambar</body></html>');
+    $pendaftaran = Pendaftaran::factory()->create([
+        'file_persyaratan' => $path,
+        'jenis_dokumen_identitas' => 'ktp',
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.preview', $pendaftaran))
+        ->assertNotFound();
+});
+
+test('only admins can preview registration identity documents', function () {
+    $path = 'pendaftaran/access-preview-test.jpg';
+    Storage::disk('local')->put($path, 'fake-image-content');
+    $pendaftaran = Pendaftaran::factory()->create(['file_persyaratan' => $path]);
+    $kader = User::factory()->kader()->create();
+    $instruktur = User::factory()->instruktur()->create();
+
+    $this->get(route('admin.pendaftaran.document.preview', $pendaftaran))
+        ->assertRedirect(route('login'));
+
+    $this->actingAs($kader)
+        ->get(route('admin.pendaftaran.document.preview', $pendaftaran))
+        ->assertForbidden();
+
+    $this->actingAs($instruktur)
+        ->get(route('admin.pendaftaran.document.preview', $pendaftaran))
+        ->assertForbidden();
+});
+
+test('admin pendaftaran index shows preview controls for image and PDF documents', function () {
+    $admin = User::factory()->admin()->create();
+
+    $jpgDoc = Pendaftaran::factory()->create(['file_persyaratan' => 'pendaftaran/img.jpg']);
+    $pdfDoc = Pendaftaran::factory()->create(['file_persyaratan' => 'pendaftaran/doc.pdf']);
+
+    $content = $this->actingAs($admin)->get(route('admin.pendaftaran.index'))->assertOk()->getContent();
+
+    $xpath = identityDocumentXPath($content);
+
+    $imageButtons = $xpath->query('//button[contains(concat(" ", normalize-space(@class), " "), " preview-image-btn ")]');
+    expect($imageButtons->length)->toBeGreaterThanOrEqual(1);
+
+    $jpgButton = null;
+    for ($i = 0; $i < $imageButtons->length; $i++) {
+        $node = $imageButtons->item($i);
+        if ($node->getAttribute('data-preview-url') === route('admin.pendaftaran.document.preview', $jpgDoc)) {
+            $jpgButton = $node;
+            break;
+        }
+    }
+
+    expect($jpgButton)->not->toBeNull()
+        ->and($jpgButton->getAttribute('data-download-url'))->toBe(route('admin.pendaftaran.document.download', $jpgDoc))
+        ->and($jpgButton->getAttribute('data-bs-toggle'))->toBe('modal')
+        ->and($jpgButton->getAttribute('data-bs-target'))->toBe('#previewDocumentModal');
+
+    $pdfLinks = $xpath->query('//a[@href="'.route('admin.pendaftaran.document.preview', $pdfDoc).'"]');
+    expect($pdfLinks->length)->toBe(1);
+
+    $pdfLink = $pdfLinks->item(0);
+    expect($pdfLink->getAttribute('target'))->toBe('_blank')
+        ->and($pdfLink->getAttribute('rel'))->toBe('noopener')
+        ->and($pdfLink->getAttribute('data-bs-toggle'))->toBe('');
+});
+
+test('admin pendaftaran detail shows preview controls for image and PDF documents', function () {
+    $admin = User::factory()->admin()->create();
+
+    $jpgDoc = Pendaftaran::factory()->create(['file_persyaratan' => 'pendaftaran/detail-img.jpg']);
+    $pdfDoc = Pendaftaran::factory()->create(['file_persyaratan' => 'pendaftaran/detail-doc.pdf']);
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.show', $jpgDoc))
+        ->assertOk()
+        ->assertSee(route('admin.pendaftaran.document.preview', $jpgDoc), false)
+        ->assertSee('Pratinjau Dokumen', false)
+        ->assertSee('preview-image-btn', false);
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.show', $pdfDoc))
+        ->assertOk()
+        ->assertSee(route('admin.pendaftaran.document.preview', $pdfDoc), false)
+        ->assertSee('Buka PDF di Tab Baru', false)
+        ->assertSee('target="_blank"', false)
+        ->assertSee('rel="noopener"', false);
+});

@@ -31,6 +31,7 @@ class AnggotaFactory extends Factory
             'alamat' => $faker->address(),
             'no_telp' => $faker->phoneNumber(),
             'status_aktif' => true,
+            'tahun_daftar' => now()->year,
         ];
     }
 

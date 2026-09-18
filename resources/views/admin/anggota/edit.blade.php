@@ -21,18 +21,6 @@
 
     <div class="card shadow-sm border-0">
         <div class="card-body p-4">
-            @if(session('warning'))
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-triangle me-2"></i>{{ session('warning') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup notifikasi"></button>
-                </div>
-            @endif
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup notifikasi"></button>
-                </div>
-            @endif
             <form action="{{ route('admin.anggota.update', $anggota->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
@@ -40,17 +28,17 @@
                 <div class="mb-4">
                     <label class="form-label fw-bold">Foto Profil</label>
                     
-                    @if($anggota->foto_profil)
+                    @if($anggota->foto_profil_url)
                         <div class="mb-2">
-                            <img src="{{ Storage::url($anggota->foto_profil) }}" class="rounded shadow-sm" width="100" height="100" style="object-fit: cover;">
+                            <img src="{{ $anggota->foto_profil_url }}" alt="{{ $anggota->nama_lengkap }}" class="rounded shadow-sm" width="100" height="100" style="object-fit: cover;" onerror="this.style.display='none';">
                         </div>
                     @endif
                     
-                    <input type="file" name="foto_profil" class="form-control @error('foto_profil') is-invalid @enderror" accept="image/*">
+                    <input type="file" name="foto_profil" class="form-control @error('foto_profil') is-invalid @enderror" accept="image/jpeg,image/png">
                     @error('foto_profil')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
-                    <small class="text-muted">Format: JPG, PNG, max 2MB. Kosongkan jika tidak ingin mengubah.</small>
+                    <small class="text-muted">JPG, JPEG, atau PNG, maksimum 2 MB dan 2048 x 2048 piksel. Disimpan sebagai WebP. Kosongkan jika tidak ingin mengubah.</small>
                 </div>
 
                 <div class="row g-3">

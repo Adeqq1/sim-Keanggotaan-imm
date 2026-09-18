@@ -21,6 +21,7 @@ class PresensiSeeder extends Seeder
             foreach ($anggotas as $anggota) {
                 Presensi::create([
                     'kegiatan_id' => $kegiatan->id,
+                    'sesi_kegiatan_id' => $kegiatan->sesiKegiatans()->first()->id,
                     'anggota_id' => $anggota->id,
                     'waktu_hadir' => now(),
                     'status_kehadiran' => fake()->randomElement(['hadir', 'izin', 'alfa']),

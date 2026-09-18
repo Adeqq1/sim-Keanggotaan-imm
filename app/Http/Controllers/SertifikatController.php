@@ -6,71 +6,191 @@ use App\Http\Requests\SertifikatRequest;
 use App\Jobs\GenerateCertificateJob;
 use App\Models\Anggota;
 use App\Models\Kegiatan;
-use App\Models\Presensi;
 use App\Models\Sertifikat;
 use App\Models\User;
+use App\Services\CertificateEligibility;
+use App\Services\VerifiedAttendance;
+use App\Support\SortParams;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Bus\BatchRepository;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\Format;
 use Intervention\Image\ImageManager;
 
 class SertifikatController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $sertifikats = Sertifikat::with(['kegiatan', 'anggota'])->latest()->paginate(6);
+        $options = ['anggota' => 'Nama Anggota', 'kegiatan' => 'Nama Kegiatan', 'nomor' => 'Nomor', 'tanggal_kegiatan' => 'Tanggal Kegiatan', 'created' => 'Waktu Ditambahkan'];
+        $sort = SortParams::resolve($request, array_keys($options), 'created');
+        $columns = ['nomor' => 'nomor_sertifikat', 'created' => 'sertifikat.created_at'];
+        $sertifikats = Sertifikat::with(['kegiatan', 'anggota'])
+            ->when(! in_array($sort['key'], ['anggota', 'kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy($columns[$sort['key']], $sort['direction']))
+            ->when($sort['key'] === 'anggota', fn ($query) => $query->orderBy(Anggota::select('nama_lengkap')->whereColumn('anggota.id', 'sertifikat.anggota_id'), $sort['direction']))
+            ->when(in_array($sort['key'], ['kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy(Kegiatan::select($sort['key'] === 'kegiatan' ? 'nama_kegiatan' : 'tanggal_waktu')->whereColumn('kegiatan.id', 'sertifikat.kegiatan_id'), $sort['direction']))
+            ->orderByDesc('sertifikat.id')->paginate(6)->withQueryString();
 
-        return view('admin.sertifikat.index', compact('sertifikats'));
+        return view('admin.sertifikat.index', compact('sertifikats', 'options', 'sort'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $kegiatans = Kegiatan::latest()->get();
-        $anggotas = Anggota::where('status_aktif', true)->get();
+        $selectedKegiatanId = $request->validate([
+            'kegiatan_id' => ['nullable', Rule::exists('kegiatan', 'id')],
+        ])['kegiatan_id'] ?? old('kegiatan_id');
+        $selectedKegiatan = $selectedKegiatanId ? $kegiatans->firstWhere('id', (int) $selectedKegiatanId) : null;
+        $anggotas = collect();
 
-        return view('admin.sertifikat.create', compact('kegiatans', 'anggotas'));
+        if ($selectedKegiatan) {
+            $eligibleIds = app(VerifiedAttendance::class)->eligibleAnggotaIdsFor($selectedKegiatan);
+            $candidates = Anggota::query()
+                ->with('user')
+                ->where('status_aktif', true)
+                ->whereIn('id', $eligibleIds)
+                ->whereHas('user', fn ($query) => $query->where('role', 'kader'))
+                ->whereDoesntHave('sertifikat', fn ($query) => $query->where('kegiatan_id', $selectedKegiatan->id))
+                ->orderBy('nama_lengkap')
+                ->get();
+            $eligibility = app(CertificateEligibility::class);
+            // eligibleAnggotaIdsFor already verifies attendance and target-year membership.
+            $anggotas = $candidates->filter(fn (Anggota $anggota): bool => $eligibility->evaluate($selectedKegiatan, $anggota, true) !== null)->values();
+        }
+
+        return view('admin.sertifikat.create', compact('kegiatans', 'anggotas', 'selectedKegiatan', 'selectedKegiatanId'));
     }
 
-    public static function generateCertificateFile(Kegiatan $kegiatan, Anggota $anggota, ?string $instruktur = null): Sertifikat
+    public static function generateCertificateFile(Kegiatan $kegiatan, Anggota $anggota, ?string $instruktur = null, ?array $eligibility = null): Sertifikat
     {
-        $nomorSertifikat = 'CERT-'.$kegiatan->id.'-'.$anggota->id.'-'.now()->format('Ymd');
+        $issuedAt = now();
+        $nomorSertifikat = 'CERT-'.$kegiatan->id.'-'.$anggota->id.'-'.$issuedAt->format('Ymd');
         $role = $anggota->user ? ucfirst($anggota->user->role) : 'Kader';
         $instruktur = $instruktur ?? User::where('role', 'instruktur')->first()?->name ?? 'Pimpinan Cabang';
 
-        // Generate PDF
-        $pdf = Pdf::loadView('pdf.sertifikat', compact('kegiatan', 'anggota', 'nomorSertifikat', 'role', 'instruktur'))
-            ->setPaper('a4', 'landscape');
-        $path = 'sertifikat/'.$nomorSertifikat.'.pdf';
-        Storage::disk('public')->put($path, $pdf->output());
+        $eligibility ??= app(CertificateEligibility::class)->evaluate($kegiatan, $anggota);
+        if (! $eligibility) {
+            throw new \RuntimeException('Anggota tidak memenuhi syarat sertifikat.');
+        }
 
-        return Sertifikat::updateOrCreate(
-            ['kegiatan_id' => $kegiatan->id, 'anggota_id' => $anggota->id],
-            [
+        $useBackground = self::useBackground();
+        $pdf = Pdf::loadView('pdf.sertifikat', compact('kegiatan', 'anggota', 'nomorSertifikat', 'role', 'instruktur', 'issuedAt', 'useBackground') + $eligibility)
+            ->setPaper('a4', 'landscape');
+        $path = 'sertifikat/'.$nomorSertifikat.'-'.(string) Str::uuid().'.pdf';
+        try {
+            $stored = Storage::disk('public')->put($path, $pdf->output());
+
+            if (! $stored) {
+                throw new \RuntimeException('Gagal menyimpan file sertifikat.');
+            }
+        } catch (\Throwable $exception) {
+            Storage::disk('public')->delete($path);
+            throw $exception;
+        }
+
+        try {
+            return Sertifikat::create([
+                'kegiatan_id' => $kegiatan->id,
+                'anggota_id' => $anggota->id,
                 'nomor_sertifikat' => $nomorSertifikat,
                 'file_sertifikat' => $path,
-            ]
-        );
+                'tipe_sertifikat' => $eligibility['tipe_sertifikat'],
+                'nilai_snapshot' => $eligibility['nilai_snapshot'],
+                'created_at' => $issuedAt,
+                'updated_at' => $issuedAt,
+            ]);
+        } catch (\Throwable $exception) {
+            Storage::disk('public')->delete($path);
+
+            if ($exception instanceof QueryException) {
+                $existing = Sertifikat::where('kegiatan_id', $kegiatan->id)
+                    ->where('anggota_id', $anggota->id)
+                    ->first();
+
+                if ($existing) {
+                    return $existing;
+                }
+            }
+
+            throw $exception;
+        }
     }
 
     public function generate(SertifikatRequest $request)
     {
         $validated = $request->validated();
-        $kegiatan = Kegiatan::findOrFail($validated['kegiatan_id']);
+        $kegiatan = Kegiatan::with([])->findOrFail($validated['kegiatan_id']);
         $instruktur = User::where('role', 'instruktur')->first()?->name ?? 'Pimpinan Cabang';
+        $anggotaIds = $validated['anggota_ids'];
+        $anggotas = Anggota::with('user')->whereIn('id', $anggotaIds)->get()->keyBy('id');
 
-        foreach ($validated['anggota_ids'] as $anggotaId) {
-            $anggota = Anggota::findOrFail($anggotaId);
-            GenerateCertificateJob::dispatch(null, $kegiatan, $anggota, $instruktur);
-        }
+        abort_unless($anggotas->count() === count($anggotaIds), 422);
 
-        return redirect()->route('admin.sertifikat.index')->with('success', 'Sertifikat sedang dibuat di latar belakang.');
+        $eligibility = app(CertificateEligibility::class);
+        abort_unless($anggotas->every(fn (Anggota $anggota): bool => $eligibility->eligible($kegiatan, $anggota)), 422);
+
+        $jobs = collect($anggotaIds)->map(function (int $anggotaId) use ($anggotas, $kegiatan, $instruktur) {
+            return new GenerateCertificateJob(null, $kegiatan, $anggotas->get($anggotaId), $instruktur);
+        })->all();
+        $batch = Bus::batch($jobs)
+            ->name('sertifikat-generation:user-'.auth()->id())
+            ->withOption('user_id', auth()->id())
+            ->withOption('kegiatan_id', $kegiatan->id)
+            ->withOption('anggota_ids', array_values($anggotaIds))
+            ->allowFailures()
+            ->dispatch();
+
+        return redirect()->route('admin.sertifikat.index', ['generation' => $batch->id])->with('success', 'Sertifikat sedang dibuat di latar belakang.');
     }
 
-    public function mySertifikat()
+    public function generationStatus(string $batchId)
+    {
+        $batch = Bus::findBatch($batchId);
+        $ownedByCurrentAdmin = $batch && (
+            (int) ($batch->options['user_id'] ?? 0) === (int) auth()->id()
+            || $batch->name === 'sertifikat-generation:user-'.auth()->id()
+        );
+        abort_unless($ownedByCurrentAdmin, 404);
+
+        $requestedIds = collect($batch->options['anggota_ids'] ?? [])->map(fn ($id) => (int) $id);
+        $createdCount = $requestedIds->isEmpty() || ! $batch->options['kegiatan_id']
+            ? 0
+            : Sertifikat::query()
+                ->where('kegiatan_id', $batch->options['kegiatan_id'])
+                ->whereIn('anggota_id', $requestedIds)
+                ->count();
+        $legacyBatch = ! array_key_exists('user_id', $batch->options);
+        $queuedBatchJobs = DB::table('jobs')->where('payload', 'like', '%'.$batch->id.'%')->exists();
+        $outputComplete = $requestedIds->isNotEmpty() && $createdCount >= $requestedIds->count();
+        $legacyBatchComplete = $legacyBatch && ! $queuedBatchJobs;
+
+        if (! $batch->finished() && ($outputComplete || $legacyBatchComplete) && $batch->pendingJobs > 0) {
+            app(BatchRepository::class)->markAsFinished($batch->id);
+            $batch = $batch->fresh();
+        }
+
+        $processed = $legacyBatchComplete ? $batch->totalJobs : max($batch->processedJobs(), $createdCount);
+        $finished = $batch->finished() || $outputComplete || $legacyBatchComplete;
+
+        return response()->json([
+            'status' => $finished ? ($batch->failedJobs > 0 ? 'finished_with_failures' : 'finished') : 'processing',
+            'total' => $batch->totalJobs,
+            'processed' => $processed,
+            'pending' => max(0, $batch->totalJobs - $processed),
+            'failed' => $batch->failedJobs,
+            'progress' => $batch->totalJobs > 0 ? min(100, (int) round(($processed / $batch->totalJobs) * 100)) : 0,
+            'finished' => $finished,
+        ])->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+    }
+
+    public function mySertifikat(Request $request)
     {
         $anggota = auth()->user()->anggota;
 
@@ -78,139 +198,48 @@ class SertifikatController extends Controller
             return redirect()->route('kader.dashboard')->with('error', 'Data anggota tidak ditemukan.');
         }
 
-        $sertifikats = Sertifikat::where('anggota_id', $anggota->id)->with('kegiatan')->latest()->paginate(6);
+        $options = ['kegiatan' => 'Nama Kegiatan', 'tanggal_kegiatan' => 'Tanggal Kegiatan', 'nomor' => 'Nomor', 'created' => 'Waktu Ditambahkan'];
+        $sort = SortParams::resolve($request, array_keys($options), 'created');
+        $columns = ['nomor' => 'nomor_sertifikat', 'created' => 'sertifikat.created_at'];
+        $sertifikats = Sertifikat::where('anggota_id', $anggota->id)->with('kegiatan')
+            ->when(! in_array($sort['key'], ['kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy($columns[$sort['key']], $sort['direction']))
+            ->when(in_array($sort['key'], ['kegiatan', 'tanggal_kegiatan'], true), fn ($query) => $query->orderBy(Kegiatan::select($sort['key'] === 'kegiatan' ? 'nama_kegiatan' : 'tanggal_waktu')->whereColumn('kegiatan.id', 'sertifikat.kegiatan_id'), $sort['direction']))
+            ->orderByDesc('sertifikat.id')->paginate(6)->withQueryString();
+        $verifiedAttendance = app(VerifiedAttendance::class);
+        $eligibleKegiatanIds = $verifiedAttendance->eligibleKegiatanIds($anggota);
+        $jumlahKegiatanHadir = $eligibleKegiatanIds->count();
+        $canDownloadSertifikat = $jumlahKegiatanHadir > 0;
 
-        return view('kader.sertifikat.index', compact('sertifikats'));
+        return view('kader.sertifikat.index', compact(
+            'sertifikats',
+            'jumlahKegiatanHadir',
+            'canDownloadSertifikat',
+            'eligibleKegiatanIds',
+            'options', 'sort',
+        ))->with('minimumKegiatanHadir', 1);
     }
 
     public function download(Sertifikat $sertifikat)
     {
-        // Pastikan hanya pemilik atau admin yang bisa download
-        if (auth()->user()->role !== 'admin' && auth()->user()->anggota->id !== $sertifikat->anggota_id) {
+        if (auth()->user()->role === 'admin') {
+            abort_unless(Storage::disk('public')->exists($sertifikat->file_sertifikat), 404);
+
+            return Storage::disk('public')->download($sertifikat->file_sertifikat);
+        }
+
+        $anggota = auth()->user()->anggota;
+
+        if (! $anggota || (int) $sertifikat->anggota_id !== $anggota->id) {
             abort(403);
         }
+
+        if (! app(VerifiedAttendance::class)->meetsRequirement($sertifikat->kegiatan, $anggota)) {
+            abort(403);
+        }
+
+        abort_unless(Storage::disk('public')->exists($sertifikat->file_sertifikat), 404);
 
         return Storage::disk('public')->download($sertifikat->file_sertifikat);
-    }
-
-    public function klaim(Request $request, Presensi $presensi)
-    {
-        // Security check: only the owner of this attendance record can claim
-        $anggota = auth()->user()->anggota;
-        if (! $anggota || $presensi->anggota_id !== $anggota->id) {
-            abort(403);
-        }
-
-        // Only allow claiming if status_klaim is null or ditolak
-        if ($presensi->status_klaim !== null && $presensi->status_klaim !== 'ditolak') {
-            return redirect()->back()->with('error', 'Sertifikat sedang diproses atau sudah disetujui.');
-        }
-
-        $request->validate([
-            'bukti_kehadiran' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-        ]);
-
-        if ($request->hasFile('bukti_kehadiran')) {
-            $file = $request->file('bukti_kehadiran');
-
-            Log::info('File upload debug', [
-                'isValid' => $file->isValid(),
-                'error' => $file->getError(),
-                'path' => $file->getPathname(),
-                'realPath' => $file->getRealPath(),
-                'size' => $file->getSize(),
-            ]);
-
-            // Delete old file if exists
-            if ($presensi->bukti_kehadiran) {
-                Storage::disk('public')->delete($presensi->bukti_kehadiran);
-            }
-
-            $compressed = false;
-            $path = null;
-
-            if (extension_loaded('gd') && class_exists(ImageManager::class) && function_exists('imagejpeg')) {
-                try {
-                    $manager = new ImageManager(new Driver);
-                    $image = $manager->decodePath($file->getPathname());
-
-                    if ($image->width() > 1200 || $image->height() > 1200) {
-                        $image->scale(width: 1200);
-                    }
-
-                    $encoded = $image->encodeUsingFormat(Format::JPEG, quality: 70);
-                    $filename = Str::random(40).'.jpg';
-                    $path = 'bukti_kehadiran/'.$filename;
-                    Storage::disk('public')->put($path, (string) $encoded);
-                    $compressed = true;
-                } catch (\Throwable $e) {
-                    Log::error('Intervention failed', [
-                        'message' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString(),
-                    ]);
-                }
-            }
-
-            if (! $compressed) {
-                Log::info('Attempting fallback store for Windows compatibility', [
-                    'pathname' => $file->getPathname(),
-                    'originalName' => $file->getClientOriginalName(),
-                ]);
-                $extension = $file->getClientOriginalExtension() ?: 'jpg';
-                $filename = Str::random(40).'.'.$extension;
-                $path = 'bukti_kehadiran/'.$filename;
-
-                $stream = fopen($file->getPathname(), 'r');
-                Storage::disk('public')->put($path, $stream);
-                if (is_resource($stream)) {
-                    fclose($stream);
-                }
-            }
-
-            $presensi->update([
-                'bukti_kehadiran' => $path,
-                'status_klaim' => 'pending',
-            ]);
-
-            return redirect()->back()->with('success', 'Klaim sertifikat berhasil diajukan. Menunggu verifikasi.');
-        }
-
-        return redirect()->back()->with('error', 'Gagal mengunggah bukti kehadiran.');
-    }
-
-    public function verifikasiIndex()
-    {
-        // Admins and instructors shared
-        $pendingClaims = Presensi::where('status_klaim', 'pending')
-            ->with(['kegiatan', 'anggota'])
-            ->latest()
-            ->paginate(6);
-
-        return view('admin.sertifikat.verifikasi', compact('pendingClaims'));
-    }
-
-    public function setuju(Presensi $presensi)
-    {
-        if ($presensi->status_klaim !== 'pending') {
-            return redirect()->back()->with('error', 'Klaim sertifikat tidak sedang menunggu verifikasi.');
-        }
-
-        $presensi->setujuiKlaim();
-
-        GenerateCertificateJob::dispatch($presensi);
-
-        return redirect()->route('admin.sertifikat.verifikasi.index')->with('success', 'Klaim sertifikat disetujui dan sertifikat berhasil diterbitkan.');
-    }
-
-    public function tolak(Presensi $presensi)
-    {
-        if ($presensi->status_klaim !== 'pending') {
-            return redirect()->back()->with('error', 'Klaim sertifikat tidak sedang menunggu verifikasi.');
-        }
-
-        $presensi->tolakKlaim();
-
-        return redirect()->route('admin.sertifikat.verifikasi.index')->with('info', 'Klaim sertifikat telah ditolak.');
     }
 
     public static function useBackground(): bool

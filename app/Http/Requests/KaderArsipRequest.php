@@ -26,7 +26,7 @@ class KaderArsipRequest extends FormRequest
         return [
             'nomor_dokumen' => ['nullable', 'string', 'max:255'],
             'judul_dokumen' => ['required', 'string', 'max:255'],
-            'kategori_arsip' => ['required', 'string', 'in:'.implode(',', array_keys(Arsip::KATEGORI))],
+            'kategori_arsip' => ['required', 'string', 'in:'.implode(',', Arsip::KATEGORI_UNGGAH_KADER)],
             'file_arsip' => ['required', 'file', 'mimes:pdf,doc,docx,xls,xlsx', 'max:5120'],
         ];
     }

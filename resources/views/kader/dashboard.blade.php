@@ -3,6 +3,7 @@
         Halo, {{ auth()->user()->name }}
     </x-slot>
 
+    <x-sort-control :action="route('kader.dashboard')" :options="$options" :selected-sort="$sort['key']" />
     {{-- Desktop: 2 kolom (Hero Card | Quick Actions), Mobile: 1 kolom --}}
     <div class="row g-4 mb-4">
 
@@ -12,15 +13,21 @@
                  style="background: linear-gradient(135deg, #800000 0%, #a00000 100%); color: white; border-radius: 20px;">
                 <div class="d-flex align-items-center min-w-0 mb-4">
                     <div class="me-3 position-relative">
-                        @if(auth()->user()->anggota && auth()->user()->anggota->foto_profil)
-                            <img src="{{ Storage::url(auth()->user()->anggota->foto_profil) }}"
+                        @if(auth()->user()->profile_photo_url)
+                            <img src="{{ auth()->user()->profile_photo_url }}"
+                                 alt="{{ auth()->user()->name }}"
                                  class="rounded-circle border border-3 border-white shadow"
                                  width="75" height="75"
-                                 style="object-fit: cover;">
+                                 style="object-fit: cover;"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="rounded-circle bg-white bg-opacity-25 align-items-center justify-content-center text-white fs-1 fw-bold border border-3 border-white shadow"
+                                 style="display: none; width: 75px; height: 75px;">
+                                {{ auth()->user()->initials }}
+                            </div>
                         @else
                             <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center text-white fs-1 fw-bold border border-3 border-white shadow"
                                  style="width: 75px; height: 75px;">
-                                {{ substr(auth()->user()->name, 0, 1) }}
+                                {{ auth()->user()->initials }}
                             </div>
                         @endif
                         <span class="position-absolute bottom-0 end-0 bg-success border border-white border-2 rounded-circle p-2 shadow-sm"></span>
@@ -47,11 +54,10 @@
             </div>
         </div>
 
-        {{-- Quick Action: mobile 2 kolom, desktop 2x2 --}}
-        <div class="col-12 col-lg-7">
-            <h6 class="fw-bold mb-3 d-none d-lg-block">Aksi Cepat</h6>
+        {{-- Quick Action mobile: 2 kolom (hanya <992px) --}}
+        <div class="col-12 d-lg-none">
             <div class="row g-3 text-center">
-                <div class="col-6 col-lg-6">
+                <div class="col-6">
                     <a href="{{ route('kader.ekta') }}"
                        class="card p-3 text-decoration-none h-100 shadow-sm border-0 quick-action-card"
                        style="border-radius: 15px;">
@@ -59,15 +65,16 @@
                         <span class="small fw-bold text-dark d-block">E-KTA Digital</span>
                     </a>
                 </div>
-                <div class="col-6 col-lg-6">
+                <div class="col-6">
                     <a href="{{ route('kader.sertifikat.index') }}"
-                       class="card p-3 text-decoration-none h-100 shadow-sm border-0 quick-action-card"
+                       class="card p-3 text-decoration-none h-100 shadow-sm border-0 quick-action-card certificate-dashboard-action"
                        style="border-radius: 15px;">
-                        <i class="bi bi-award text-success display-6 mb-2"></i>
+                        <i class="bi bi-patch-check-fill text-success display-6 mb-2"></i>
                         <span class="small fw-bold text-dark d-block">E-Sertifikat</span>
+                        <small class="text-muted mt-1">{{ $stats['total_sertifikat'] }} tersedia</small>
                     </a>
                 </div>
-                <div class="col-6 col-lg-6">
+                <div class="col-6">
                     <a href="{{ route('kader.riwayat.index') }}"
                        class="card p-3 text-decoration-none h-100 shadow-sm border-0 quick-action-card"
                        style="border-radius: 15px;">
@@ -75,12 +82,60 @@
                         <span class="small fw-bold text-dark d-block">Riwayat</span>
                     </a>
                 </div>
-                <div class="col-6 col-lg-6">
+                <div class="col-6">
                     <a href="{{ route('profile.edit') }}"
                        class="card p-3 text-decoration-none h-100 shadow-sm border-0 quick-action-card"
                        style="border-radius: 15px;">
                         <i class="bi bi-gear text-secondary display-6 mb-2"></i>
                         <span class="small fw-bold text-dark d-block">Pengaturan</span>
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a href="{{ route('kader.materi.index') }}"
+                       class="card p-3 text-decoration-none h-100 shadow-sm border-0 quick-action-card"
+                       style="border-radius: 15px;">
+                        <i class="bi bi-journal-text text-primary display-6 mb-2"></i>
+                        <span class="small fw-bold text-dark d-block">Materi</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {{-- Quick Action desktop: kartu ringkas (≥992px) --}}
+        <div class="col-lg-7 d-none d-lg-flex flex-column">
+            <div class="desktop-section-heading"><i class="bi bi-lightning-charge"></i> Aksi Cepat</div>
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <a href="{{ route('kader.ekta') }}" class="desktop-quick-action">
+                        <span class="desktop-quick-action__icon text-bg-primary-subtle"><i class="bi bi-person-vcard text-primary"></i></span>
+                        <span class="desktop-quick-action__label">E-KTA Digital</span>
+                    </a>
+                </div>
+                <div class="col-lg-6">
+                    <a href="{{ route('kader.sertifikat.index') }}" class="desktop-quick-action certificate-dashboard-action">
+                        <span class="desktop-quick-action__icon text-bg-success-subtle"><i class="bi bi-patch-check-fill text-success"></i></span>
+                        <span class="desktop-quick-action__label">
+                            E-Sertifikat
+                            <small class="certificate-dashboard-action__meta">{{ $stats['total_sertifikat'] }} tersedia</small>
+                        </span>
+                    </a>
+                </div>
+                <div class="col-lg-6">
+                    <a href="{{ route('kader.riwayat.index') }}" class="desktop-quick-action">
+                        <span class="desktop-quick-action__icon text-bg-info-subtle"><i class="bi bi-clock-history text-info-emphasis"></i></span>
+                        <span class="desktop-quick-action__label">Riwayat</span>
+                    </a>
+                </div>
+                <div class="col-lg-6">
+                    <a href="{{ route('profile.edit') }}" class="desktop-quick-action">
+                        <span class="desktop-quick-action__icon text-bg-secondary-subtle"><i class="bi bi-gear text-secondary"></i></span>
+                        <span class="desktop-quick-action__label">Pengaturan</span>
+                    </a>
+                </div>
+                <div class="col-lg-12">
+                    <a href="{{ route('kader.materi.index') }}" class="desktop-quick-action">
+                        <span class="desktop-quick-action__icon text-bg-primary-subtle"><i class="bi bi-journal-text text-primary"></i></span>
+                        <span class="desktop-quick-action__label">Materi</span>
                     </a>
                 </div>
             </div>
@@ -90,7 +145,7 @@
 
     {{-- Kegiatan Mendatang --}}
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h6 class="fw-bold mb-0">Kegiatan Mendatang</h6>
+        <h6 class="fw-bold mb-0 desktop-section-heading"><i class="bi bi-calendar3"></i> Kegiatan Mendatang</h6>
         <i class="bi bi-calendar3 text-primary"></i>
     </div>
 

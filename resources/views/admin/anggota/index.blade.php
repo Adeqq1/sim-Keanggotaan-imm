@@ -18,37 +18,61 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup notifikasi"></button>
-        </div>
-    @endif
-    @if(session('warning'))
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle me-2"></i>{{ session('warning') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup notifikasi"></button>
-        </div>
-    @endif
-
     <form action="{{ route('admin.anggota.index') }}" method="GET" class="mb-4">
-        <div class="input-group shadow-sm">
-            <input type="text" name="search" class="form-control border-0" placeholder="Cari nama atau NIA..." value="{{ request('search') }}">
-            <button class="btn btn-white border-0" type="submit" aria-label="Cari anggota"><i class="bi bi-search text-primary"></i></button>
+        <input type="hidden" name="sort" value="{{ $sort['key'] }}">
+        <input type="hidden" name="direction" value="{{ $sort['direction'] }}">
+        <div class="row g-2 align-items-center">
+            <div class="col-12 col-md">
+                <label for="anggota-search" class="visually-hidden">Cari anggota berdasarkan nama atau NIA</label>
+                <input id="anggota-search" type="text" name="search" class="form-control shadow-sm" placeholder="Cari nama atau NIA..." value="{{ $search }}" aria-label="Cari anggota berdasarkan nama atau NIA">
+            </div>
+            <div class="col-12 col-md-auto">
+                <label for="anggota-role" class="visually-hidden">Filter role anggota</label>
+                <select id="anggota-role" name="role" class="form-select shadow-sm" aria-label="Filter role anggota">
+                    <option value="">Semua role</option>
+                    @foreach (App\Enums\RoleEnum::cases() as $roleOption)
+                        @continue($roleOption === App\Enums\RoleEnum::ADMIN)
+                        <option value="{{ $roleOption->value }}" @selected($selectedRole === $roleOption->value)>
+                            {{ $roleOption->label() }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-12 col-md-auto">
+                <label for="anggota-komisariat" class="visually-hidden">Filter komisariat anggota</label>
+                <select id="anggota-komisariat" name="komisariat" class="form-select shadow-sm" aria-label="Filter komisariat anggota">
+                    <option value="">Semua komisariat</option>
+                    @foreach (App\Models\Pendaftaran::KOMISARIAT as $komisariatId => $komisariatLabel)
+                        <option value="{{ $komisariatId }}" @selected($selectedKomisariat === $komisariatId)>{{ $komisariatLabel }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-12 col-md-auto d-flex gap-2">
+                <button class="btn btn-primary btn-ui flex-grow-1" type="submit">
+                    <i class="bi bi-search me-1"></i> Cari
+                </button>
+                @if($search !== '' || $selectedRole !== null || $selectedKomisariat !== null)
+                    <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-secondary btn-ui flex-grow-1 text-nowrap">Atur ulang filter</a>
+                @endif
+            </div>
         </div>
     </form>
+            <x-sort-control :action="route('admin.anggota.index')" :options="$options" :selected-sort="$sort['key']" :preserved-inputs="['search' => $search, 'role' => $selectedRole, 'komisariat' => $selectedKomisariat]" />
 
     <div class="row g-3 index-card-grid">
     @forelse($anggotas as $anggota)
         <div class="col-12 col-sm-6">
         <div class="card h-100 p-3 index-card d-flex flex-column">
             <div class="d-flex align-items-center gap-2">
-                <div class="me-3">
-                    @if($anggota->foto_profil)
-                        <img src="{{ Storage::url($anggota->foto_profil) }}" class="rounded-circle shadow-sm" width="50" height="50" style="object-fit: cover;">
+                <div class="me-3 flex-shrink-0">
+                    @if($anggota->foto_profil_url)
+                        <img src="{{ $anggota->foto_profil_url }}" alt="{{ $anggota->nama_lengkap }}" class="rounded-circle shadow-sm" width="50" height="50" style="object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="rounded-circle bg-light align-items-center justify-content-center text-primary fw-bold shadow-sm" style="display: none; width: 50px; height: 50px;">
+                            {{ $anggota->initials }}
+                        </div>
                     @else
                         <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-primary fw-bold" style="width: 50px; height: 50px;">
-                            {{ substr($anggota->nama_lengkap, 0, 1) }}
+                            {{ $anggota->initials }}
                         </div>
                     @endif
                 </div>
@@ -83,10 +107,9 @@
         </div>
     @empty
         <div class="col-12 text-center py-5">
-            @if(request('search'))
+            @if($search !== '' || $selectedRole !== null || $selectedKomisariat !== null)
                 <i class="bi bi-search display-4 text-muted opacity-50"></i>
-                <p class="text-muted mt-2">Anggota dengan kata kunci "{{ request('search') }}" tidak ditemukan.</p>
-                <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-primary btn-ui btn-ui-sm mt-2">Bersihkan Pencarian</a>
+                <p class="text-muted mt-2">Tidak ada anggota yang sesuai dengan pencarian atau filter yang dipilih.</p>
             @else
                 <i class="bi bi-people display-4 text-muted"></i>
                 <p class="text-muted mt-2">Belum ada data anggota.</p>

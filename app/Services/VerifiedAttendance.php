@@ -1,0 +1,101 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Anggota;
+use App\Models\Kegiatan;
+use App\Models\Presensi;
+use Illuminate\Support\Collection;
+
+class VerifiedAttendance
+{
+    public function countFor(Kegiatan $kegiatan, Anggota $anggota): int
+    {
+        return Presensi::query()
+            ->terverifikasi()
+            ->where('presensi.kegiatan_id', $kegiatan->id)
+            ->where('presensi.anggota_id', $anggota->id)
+            ->where(function ($query) use ($anggota): void {
+                $query->whereExists(fn ($subquery) => $subquery->from('kegiatan_tahun_angkatan')
+                    ->whereColumn('kegiatan_tahun_angkatan.kegiatan_id', 'presensi.kegiatan_id')
+                    ->where('kegiatan_tahun_angkatan.tahun_daftar', $anggota->tahun_daftar))
+                    ->when($anggota->tahun_daftar === null, fn ($legacy) => $legacy->orWhere('presensi.status_verifikasi', 'legacy'));
+            })
+            ->whereRelation('sesiKegiatan', 'kegiatan_id', $kegiatan->id)
+            ->distinct('sesi_kegiatan_id')
+            ->count('sesi_kegiatan_id');
+    }
+
+    public function meetsRequirement(Kegiatan $kegiatan, Anggota $anggota): bool
+    {
+        return match ($kegiatan->jenis_pelaksanaan) {
+            Kegiatan::SATU_SESI => $kegiatan->minimum_sesi_terverifikasi === 1 && $this->countFor($kegiatan, $anggota) >= 1,
+            Kegiatan::MULTI_SESI => $kegiatan->minimum_sesi_terverifikasi !== null
+                && $kegiatan->minimum_sesi_terverifikasi >= 3
+                && $this->countFor($kegiatan, $anggota) >= $kegiatan->minimum_sesi_terverifikasi,
+            default => false,
+        };
+    }
+
+    public function eligibleAnggotaIdsFor(Kegiatan $kegiatan): Collection
+    {
+        if (! in_array($kegiatan->jenis_pelaksanaan, [Kegiatan::SATU_SESI, Kegiatan::MULTI_SESI], true)
+            || $kegiatan->minimum_sesi_terverifikasi === null
+            || ($kegiatan->jenis_pelaksanaan === Kegiatan::SATU_SESI && (int) $kegiatan->minimum_sesi_terverifikasi !== 1)
+            || ($kegiatan->jenis_pelaksanaan === Kegiatan::MULTI_SESI && (int) $kegiatan->minimum_sesi_terverifikasi < 3)) {
+            return collect();
+        }
+
+        return Presensi::query()
+            ->terverifikasi()
+            ->join('anggota', 'anggota.id', '=', 'presensi.anggota_id')
+            ->where('kegiatan_id', $kegiatan->id)
+            ->where(function ($query): void {
+                $query->whereExists(fn ($subquery) => $subquery->from('kegiatan_tahun_angkatan')
+                    ->whereColumn('kegiatan_tahun_angkatan.kegiatan_id', 'presensi.kegiatan_id')
+                    ->whereColumn('kegiatan_tahun_angkatan.tahun_daftar', 'anggota.tahun_daftar'))
+                    ->orWhere(function ($legacy): void {
+                        $legacy->whereNull('anggota.tahun_daftar')
+                            ->where('presensi.status_verifikasi', 'legacy');
+                    });
+            })
+            ->whereRelation('sesiKegiatan', 'kegiatan_id', $kegiatan->id)
+            ->select('anggota_id')
+            ->selectRaw('COUNT(DISTINCT sesi_kegiatan_id) as verified_sessions')
+            ->groupBy('anggota_id')
+            ->havingRaw('COUNT(DISTINCT sesi_kegiatan_id) >= ?', [$kegiatan->minimum_sesi_terverifikasi])
+            ->pluck('anggota_id');
+    }
+
+    public function eligibleKegiatanIds(Anggota $anggota): Collection
+    {
+        return Presensi::query()
+            ->terverifikasi()
+            ->join('kegiatan', 'kegiatan.id', '=', 'presensi.kegiatan_id')
+            ->join('sesi_kegiatan', 'sesi_kegiatan.id', '=', 'presensi.sesi_kegiatan_id')
+            ->join('anggota', 'anggota.id', '=', 'presensi.anggota_id')
+            ->where(function ($query): void {
+                $query->whereExists(fn ($subquery) => $subquery->from('kegiatan_tahun_angkatan')
+                    ->whereColumn('kegiatan_tahun_angkatan.kegiatan_id', 'presensi.kegiatan_id')
+                    ->whereColumn('kegiatan_tahun_angkatan.tahun_daftar', 'anggota.tahun_daftar'))
+                    ->orWhere(function ($legacy): void {
+                        $legacy->whereNull('anggota.tahun_daftar')
+                            ->where('presensi.status_verifikasi', 'legacy');
+                    });
+            })
+            ->where('presensi.anggota_id', $anggota->id)
+            ->whereIn('kegiatan.jenis_pelaksanaan', [Kegiatan::SATU_SESI, Kegiatan::MULTI_SESI])
+            ->whereColumn('sesi_kegiatan.kegiatan_id', 'kegiatan.id')
+            ->whereNotNull('kegiatan.minimum_sesi_terverifikasi')
+            ->select('presensi.kegiatan_id')
+            ->selectRaw('COUNT(DISTINCT presensi.sesi_kegiatan_id) as verified_sessions')
+            ->groupBy('presensi.kegiatan_id', 'kegiatan.minimum_sesi_terverifikasi')
+            ->havingRaw('COUNT(DISTINCT presensi.sesi_kegiatan_id) >= MAX(kegiatan.minimum_sesi_terverifikasi)')
+            ->pluck('presensi.kegiatan_id');
+    }
+
+    public function countEligibleActivities(Anggota $anggota): int
+    {
+        return $this->eligibleKegiatanIds($anggota)->count();
+    }
+}

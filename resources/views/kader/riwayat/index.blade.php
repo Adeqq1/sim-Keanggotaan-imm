@@ -25,7 +25,18 @@
         </div>
     </div>
 
+    <div class="card border-0 shadow-sm p-3 mb-4" style="border-radius: 15px;">
+        <div class="d-flex align-items-center justify-content-between gap-2">
+            <div>
+                <h6 class="fw-bold mb-1">Kehadiran terkonfirmasi</h6>
+                <small class="text-muted">{{ $jumlahKegiatanHadir }} dari {{ $minimumKegiatanHadir }} kegiatan hadir</small>
+            </div>
+            <i class="bi bi-patch-check fs-3 text-success"></i>
+        </div>
+    </div>
+
     <h6 class="fw-bold mb-3">Daftar Kehadiran</h6>
+    <x-sort-control :action="route('kader.riwayat.index')" :options="$options" :selected-sort="$sort['key']" />
     <div class="row g-3 index-card-grid">
     @forelse($presensis as $p)
         <div class="col-12 col-sm-6">
@@ -38,6 +49,7 @@
                     <div class="min-w-0">
                         <h6 class="mb-0 fw-bold text-break" style="font-size: 0.85rem;">{{ $p->kegiatan->nama_kegiatan }}</h6>
                         <small class="text-muted d-block" style="font-size: 0.7rem;">{{ $p->kegiatan->tanggal_waktu->translatedFormat('d M Y') }}</small>
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">{{ $p->sesiKegiatan?->nama_sesi ?? 'Sesi lama' }}</small>
                     </div>
                 </div>
                 <span class="badge {{ $p->status_kehadiran === 'hadir' ? 'bg-success' : ($p->status_kehadiran === 'izin' ? 'bg-warning' : 'bg-danger') }} rounded-pill px-3" style="font-size: 0.65rem;">
@@ -50,26 +62,24 @@
             @endphp
             <div class="mt-3 pt-2 border-top d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 index-card__actions">
                 <div class="small text-muted" style="font-size: 0.75rem;">
-                    Sertifikat: 
-                    @if($p->status_klaim === 'pending')
-                        <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> Menunggu Verifikasi</span>
-                    @elseif($p->status_klaim === 'disetujui' && $sertifikat)
-                        <span class="badge bg-success"><i class="bi bi-patch-check"></i> Disetujui</span>
-                    @elseif($p->status_klaim === 'ditolak')
-                        <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Ditolak</span>
+                    Sertifikat:
+                    @if($sertifikat)
+                        <span class="badge bg-success"><i class="bi bi-patch-check"></i> Tersedia</span>
                     @else
-                        <span class="badge bg-secondary">Belum Diklaim</span>
+                        <span class="badge bg-secondary">Belum tersedia</span>
                     @endif
                 </div>
                 <div>
-                    @if($p->status_klaim === 'disetujui' && $sertifikat)
+                    @if($sertifikat && $eligibleKegiatanIds->contains($p->kegiatan_id))
                         <a href="{{ route('kader.sertifikat.download', $sertifikat) }}" class="btn btn-sm btn-outline-success btn-ui btn-ui-sm px-3">
                             <i class="bi bi-download"></i> Unduh
                         </a>
-                    @elseif($p->status_klaim === null || $p->status_klaim === 'ditolak')
-                        <button type="button" class="btn btn-sm btn-primary btn-ui btn-ui-sm px-3" data-bs-toggle="modal" data-bs-target="#claimModal{{ $p->id }}">
-                            <i class="bi bi-upload"></i> Klaim
-                        </button>
+                    @elseif(! $sertifikat && $eligibleKegiatanIds->contains($p->kegiatan_id))
+                        <span class="small text-muted">Sertifikat diterbitkan oleh admin</span>
+                    @elseif(! $sertifikat)
+                        <span class="small text-muted">Belum memenuhi syarat penerbitan</span>
+                    @elseif($sertifikat)
+                        <span class="small text-muted">Unduh terkunci</span>
                     @endif
                 </div>
             </div>
@@ -84,38 +94,7 @@
     @endforelse
     </div>
 
-    @foreach($presensis as $p)
-        @if($p->status_klaim === null || $p->status_klaim === 'ditolak')
-            <div class="modal fade" id="claimModal{{ $p->id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable mx-3">
-                    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-                        <form action="{{ route('kader.sertifikat.klaim', $p) }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            <div class="modal-header border-0 pb-0">
-                                <h5 class="fw-bold mb-0">Klaim Sertifikat</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-                            </div>
-                            <div class="modal-body py-3">
-                                <p class="text-muted small mb-3">Silakan unggah foto bukti kehadiran Anda pada kegiatan <strong>{{ $p->kegiatan->nama_kegiatan }}</strong>.</p>
-                                <div class="mb-3 text-start">
-                                    <label for="bukti_kehadiran_{{ $p->id }}" class="form-label fw-semibold small">Foto Bukti Kehadiran (Format: JPG, PNG, max 2MB)</label>
-                                    <input type="file" class="form-control" id="bukti_kehadiran_{{ $p->id }}" name="bukti_kehadiran" accept="image/png, image/jpeg, image/jpg" required style="border-radius: 8px;">
-                                </div>
-                            </div>
-                            <div class="modal-footer border-0 pt-0">
-                                <button type="button" class="btn btn-outline-secondary btn-ui btn-ui-sm" data-bs-dismiss="modal">Batal</button>
-                                <button type="submit" class="btn btn-primary btn-ui btn-ui-sm">Kirim Klaim</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        @endif
-    @endforeach
-
     {{ $presensis->links('components.pagination') }}
 
     <div class="pb-3"></div>
-
-    @vite(['resources/js/image-compressor.js'])
 </x-app-layout>

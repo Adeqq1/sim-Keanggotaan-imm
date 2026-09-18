@@ -4,6 +4,10 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use App\Models\Kegiatan;
+use App\Models\SesiKegiatan;
+use App\Models\Anggota;
 
 class PresensiRequest extends FormRequest
 {
@@ -12,7 +16,14 @@ class PresensiRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $kegiatan = $this->route('kegiatan');
+        $sesi = $this->route('sesiKegiatan');
+
+        return $this->user()?->role === 'instruktur'
+            && $kegiatan instanceof Kegiatan
+            && ($sesi === null || $sesi instanceof SesiKegiatan)
+            && ($sesi === null || $sesi->kegiatan_id === $kegiatan->id)
+            && $kegiatan->jenis_pelaksanaan !== Kegiatan::BELUM_DITETAPKAN;
     }
 
     /**
@@ -23,10 +34,34 @@ class PresensiRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'kegiatan_id' => ['required', 'exists:kegiatan,id'],
-            'presensi' => ['required', 'array'],
-            'presensi.*.anggota_id' => ['required', 'exists:anggota,id'],
+            'presensi' => ['required', 'array', 'min:1'],
+            'presensi.*' => ['required', 'array'],
+            'presensi.*.anggota_id' => [
+                'required',
+                'integer',
+                'distinct',
+                Rule::exists('anggota', 'id')->where(function ($query): void {
+                    $query->where('status_aktif', true)
+                        ->whereExists(fn ($users) => $users->from('users')
+                            ->whereColumn('users.id', 'anggota.user_id')
+                            ->where('users.role', 'kader'));
+                }),
+            ],
             'presensi.*.status_kehadiran' => ['required', 'in:hadir,izin,alfa'],
         ];
+    }
+
+    public function after(): array
+    {
+        return [function ($validator): void {
+            $kegiatan = $this->route('kegiatan');
+            $targetYears = $kegiatan instanceof Kegiatan ? $kegiatan->tahunAngkatans()->pluck('tahun_daftar') : collect();
+            foreach ((array) $this->input('presensi', []) as $index => $data) {
+                $anggota = isset($data['anggota_id']) ? Anggota::find($data['anggota_id']) : null;
+                if ($anggota && ! $targetYears->contains((int) $anggota->tahun_daftar)) {
+                    $validator->errors()->add("presensi.{$index}.anggota_id", 'Anggota tidak termasuk target angkatan kegiatan.');
+                }
+            }
+        }];
     }
 }

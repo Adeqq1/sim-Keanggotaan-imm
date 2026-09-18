@@ -126,15 +126,42 @@ User
 Anggota
  ├─ belongsTo User
  ├─ hasMany Presensi
+ ├─ hasMany PenilaianKegiatan
  ├─ hasMany Sertifikat
  └─ hasMany Arsip
 
 Kegiatan
+ ├─ hasMany SesiKegiatan
  ├─ hasMany Presensi
+ ├─ hasMany PenilaianKegiatan
+ ├─ hasMany MateriKegiatan
+ ├─ hasOne LaporanKegiatan
  └─ hasMany Sertifikat
+
+SesiKegiatan
+ ├─ belongsTo Kegiatan
+ └─ hasMany Presensi
 
 Presensi
  ├─ belongsTo Kegiatan
+ ├─ belongsTo SesiKegiatan
+ └─ belongsTo Anggota
+
+PenilaianKegiatan
+ ├─ belongsTo Kegiatan
+ └─ belongsTo Anggota
+
+MateriKegiatan
+ └─ belongsTo Kegiatan
+
+LaporanKegiatan
+ └─ belongsTo Kegiatan
+
+Sertifikat
+ ├─ belongsTo Kegiatan
+ └─ belongsTo Anggota
+
+Arsip
  └─ belongsTo Anggota
 ```
 

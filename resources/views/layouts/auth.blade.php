@@ -22,7 +22,7 @@
         <script>
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/sw.js');
+                    navigator.serviceWorker.register('/sw.js').then(registration => registration.update());
                 });
             }
         </script>
@@ -62,7 +62,7 @@
 
             {{-- Sisi Kanan: Form auth --}}
             <div class="auth-split-right">
-                <div class="auth-card">
+                <div class="auth-card @yield('auth-card-class')">
                     <div class="text-center mb-4">
                         <div class="auth-brand-icon">
                             <i class="bi bi-shield-check fs-3"></i>
@@ -76,5 +76,7 @@
             </div>
 
         </div>
+
+        <x-_alert />
     </body>
 </html>

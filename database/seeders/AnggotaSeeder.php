@@ -13,19 +13,21 @@ class AnggotaSeeder extends Seeder
      */
     public function run(): void
     {
-        $kader = User::where('role', 'kader')->first();
+        $kader = User::where('email', 'kader@example.com')->where('role', 'kader')->first();
 
-        if ($kader) {
-            Anggota::create([
-                'user_id' => $kader->id,
-                'nia' => '1234567890',
-                'nama_lengkap' => $kader->name,
-                'tempat_lahir' => 'Yogyakarta',
-                'tanggal_lahir' => '2000-01-01',
-                'alamat' => 'Jl. Malioboro No. 1, Yogyakarta',
-                'no_telp' => '081234567890',
-                'status_aktif' => true,
-            ]);
+        if ($kader && ! Anggota::where('nia', '24260001')->where('user_id', '!=', $kader->id)->exists()) {
+            Anggota::firstOrCreate(
+                ['user_id' => $kader->id],
+                [
+                    'nia' => '24260001',
+                    'nama_lengkap' => $kader->name,
+                    'tempat_lahir' => 'Yogyakarta',
+                    'tanggal_lahir' => '2000-01-01',
+                    'alamat' => 'Jl. Malioboro No. 1, Yogyakarta',
+                    'no_telp' => '081234567890',
+                    'status_aktif' => true,
+                ],
+            );
         }
     }
 }

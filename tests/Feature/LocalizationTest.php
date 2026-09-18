@@ -16,6 +16,9 @@ function payloadPendaftaranDenganFile(array $overrides = []): array
         'password' => 'password',
         'password_confirmation' => 'password',
         'role' => 'kader',
+        'komisariat_id' => array_key_first(\App\Models\Pendaftaran::KOMISARIAT),
+        'tahun_daftar' => 2024,
+        'jenis_dokumen_identitas' => 'ktp',
         'tempat_lahir' => 'Yogyakarta',
         'tanggal_lahir' => '2000-01-01',
         'no_telp' => '08123456789',
@@ -31,7 +34,9 @@ test('Indonesian catalogs resolve framework messages and readable attributes', f
         ->and(__('validation.required', ['attribute' => __('validation.attributes.nama_lengkap')]))
         ->toBe('nama lengkap wajib diisi.')
         ->and(__('validation.mimes', ['attribute' => __('validation.attributes.file_persyaratan'), 'values' => 'pdf, jpg']))
-        ->toBe('file persyaratan harus berupa berkas dengan tipe: pdf, jpg.');
+        ->toBe('dokumen identitas harus berupa berkas dengan tipe: pdf, jpg.')
+        ->and(__('validation.attributes.komisariat_id'))->toBe('komisariat')
+        ->and(__('validation.attributes.tahun_daftar'))->toBe('tahun daftar');
 });
 
 test('public registration renders Indonesian file validation feedback', function () {
@@ -42,10 +47,13 @@ test('public registration renders Indonesian file validation feedback', function
         ])
     );
 
-    $response
+        $response
         ->assertRedirect(route('pendaftaran'))
         ->assertSessionHas('errors', function ($errors) {
-            return $errors->get('file_persyaratan') === ['file persyaratan harus berupa berkas dengan tipe: pdf, jpg, jpeg, png.'];
+            return $errors->get('file_persyaratan') === [
+                'dokumen identitas harus memiliki salah satu ekstensi berikut: pdf, jpg, jpeg, png.',
+                'dokumen identitas harus berupa berkas dengan tipe: pdf, jpg, jpeg, png.',
+            ];
         });
 
     $this->followingRedirects()->post(
@@ -56,7 +64,7 @@ test('public registration renders Indonesian file validation feedback', function
         ])
     )
         ->assertOk()
-        ->assertSee('file persyaratan harus berupa berkas dengan tipe: pdf, jpg, jpeg, png.');
+        ->assertSee('dokumen identitas harus memiliki salah satu ekstensi berikut: pdf, jpg, jpeg, png.');
 
     $this->assertDatabaseMissing('pendaftaran', ['email' => 'ahmad.kader@example.com']);
 });

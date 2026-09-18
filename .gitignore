@@ -1,4 +1,5 @@
 *.log
+*.sql
 .DS_Store
 .env
 .env.backup
@@ -36,3 +37,10 @@ issue.md
 /database/seeders/StressTestSeeder.php
 CLAUDE.md
 AGENTS.md
+
+# Docker local configuration
+compose.override.yaml
+docker-compose.override.yml
+/.docker-data/
+.commandcode
+DEPLOYMENT.md

@@ -1,58 +1,148 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SIM Keanggotaan IMM (Ikatan Mahasiswa Muhammadiyah)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem Informasi Manajemen (SIM) Keanggotaan Ikatan Mahasiswa Muhammadiyah (IMM) adalah platform web terpadu berbasis Laravel untuk pengelolaan data kader, verifikasi pendaftaran anggota baru, manajemen agenda perkaderan & sesi kegiatan, presensi & penilaian instruktur, penerbitan e-KTA digital, arsip dokumen, serta generate e-sertifikat otomatis berbasis antrean background job.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Fitur Utama Berdasarkan Peran
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 1. Pengunjung / Guest (Publik)
+- **Landing Page Interaktif**: Menampilkan profil organisasi, 3 pilar pergerakan, data statistik, program kerja, dan 3 kegiatan terbaru (di-cache dengan key `kegiatan.terbaru`).
+- **Detail Kegiatan**: Halaman informasi lengkap per kegiatan beserta rekomendasi kegiatan lainnya.
+- **Pendaftaran Calon Anggota**: Form pendaftaran online dengan unggah foto profil (publik) dan dokumen identitas KTP/KTM ke penyimpanan privat (`storage/app/private/pendaftaran`).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 2. Kader (Anggota Aktif)
+- **Dashboard Kader**: Ringkasan profil, statistik kehadiran, dan kegiatan mendatang.
+- **E-KTA Digital**: Kartu Tanda Anggota digital interaktif dengan efek 3D Flip (sisi depan & belakang), QR code verifikasi, fitur cetak langsung, dan ekspor PDF resmi standar CR80.
+- **Materi Perkaderan**: Mengakses, mengunduh, dan menyimpan modul/materi dari kegiatan yang dihadiri.
+- **E-Sertifikat**: Melihat dan mengunduh sertifikat resmi kegiatan yang telah diterbitkan oleh pengurus.
+- **Riwayat Keaktifan**: Grafik persentase kehadiran dan riwayat partisipasi kegiatan.
+- **E-Arsip Mandiri**: Mengunggah, mengkategorikan, dan mengunduh dokumen penting organisasi pribadi ke penyimpanan privat.
 
-## Learning Laravel
+### 3. Instruktur (Pemandu Perkaderan)
+- **Manajemen Kegiatan & Sesi**: Membuat agenda kegiatan serta membagi kegiatan menjadi beberapa sesi pertemuan (`SesiKegiatan`).
+- **Pencatatan Presensi Lapangan**: Otoritas utama pencatatan absensi peserta (`Hadir`, `Izin`, `Alfa`).
+- **Verifikasi Kehadiran**: Memvalidasi bukti kehadiran kader per sesi kegiatan.
+- **Penilaian Kegiatan Multi-Sesi**: Memberikan nilai kualitatif/kuantitatif (A–D) pada kader sebagai syarat kelulusan perkaderan.
+- **Unggah Materi Kegiatan**: Membagikan slide, dokumen modul, dan bahan bacaan untuk peserta.
+- **Laporan Kegiatan & Berita Acara**: Menyusun dan mengunduh laporan pelaksanaan kegiatan dalam format PDF.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 4. Admin (Sekretariat & Pengurus Cabang)
+- **Dashboard Eksekutif**: Monitoring metrik keanggotaan, pendaftaran pending, dan kegiatan aktif.
+- **Validasi Pendaftaran Anggota**: Memeriksa dokumen identitas (preview/download aman), menyetujui pendaftaran secara transaksional (`DB::transaction` + `lockForUpdate`), serta otomatis membuat akun login `User` dan profil `Anggota`.
+- **Manajemen Anggota & Penomoran NIA**: Pengelolaan biodata kader, aktivasi status, serta generate Nomor Induk Anggota (NIA) satuan maupun massal (*bulk generation*).
+- **Penerbitan E-Sertifikat Otomatis**: Generate sertifikat massal berbasis antrean background job (`GenerateCertificateJob`), pengecekan kelayakan otomatis (`CertificateEligibility`), dan kustomisasi template sertifikat (`sertifikat_settings.json`).
+- **Manajemen Berkas & Arsip**: Akses dokumen arsip privat seluruh kader.
+- **Rekapitulasi & Ekspor Laporan**: Ekspor data keanggotaan dan statistik ke format PDF dan Excel.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## 🛠️ Tech Stack & Arsitektur
 
-## Agentic Development
+- **Framework**: Laravel 13 (PHP 8.4)
+- **Database**: MariaDB 10.11+
+- **Frontend / Styling**: Tailwind CSS, Alpine.js, Blade Views, Vite
+- **PDF & Dokumen**: Barryvdh DomPDF (`barryvdh/laravel-dompdf`)
+- **Manipulasi Gambar**: Intervention Image v3
+- **Containerization**: Docker & Docker Compose
+- **Job & Queue**: Database Queue Driver (Asynchronous Certificate Generation)
+- **Penyimpanan Berkas**:
+  - **Public Disk** (`storage/app/public`): `foto_profil`, `kegiatan_thumbnails`, `sertifikat` (wajib `storage:link`).
+  - **Private / Local Disk** (`storage/app/private`): `pendaftaran` (dokumen KTP/KTM), `arsip` (berkas kader), `sertifikat_settings.json`.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+---
+
+## 📦 Panduan Instalasi Cepat (Docker)
+
+### 1. Prasyarat
+- Docker Engine & Docker Compose
+- Node.js & npm (di mesin host untuk kompilasi frontend Vite)
+
+### 2. Langkah Setup Pertama Kali
 
 ```bash
-composer require laravel/boost --dev
+# 1. Masuk ke direktori proyek
+cd ~/Developments/sim-Keanggotaan-imm-docker
 
-php artisan boost:install
+# 2. Salin environment file
+cp .env.example .env
+cat .env.docker.example >> .env
+
+# 3. Jalankan container Docker (PHP 8.4 app, MariaDB, phpMyAdmin, Queue Worker)
+docker compose up -d --build
+
+# 4. Install dependensi PHP di dalam container
+docker compose exec app composer install
+
+# 5. Generate application key
+docker compose exec app php artisan key:generate
+
+# 6. Jalankan migrasi database
+docker compose exec app php artisan migrate
+
+# 7. Buat symbolic link public storage
+docker compose exec app php artisan storage:link
+
+# 8. Install & kompilasi dependensi frontend di host
+npm install
+npm run build
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Aplikasi siap dibuka di:
+- **Aplikasi Web**: [http://localhost:8000](http://localhost:8000)
+- **phpMyAdmin**: [http://localhost:8080](http://localhost:8080)
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🧪 Data Dummy & Seeder
 
-## Code of Conduct
+Untuk mengisi database dengan data pengujian lengkap beserta berkas PDF/gambar dummy:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+# Reset database dan jalankan seeder
+docker compose exec app php artisan migrate:fresh --seed
 
-## Security Vulnerabilities
+# Buat dummy files (foto profil, KTP, arsip PDF, background sertifikat)
+docker compose exec app php artisan demo:seed-files
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Akun Bawaan (Default Demo Credentials)
+- **Admin**: `admin@imm.or.id` (atau cek email di tabel `users`) / Password: `password`
+- **Instruktur**: Cek tabel `users` dengan `role = 'instruktur'` / Password: `password`
+- **Kader**: Cek tabel `users` dengan `role = 'kader'` / Password: `password`
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## ⚡ Perintah Penting Pengembang (Cheat Sheet)
+
+```bash
+# Menjalankan unit & feature testing
+docker compose exec app php artisan test
+
+# Menjalankan test tertentu
+docker compose exec app php artisan test --filter=CertificateEligibilityTest
+
+# Format kode PHP sesuai standar Pint
+docker compose exec app vendor/bin/pint --dirty
+
+# Menjalankan background worker antrean sertifikat
+docker compose exec app php artisan queue:work
+
+# Memeriksa daftar route aktif
+docker compose exec app php artisan route:list
+
+# Development frontend (HMR Vite)
+npm run dev
+```
+
+---
+
+## 📚 Dokumentasi Lanjutan
+
+Untuk panduan arsitektur teknis lebih mendalam dan buku panduan pengoperasian:
+- [Panduan Fungsional Developer (`support-for-developer/dokumentasi.md`)](support-for-developer/dokumentasi.md)
+- [Panduan Pengoperasian User Manual (`support-for-developer/pengoperasian.md`)](support-for-developer/pengoperasian.md)
+- [Panduan Dasar Pemrograman Laravel (`support-for-developer/basics/`)](support-for-developer/basics/)
+- [Panduan Deployment Produksi (`DEPLOYMENT.md`)](DEPLOYMENT.md)
+- [Instruksi AI Agent (`AGENTS.md`)](AGENTS.md)
+

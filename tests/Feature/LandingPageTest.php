@@ -19,13 +19,40 @@ test('landing page contains IMM branding', function () {
         ->assertSee('Visi');
 });
 
+test('landing navigation shows login action to guests', function () {
+    $this->get(route('landing'))
+        ->assertOk()
+        ->assertSee('Masuk')
+        ->assertDontSee('Dashboard');
+});
+
+test('landing navigation links authenticated users to their role dashboard', function (string $role, string $routeName) {
+    $user = User::factory()->create(['role' => $role]);
+
+    $this->actingAs($user)
+        ->get(route('landing'))
+        ->assertOk()
+        ->assertSee('Dashboard')
+        ->assertSee(route($routeName), false);
+})->with([
+    'admin' => ['admin', 'admin.dashboard'],
+    'instruktur' => ['instruktur', 'admin.kegiatan.index'],
+    'kader' => ['kader', 'kader.dashboard'],
+]);
+
 test('landing page has correct route name', function () {
     expect(route('landing'))->toBe(url('/'));
 });
 
 test('landing page displays 3 latest activities', function () {
-    // Seed 5 activities
-    $activities = Kegiatan::factory()->count(5)->create();
+    Cache::forget('kegiatan.terbaru');
+
+    // Seed uniquely named activities so the older-record assertion cannot collide.
+    $activities = collect(range(1, 5))->map(fn (int $index) => Kegiatan::factory()->create([
+        'nama_kegiatan' => 'Kegiatan Uji '.$index,
+        'created_at' => now()->addSeconds($index),
+        'updated_at' => now()->addSeconds($index),
+    ]));
     $latest = Kegiatan::latest()->take(3)->get();
 
     $response = $this->get('/');
@@ -86,6 +113,7 @@ test('landing page activities are cached', function () {
 
 test('activities cache is cleared when activities are added, updated, or deleted', function () {
     $instruktur = User::factory()->instruktur()->create();
+    $scheduledAt = now()->addDays(2)->setTime(10, 0)->format('Y-m-d H:i');
 
     // Cache is active
     Cache::remember('kegiatan.terbaru', 3600, function () {
@@ -97,8 +125,11 @@ test('activities cache is cleared when activities are added, updated, or deleted
     $this->actingAs($instruktur)->post(route('admin.kegiatan.store'), [
         'nama_kegiatan' => 'Latihan Kader Baru',
         'deskripsi' => 'Deskripsi baru',
-        'tanggal_waktu' => '2026-06-15 10:00:00',
+        'tanggal_waktu' => $scheduledAt,
         'lokasi' => 'Aula IMM',
+        'tahun_angkatan' => [now()->year],
+        'jenis_pelaksanaan' => 'satu_sesi',
+        'minimum_sesi_terverifikasi' => 1,
     ]);
     expect(Cache::has('kegiatan.terbaru'))->toBeFalse();
 
@@ -113,8 +144,11 @@ test('activities cache is cleared when activities are added, updated, or deleted
     // 2. Update activity clears cache
     $this->actingAs($instruktur)->put(route('admin.kegiatan.update', $kegiatan), [
         'nama_kegiatan' => 'Latihan Kader Updated',
-        'tanggal_waktu' => '2026-06-15 10:00:00',
+        'tanggal_waktu' => $scheduledAt,
         'lokasi' => 'Aula IMM Baru',
+        'tahun_angkatan' => [$kegiatan->tahunAngkatans()->value('tahun_daftar')],
+        'jenis_pelaksanaan' => 'satu_sesi',
+        'minimum_sesi_terverifikasi' => 1,
     ]);
     expect(Cache::has('kegiatan.terbaru'))->toBeFalse();
 

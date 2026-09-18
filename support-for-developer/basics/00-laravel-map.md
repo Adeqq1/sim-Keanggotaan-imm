@@ -11,81 +11,87 @@ Bayangkan Laravel seperti restoran:
 | View (Blade) | Tampilan makanan / UI | `resources/views/` |
 | Config | Aturan rumah | `config/` |
 | Middleware | Satpam | `app/Http/Middleware/` |
+| Jobs / Queues | Dapur pesanan massal latar belakang | `app/Jobs/` |
+| Services | Ahli logika khusus | `app/Services/` |
 
 ## Folder penting
 
 ```text
 sim-Keanggotaan-imm-docker/
 ├── app/
-│   ├── Enums/                 # daftar nilai tetap (role, dll)
-│   ├── Http/Controllers/      # logika request
-│   ├── Http/Middleware/       # cek akses (role, auth)
-│   └── Models/                # tabel ↔ objek PHP
+│   ├── Enums/                 # daftar nilai tetap (RoleEnum, dll)
+│   ├── Http/Controllers/      # logika request web
+│   ├── Http/Middleware/       # cek otentikasi & role akses
+│   ├── Http/Requests/         # validasi form request
+│   ├── Jobs/                  # background queue (GenerateCertificateJob)
+│   ├── Models/                # tabel ↔ objek Eloquent ORM (12 model)
+│   └── Services/              # business logic (CertificateEligibility, VerifiedAttendance)
 ├── database/
-│   ├── migrations/            # buat/ubah tabel
-│   └── seeders/               # data dummy (jika ada)
-├── resources/views/           # halaman Blade HTML
+│   ├── migrations/            # struktur tabel versi database
+│   ├── factories/             # pembuat data dummy model
+│   └── seeders/               # pengisi data awal / demo
+├── resources/views/           # template antarmuka Blade HTML & Tailwind
 ├── routes/
-│   ├── web.php                # route website utama
-│   └── auth.php               # route login/register
-├── public/                    # entry point (index.php, asset)
-├── support-for-developer/     # dokumentasi untuk manusia/AI junior
-└── compose.yaml / Dockerfile  # stack Docker lokal
+│   ├── web.php                # route aplikasi (public, admin, instruktur, kader)
+│   └── auth.php               # route autentikasi (login, password reset)
+├── storage/app/
+│   ├── public/                # file publik (foto profil, thumbnail kegiatan, sertifikat)
+│   └── private/               # file privat (KTP pendaftaran, arsip, materi, settings)
+├── support-for-developer/     # dokumentasi lengkap developer
+└── compose.yaml / Dockerfile  # konfigurasi Docker lokal (PHP 8.4, MariaDB)
 ```
 
-## Tabel utama di aplikasi ini
+## 12 Model Utama di Aplikasi Ini
 
-| Tabel | Model | Arti |
-|-------|-------|------|
-| `users` | `User` | akun login + role |
-| `anggota` | `Anggota` | profil anggota yang terhubung ke user |
-| `pendaftaran` | `Pendaftaran` | data form pendaftaran |
-| `kegiatan` | `Kegiatan` | event / kegiatan |
-| `presensi` | `Presensi` | kehadiran anggota di kegiatan |
-| `sertifikat` | `Sertifikat` | sertifikat |
-| `arsip` | `Arsip` | file arsip anggota |
+| Tabel | Model | Arti & Kegunaan |
+|-------|-------|-----------------|
+| `users` | `User` | Akun autentikasi login + peran (`admin`, `kader`, `instruktur`) |
+| `anggota` | `Anggota` | Profil biodata anggota/kader yang terhubung ke akun user |
+| `pendaftaran` | `Pendaftaran` | Data formulir pendaftaran calon anggota baru |
+| `kegiatan` | `Kegiatan` | Agenda acara/kegiatan perkaderan organisasi |
+| `sesi_kegiatan` | `SesiKegiatan` | Sesi pertemuan spesifik dalam suatu kegiatan |
+| `presensi` | `Presensi` | Catatan absensi kehadiran anggota di kegiatan/sesi |
+| `penilaian_kegiatan` | `PenilaianKegiatan` | Nilai evaluasi mutu kader (A–D) oleh instruktur |
+| `materi_kegiatan` | `MateriKegiatan` | Berkas modul/slide materi perkaderan |
+| `laporan_kegiatan` | `LaporanKegiatan` | Berita acara dan laporan pelaksanaan kegiatan |
+| `sertifikat` | `Sertifikat` | Berkas e-sertifikat resmi hasil generate sistem |
+| `arsip` | `Arsip` | Berkas dokumen digital organisasi/kader |
+| `kegiatan_tahun_angkatan` | `KegiatanTahunAngkatan` | Data pemetaan tahun angkatan perkaderan |
 
-## Gambar relasi inti
+## Gambar Relasi Inti
 
 ```text
-users 1 ── 1 anggota
-users 1 ── 1 pendaftaran
+User 1 ── 1 Anggota
+User 1 ── 1 Pendaftaran
 
-anggota 1 ── * presensi * ── 1 kegiatan
-anggota 1 ── * sertifikat * ── 1 kegiatan
-anggota 1 ── * arsip
+Kegiatan 1 ── * SesiKegiatan 1 ── * Presensi * ── 1 Anggota
+Kegiatan 1 ── * MateriKegiatan
+Kegiatan 1 ── * PenilaianKegiatan * ── 1 Anggota
+Kegiatan 1 ── 1 LaporanKegiatan
+Kegiatan 1 ── * Sertifikat * ── 1 Anggota
+
+Anggota 1 ── * Arsip
 ```
 
-Artinya:
-
-- 1 akun login bisa punya 1 profil anggota
-- 1 anggota bisa hadir di banyak kegiatan (`presensi`)
-- 1 kegiatan bisa punya banyak baris presensi
-
-## Alur request (sederhana)
+## Alur Request (Sederhana)
 
 ```text
 URL di browser
    → routes/web.php
-   → method Controller
-   → Model / Database
-   → View Blade HTML
+   → Middleware (auth & role)
+   → Controller Method
+   → Model / Database / Service
+   → View Blade (HTML + Tailwind)
    → Browser
 ```
 
-Contoh:
+## Aturan Praktis
 
-1. User buka `/admin/anggota`
-2. Route mengarah ke `AnggotaController@index`
-3. Controller ambil `Anggota::with('user')->get()`
-4. Controller kembalikan view Blade beserta datanya
-
-## Aturan praktis
-
-1. **Ubah struktur DB?** buat migration.
-2. **Objek data bisnis?** buat/update Model.
-3. **Halaman / aksi baru?** tambah Route + Controller (+ View jika perlu).
-4. **Siapa yang boleh akses?** middleware / cek role.
-5. **Jangan edit migration lama** yang sudah pernah jalan di production; buat migration baru untuk mengubah tabel.
+1. **Ubah struktur DB?** Buat file migration baru.
+2. **Objek data bisnis?** Buat/update Model Eloquent.
+3. **Halaman / aksi baru?** Tambah Route + Controller (+ View jika perlu).
+4. **Siapa yang boleh akses?** Proteksi di middleware `role` (`role:admin`, `role:instruktur`, `role:kader`).
+5. **Jangan edit migration lama** yang sudah pernah berjalan; buat migration baru.
 
 Berikutnya: [01 — Tabel database & migration](./01-database-tables-migrations.md)
+

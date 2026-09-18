@@ -4,6 +4,7 @@ use App\Models\Anggota;
 use App\Models\Arsip;
 use App\Models\Kegiatan;
 use App\Models\Pendaftaran;
+use App\Models\Presensi;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
@@ -15,8 +16,11 @@ test('admin can approve pendaftaran and create kader account', function () {
 
     $admin = User::factory()->admin()->create();
     $password = 'Pendaftaran-Password-2026';
+    $komisariatId = array_key_first(Pendaftaran::KOMISARIAT);
     $pendaftaran = Pendaftaran::factory()->create([
         'password' => Hash::make($password),
+        'komisariat_id' => $komisariatId,
+        'tahun_daftar' => 2024,
     ]);
 
     $response = $this->actingAs($admin)
@@ -41,6 +45,8 @@ test('admin can approve pendaftaran and create kader account', function () {
     $this->assertDatabaseHas('anggota', [
         'user_id' => $newUser->id,
         'nama_lengkap' => $pendaftaran->nama_lengkap,
+        'komisariat_id' => $komisariatId,
+        'tahun_daftar' => 2024,
     ]);
 
     Mail::assertNothingQueued();
@@ -66,7 +72,11 @@ test('admin can approve a legacy pendaftaran with a temporary password', functio
 
 test('admin pendaftaran detail page posts explicit status for approval action', function () {
     $admin = User::factory()->admin()->create();
-    $pendaftaran = Pendaftaran::factory()->instruktur()->create();
+    $komisariatId = array_key_first(Pendaftaran::KOMISARIAT);
+    $pendaftaran = Pendaftaran::factory()->instruktur()->create([
+        'komisariat_id' => $komisariatId,
+        'tahun_daftar' => 2024,
+    ]);
 
     $response = $this->actingAs($admin)
         ->get(route('admin.pendaftaran.show', $pendaftaran));
@@ -79,9 +89,26 @@ test('admin pendaftaran detail page posts explicit status for approval action', 
         ->assertSeeText('Daftar Sebagai')
         ->assertSeeText('Role Akun')
         ->assertSeeText('Instruktur')
+        ->assertSeeText(Pendaftaran::KOMISARIAT[$komisariatId])
+        ->assertSeeText('2024')
         ->assertSeeText('Setujui & Buat Akun')
         ->assertSeeText('Tolak Pendaftaran')
         ->assertSeeText('Kembali ke Daftar');
+});
+
+test('admin pendaftaran detail shows legacy fallback for missing komisariat and tahun', function () {
+    $admin = User::factory()->admin()->create();
+    $pendaftaran = Pendaftaran::factory()->create([
+        'komisariat_id' => null,
+        'tahun_daftar' => null,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.show', $pendaftaran))
+        ->assertOk()
+        ->assertSeeText('Komisariat')
+        ->assertSeeText('Tahun Daftar')
+        ->assertSeeText('Tidak tercatat (data lama)');
 });
 
 test('admin pendaftaran index shows selected role', function () {
@@ -229,6 +256,80 @@ test('admin can reject pendaftaran', function () {
     expect($pendaftaran->password)->toBeNull();
 });
 
+test('admin rejection deletes the registration identity document', function () {
+    Storage::fake('local');
+
+    $admin = User::factory()->admin()->create();
+    $path = 'pendaftaran/rejected-identity.pdf';
+    Storage::disk('local')->put($path, '%PDF-1.4 rejected document');
+    $pendaftaran = Pendaftaran::factory()->create([
+        'file_persyaratan' => $path,
+        'jenis_dokumen_identitas' => 'ktp',
+    ]);
+
+    $this->actingAs($admin)
+        ->post(route('admin.pendaftaran.validate', $pendaftaran), [
+            'status' => 'ditolak',
+            'catatan_admin' => 'Data tidak lengkap.',
+        ])
+        ->assertRedirect(route('admin.pendaftaran.index'));
+
+    $pendaftaran->refresh();
+    expect($pendaftaran->status_validasi)->toBe('ditolak')
+        ->and($pendaftaran->file_persyaratan)->toBeNull();
+    Storage::disk('local')->assertMissing($path);
+});
+
+test('admin cannot reject a pendaftaran that was already approved', function () {
+    Storage::fake('local');
+
+    $admin = User::factory()->admin()->create();
+    $path = 'pendaftaran/approved-identity.pdf';
+    Storage::disk('local')->put($path, '%PDF-1.4 approved document');
+    $user = User::factory()->kader()->create();
+    $pendaftaran = Pendaftaran::factory()->approved()->create([
+        'user_id' => $user->id,
+        'file_persyaratan' => $path,
+    ]);
+
+    $this->actingAs($admin)
+        ->from(route('admin.pendaftaran.show', $pendaftaran))
+        ->post(route('admin.pendaftaran.validate', $pendaftaran), [
+            'status' => 'ditolak',
+            'catatan_admin' => 'Tidak boleh diproses ulang.',
+        ])
+        ->assertSessionHasErrors('status');
+
+    expect($pendaftaran->refresh()->status_validasi)->toBe('disetujui');
+    Storage::disk('local')->assertExists($path);
+});
+
+test('admin approval flash renders as auto-dismiss toast', function () {
+    $admin = User::factory()->admin()->create();
+
+    $content = $this->actingAs($admin)
+        ->withSession(['success' => 'Pendaftaran disetujui.'])
+        ->get(route('admin.pendaftaran.index'))
+        ->assertOk()
+        ->getContent();
+
+    $dom = new DOMDocument();
+    $previous = libxml_use_internal_errors(true);
+    $dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR | LIBXML_NOWARNING);
+    libxml_use_internal_errors($previous);
+    $xpath = new DOMXPath($dom);
+
+    $toasts = $xpath->query('//div[@data-auto-dismiss-toast]');
+    expect($toasts->length)->toBe(1);
+
+    $toast = $toasts->item(0);
+    expect($toast->getAttribute('class'))->toContain('show')
+        ->and($toast->textContent)->toContain('Pendaftaran disetujui.');
+
+    $closeButtons = $xpath->query('.//button[@data-bs-dismiss="toast"]', $toast);
+    expect($closeButtons->length)->toBe(1);
+});
+
 test('admin must provide catatan admin when rejecting pendaftaran', function () {
     $admin = User::factory()->admin()->create();
     $pendaftaran = Pendaftaran::factory()->create();
@@ -244,33 +345,43 @@ test('admin must provide catatan admin when rejecting pendaftaran', function () 
     expect($pendaftaran->status_validasi)->toBe('pending');
 });
 
-test('admin can store presensi data', function () {
+test('admin can view presensi but cannot store it', function () {
     $admin = User::factory()->admin()->create();
-    $kegiatan = Kegiatan::factory()->create();
-    $anggota1 = Anggota::factory()->create();
-    $anggota2 = Anggota::factory()->create();
+    $kegiatan = Kegiatan::factory()->withDefaultSession()->create();
+    $anggota1 = Anggota::factory()->create(['tahun_daftar' => now()->year]);
+    $anggota2 = Anggota::factory()->create(['tahun_daftar' => now()->year]);
+    $presensi = Presensi::create([
+        'kegiatan_id' => $kegiatan->id,
+        'sesi_kegiatan_id' => $kegiatan->sesiKegiatans()->first()->id,
+        'anggota_id' => $anggota1->id,
+        'status_kehadiran' => 'hadir',
+        'waktu_hadir' => now(),
+    ]);
 
-    $response = $this->actingAs($admin)
-        ->post(route('admin.presensi.store', $kegiatan->id), [
+    $response = $this->actingAs($admin)->get(route('admin.presensi.sesi.show', [$kegiatan, $kegiatan->sesiKegiatans()->first()]));
+
+    $response->assertSuccessful()
+        ->assertSeeText($anggota1->nama_lengkap)
+        ->assertSeeText($anggota2->nama_lengkap)
+        ->assertSeeText('Hadir')
+        ->assertSeeText('Belum dicatat')
+        ->assertDontSeeText('Alfa')
+        ->assertDontSee('name="presensi[', false)
+        ->assertDontSeeText('Simpan Presensi');
+
+    $response = $this->actingAs($admin)->post(route('admin.presensi.store', $kegiatan), [
             'presensi' => [
-                $anggota1->id => 'hadir',
-                $anggota2->id => 'izin',
+                [
+                    'anggota_id' => $anggota2->id,
+                    'status_kehadiran' => 'izin',
+                ],
             ],
         ]);
 
-    $response->assertRedirect(route('admin.kegiatan.index'));
-
-    $this->assertDatabaseHas('presensi', [
-        'kegiatan_id' => $kegiatan->id,
-        'anggota_id' => $anggota1->id,
-        'status_kehadiran' => 'hadir',
-    ]);
-
-    $this->assertDatabaseHas('presensi', [
-        'kegiatan_id' => $kegiatan->id,
-        'anggota_id' => $anggota2->id,
-        'status_kehadiran' => 'izin',
-    ]);
+    $response->assertForbidden();
+    expect($presensi->fresh()->status_kehadiran)->toBe('hadir')
+        ->and($presensi->fresh()->waktu_hadir)->not->toBeNull();
+    expect(Presensi::where('kegiatan_id', $kegiatan->id)->count())->toBe(1);
 });
 
 test('admin cannot access arsip upload page (upload only by kader)', function () {
@@ -327,6 +438,10 @@ test('admin can search and filter arsip', function () {
     ]));
 
     $response->assertSuccessful();
+    $response->assertViewHas('kategori', Arsip::KATEGORI);
+    $response->assertSee('Surat Masuk');
+    $response->assertSee('Surat Keluar');
+    $response->assertSee('Lain-lain');
     $response->assertSee('Proposal Rapat Kerja');
     $response->assertDontSee('Surat Keluar Cabang');
     $response->assertSee('Atur ulang filter');

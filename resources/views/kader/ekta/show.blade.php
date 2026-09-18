@@ -3,66 +3,141 @@
         E-KTA Digital
     </x-slot>
 
-    {{-- Di desktop, konten dibatasi lebarnya agar kartu tidak terlalu besar --}}
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-5 col-xl-4">
+    <style data-testid="ekta-print-styles">
+        @media print {
+            @page {
+                margin: 8mm;
+                size: A4 portrait;
+            }
 
-            <div class="mb-4 text-center">
+            body {
+                background: #ffffff !important;
+                padding-bottom: 0 !important;
+                print-color-adjust: exact !important;
+                -webkit-print-color-adjust: exact !important;
+            }
+
+            .sidebar-desktop,
+            .desktop-topbar,
+            .navbar-header,
+            .app-wrapper > nav,
+            .app-wrapper > .toast-container,
+            .ekta-print-hide {
+                display: none !important;
+            }
+
+            .app-wrapper {
+                margin-left: 0 !important;
+            }
+
+            .app-main-content {
+                padding: 0 !important;
+            }
+
+            .ekta-page {
+                display: block !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .ekta-page > div {
+                margin: 0 auto !important;
+                max-width: 520px !important;
+                padding: 0 !important;
+                width: 100%;
+            }
+
+            .ekta-flip-wrapper {
+                display: block !important;
+                margin: 0 auto !important;
+                max-width: 520px !important;
+                perspective: none !important;
+                width: 100% !important;
+            }
+
+            .ekta-flip-card {
+                display: block !important;
+                height: auto !important;
+                transform: none !important;
+                width: 100% !important;
+            }
+
+            .ekta-flip-front,
+            .ekta-flip-back {
+                backface-visibility: visible !important;
+                display: block !important;
+                margin: 0 auto 16px !important;
+                max-width: 520px !important;
+                position: static !important;
+                transform: none !important;
+                visibility: visible !important;
+                width: 100% !important;
+            }
+
+            .ekta-card,
+            .ekta-card-back {
+                box-shadow: none !important;
+                break-inside: avoid;
+                page-break-inside: avoid;
+                print-color-adjust: exact !important;
+                -webkit-print-color-adjust: exact !important;
+            }
+        }
+
+        .ekta-flip-wrapper { max-width: 520px; margin: 0 auto 1.5rem; perspective: 1000px; }
+        .ekta-flip-card { position: relative; transform-style: preserve-3d; transition: transform .6s ease; }
+        .ekta-flip-card.is-flipped { transform: rotateY(180deg); }
+        .ekta-flip-front, .ekta-flip-back { backface-visibility: hidden; width: 100%; }
+        .ekta-flip-back { left: 0; position: absolute; top: 0; transform: rotateY(180deg); }
+    </style>
+
+    <div class="row justify-content-center ekta-page">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-7">
+
+            <div class="mb-4 text-center ekta-print-hide">
                 <p class="text-muted small">Kartu Tanda Anggota Digital Anda</p>
             </div>
 
-            <!-- KTA Card View -->
-            <div class="card p-0 mb-4 shadow-lg overflow-hidden" style="border-radius: 18px; border: none; aspect-ratio: 1.58/1; background: linear-gradient(135deg, #800000 0%, #a00000 100%); position: relative;">
-                <!-- Card Background Pattern -->
-                <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-                <div style="position: absolute; bottom: -20px; left: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-
-                <div class="p-3 h-100 d-flex flex-column justify-content-between position-relative">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h5 class="text-white fw-bold mb-0" style="letter-spacing: 1px;">KADER IMM</h5>
-                            <small class="text-white opacity-50" style="font-size: 0.6rem;">IKATAN MAHASISWA MUHAMMADIYAH</small>
-                        </div>
-                        <i class="bi bi-shield-check text-white fs-3"></i>
+            <div class="ekta-flip-wrapper" data-testid="ekta-flip-container">
+                <div class="ekta-flip-card" id="ektaCardFlipper" role="button" tabindex="0" aria-label="Balik Kartu E-KTA">
+                    <div class="ekta-flip-front" data-testid="ekta-front-side">
+                <x-ekta-card
+                    :anggota="$anggota"
+                    :role-label="$roleLabel"
+                    :photo-src="$photoSrc"
+                    :logo-src="$logoSrc"
+                />
                     </div>
-
-                    <div class="d-flex align-items-center min-w-0 mt-3">
-                        <div class="me-3">
-                            @if($anggota->foto_profil)
-                                <img src="{{ Storage::url($anggota->foto_profil) }}" class="rounded-3 border border-2 border-white shadow-sm" width="70" height="85" style="object-fit: cover;">
-                            @else
-                                <div class="rounded-3 bg-white bg-opacity-25 d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" style="width: 70px; height: 85px; font-size: 2rem;">
-                                    {{ substr($anggota->nama_lengkap, 0, 1) }}
-                                </div>
-                            @endif
-                        </div>
-                        <div class="text-white min-w-0">
-                            <h6 class="fw-bold mb-0 text-break" style="font-size: 0.9rem;">{{ strtoupper($anggota->nama_lengkap) }}</h6>
-                            <p class="mb-1 fw-bold text-warning" style="font-size: 0.8rem; letter-spacing: 1px;">NIA: {{ $anggota->nia }}</p>
-                            <small class="d-block opacity-75" style="font-size: 0.6rem;">AKTIF SEJAK: {{ $anggota->created_at->format('Y') }}</small>
-                        </div>
-                    </div>
-
-                    <div class="text-end">
-                        <small class="text-white opacity-25" style="font-size: 0.5rem; letter-spacing: 2px;">KARTU ANGGOTA RESMI</small>
+                    <div class="ekta-flip-back" data-testid="ekta-back-side">
+                        <x-ekta-card-back :anggota="$anggota" :role-label="$roleLabel" :qr-code-src="$qrCodeSrc" :logo-src="$logoSrc" />
                     </div>
                 </div>
             </div>
 
-            <div class="d-grid gap-3">
-                <a href="{{ route('kader.ekta.download') }}" class="btn btn-primary btn-ui py-3">
-                    <i class="bi bi-download me-2"></i> Unduh KTA (PDF)
-                </a>
-                <button onclick="window.print()" class="btn btn-outline-secondary btn-ui py-3">
+            <div class="text-center mb-4 ekta-print-hide"><button type="button" class="btn btn-sm btn-outline-secondary" id="btnFlipCard">Balik Sisi Kartu</button></div>
+
+            <div class="d-grid ekta-print-hide">
+                <button onclick="window.print()" class="btn btn-primary btn-ui py-3 ekta-print-button">
                     <i class="bi bi-printer me-2"></i> Cetak Kartu
                 </button>
             </div>
 
-            <div class="mt-4 p-3 bg-light rounded-3">
+            <div class="mt-4 p-3 bg-light rounded-3 ekta-print-hide">
                 <h6 class="fw-bold small mb-2"><i class="bi bi-info-circle me-1"></i> Informasi Kartu</h6>
                 <p class="text-muted" style="font-size: 0.75rem; line-height: 1.4;">E-KTA ini adalah identitas resmi anggota Ikatan Mahasiswa Muhammadiyah. Gunakan kartu ini untuk keperluan verifikasi pada kegiatan resmi organisasi.</p>
             </div>
 
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const card = document.getElementById('ektaCardFlipper');
+            const toggle = () => card?.classList.toggle('is-flipped');
+            card?.addEventListener('click', toggle);
+            card?.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggle(); }
+            });
+            document.getElementById('btnFlipCard')?.addEventListener('click', toggle);
+        });
+    </script>
 </x-app-layout>

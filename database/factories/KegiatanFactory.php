@@ -12,6 +12,7 @@ class KegiatanFactory extends Factory
 {
     protected $model = Kegiatan::class;
 
+
     /**
      * Contoh judul kegiatan IMM/kampus berbahasa Indonesia.
      *
@@ -80,7 +81,27 @@ class KegiatanFactory extends Factory
             'deskripsi' => fake()->randomElement(self::DESKRIPSI),
             'tanggal_waktu' => fake()->dateTimeBetween('+1 day', '+30 days'),
             'lokasi' => fake()->randomElement(self::LOKASI).', '.$kota,
+            'jenis_pelaksanaan' => Kegiatan::SATU_SESI,
+            'minimum_sesi_terverifikasi' => 1,
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Kegiatan $kegiatan): void {
+            $kegiatan->tahunAngkatans()->firstOrCreate(['tahun_daftar' => now()->year]);
+        });
+    }
+
+    public function withDefaultSession(): static
+    {
+        return $this->afterCreating(function (Kegiatan $kegiatan): void {
+            $kegiatan->sesiKegiatans()->create([
+                    'urutan' => 1,
+                    'nama_sesi' => 'Sesi 1',
+                    'mulai_pada' => $kegiatan->tanggal_waktu,
+            ]);
+        });
     }
 
     /**

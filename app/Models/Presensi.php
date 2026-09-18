@@ -6,10 +6,9 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Builder;
 
-#[Fillable(['kegiatan_id', 'anggota_id', 'waktu_hadir', 'status_kehadiran', 'bukti_kehadiran', 'status_klaim'])]
+#[Fillable(['kegiatan_id', 'anggota_id', 'sesi_kegiatan_id', 'waktu_hadir', 'status_kehadiran', 'bukti_kehadiran', 'status_klaim', 'status_verifikasi', 'pemeriksa_id', 'diperiksa_pada'])]
 class Presensi extends Model
 {
     use HasFactory;
@@ -18,7 +17,10 @@ class Presensi extends Model
 
     protected $casts = [
         'waktu_hadir' => 'datetime',
+        'diperiksa_pada' => 'datetime',
     ];
+
+    protected $attributes = ['status_verifikasi' => 'pending'];
 
     public function kegiatan(): BelongsTo
     {
@@ -30,28 +32,23 @@ class Presensi extends Model
         return $this->belongsTo(Anggota::class);
     }
 
-    public function setujuiKlaim(): void
+    public function sesiKegiatan(): BelongsTo
     {
-        DB::transaction(function () {
-            $this->update([
-                'status_klaim' => 'disetujui',
-                'status_kehadiran' => 'hadir',
-                'waktu_hadir' => $this->waktu_hadir ?? now(),
-            ]);
-        });
+        return $this->belongsTo(SesiKegiatan::class);
     }
 
-    public function tolakKlaim(): void
+    public function pemeriksa(): BelongsTo
     {
-        DB::transaction(function () {
-            if ($this->bukti_kehadiran) {
-                Storage::disk('public')->delete($this->bukti_kehadiran);
-            }
+        return $this->belongsTo(User::class, 'pemeriksa_id');
+    }
 
-            $this->update([
-                'status_klaim' => 'ditolak',
-                'bukti_kehadiran' => null,
-            ]);
-        });
+    public function scopeTerverifikasi(Builder $query): Builder
+    {
+        return $query->where('status_kehadiran', 'hadir')
+            ->where(function (Builder $query): void {
+                $query->where(function (Builder $query): void {
+                    $query->where('status_verifikasi', 'terverifikasi')->whereNotNull('diperiksa_pada');
+                })->orWhere('status_verifikasi', 'legacy');
+            });
     }
 }

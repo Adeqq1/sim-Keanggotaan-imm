@@ -26,6 +26,8 @@ class LaporanRequest extends FormRequest
             'tanggal_mulai' => ['required', 'date'],
             'tanggal_selesai' => ['required', 'date', 'after_or_equal:tanggal_mulai'],
             'jenis_laporan' => ['required', 'in:kegiatan,anggota,pendaftaran,arsip'],
+            'sort' => ['nullable', 'string'],
+            'direction' => ['nullable', 'in:asc,desc,ASC,DESC'],
         ];
     }
 }

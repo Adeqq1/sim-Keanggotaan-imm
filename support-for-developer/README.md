@@ -6,9 +6,10 @@ Folder ini adalah **buku panduan developer** untuk project ini.
 
 | Dokumen | Kegunaan |
 |---------|----------|
-| [dokumentasi.md](./dokumentasi.md) | Fitur fungsional yang sudah ada (route, role, modul) |
-| [basics/](./basics/) | **Dasar pemrograman Laravel** (tabel, model, relasi, seeder, alur CRUD) |
-| [troubleshooting/](./troubleshooting/) | Catatan bugfix dan checklist |
+| [dokumentasi.md](./dokumentasi.md) | Fitur fungsional teknis, route, role, 12 model Eloquent, dan arsitektur |
+| [pengoperasian.md](./pengoperasian.md) | **Buku panduan pengoperasian (User Manual)** untuk Guest, Kader, Instruktur, dan Admin |
+| [basics/](./basics/) | **Dasar pemrograman Laravel** (peta arsitektur, tabel, model, relasi, seeder, alur CRUD) |
+| [troubleshooting/](./troubleshooting/) | Catatan pengujian manual, bugfix, dan checklist |
 
 ## Mulai di sini jika baru
 

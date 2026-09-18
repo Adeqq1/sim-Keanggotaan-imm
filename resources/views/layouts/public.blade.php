@@ -61,13 +61,13 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js');
+                navigator.serviceWorker.register('/sw.js').then(registration => registration.update());
             });
         }
     </script>
     @endverbatim
 </head>
-<body style="font-family:'Inter',sans-serif;">
+<body class="public-site" style="font-family:'Inter',sans-serif;">
 
     @include('public.partials._navbar')
 

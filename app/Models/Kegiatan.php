@@ -6,16 +6,23 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Storage;
 
-#[Fillable(['nama_kegiatan', 'deskripsi', 'tanggal_waktu', 'lokasi', 'thumbnail'])]
+#[Fillable(['nama_kegiatan', 'deskripsi', 'tanggal_waktu', 'lokasi', 'thumbnail', 'jenis_pelaksanaan', 'minimum_sesi_terverifikasi'])]
 class Kegiatan extends Model
 {
     use HasFactory;
+
+    public const BELUM_DITETAPKAN = 'belum_ditetapkan';
+    public const SATU_SESI = 'satu_sesi';
+    public const MULTI_SESI = 'multi_sesi';
 
     protected $table = 'kegiatan';
 
     protected $casts = [
         'tanggal_waktu' => 'datetime',
+        'minimum_sesi_terverifikasi' => 'integer',
     ];
 
     public function presensi(): HasMany
@@ -23,16 +30,44 @@ class Kegiatan extends Model
         return $this->hasMany(Presensi::class);
     }
 
+    public function penilaianKegiatans(): HasMany
+    {
+        return $this->hasMany(PenilaianKegiatan::class);
+    }
+
+    public function sesiKegiatans(): HasMany
+    {
+        return $this->hasMany(SesiKegiatan::class)->orderBy('urutan');
+    }
+
     public function sertifikat(): HasMany
     {
         return $this->hasMany(Sertifikat::class);
     }
 
+    public function materiKegiatans(): HasMany
+    {
+        return $this->hasMany(MateriKegiatan::class);
+    }
+
+    public function laporanKegiatan(): HasOne
+    {
+        return $this->hasOne(LaporanKegiatan::class);
+    }
+
     /**
-     * Get the URL of the activity's thumbnail, falling back to a lightweight placeholder image.
+     * Get the URL of the activity's thumbnail, falling back to a placeholder image.
      */
     public function getThumbnailUrlAttribute(): string
     {
-        return $this->thumbnail ? asset('storage/'.$this->thumbnail) : asset('images/placeholder-kegiatan.png');
+        return filled($this->thumbnail) && Storage::disk('public')->exists($this->thumbnail)
+            ? asset('storage/'.$this->thumbnail)
+            : asset('images/placeholder-kegiatan.png');
     }
+
+    public function tahunAngkatans(): HasMany
+    {
+        return $this->hasMany(KegiatanTahunAngkatan::class)->orderBy('tahun_daftar');
+    }
+
 }
