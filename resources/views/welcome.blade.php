@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-        <title>SIM-IMM | Keanggotaan & Kearsipan</title>
+        <title>IMM | Ikatan Mahasiswa Muhammadiyah Bungo</title>
         
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
