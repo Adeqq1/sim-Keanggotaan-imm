@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>IMM | Ikatan Mahasiswa Muhammadiyah</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
     {{-- SEO Meta --}}
     <meta name="description" content="Profil resmi Ikatan Mahasiswa Muhammadiyah (IMM). Bergabung, berkarya, dan berkembang bersama.">
