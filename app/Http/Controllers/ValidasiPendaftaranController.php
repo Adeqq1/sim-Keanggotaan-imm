@@ -144,14 +144,25 @@ class ValidasiPendaftaranController extends Controller
             return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftaran disetujui.');
         }
 
-        $filePath = $pendaftar->file_persyaratan;
+        $filePath = DB::transaction(function () use ($pendaftar, $validated): ?string {
+            $locked = Pendaftaran::query()->lockForUpdate()->findOrFail($pendaftar->id);
 
-        $pendaftar->update([
-            'password' => null,
-            'status_validasi' => 'ditolak',
-            'catatan_admin' => $validated['catatan_admin'],
-            'file_persyaratan' => null,
-        ]);
+            if ($locked->status_validasi !== 'pending') {
+                throw ValidationException::withMessages([
+                    'status' => 'Pendaftaran ini sudah diproses.',
+                ]);
+            }
+
+            $filePath = $locked->file_persyaratan;
+            $locked->update([
+                'password' => null,
+                'status_validasi' => 'ditolak',
+                'catatan_admin' => $validated['catatan_admin'],
+                'file_persyaratan' => null,
+            ]);
+
+            return $filePath;
+        });
 
         if (is_string($filePath) && $filePath !== '') {
             try {

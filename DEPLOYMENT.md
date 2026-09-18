@@ -2,6 +2,14 @@
 
 Production uses `/opt/sim-keanggotaan-imm/compose.prod.yaml`. Never use
 `docker compose down -v`, `migrate:fresh`, or `db:wipe` on this instance.
+Copy `.env.production.example` to `.env`, set every placeholder to a unique
+secret, and keep the file mode at `0600`. The Compose file fails fast when the
+database credentials are missing.
+
+If a credential, session, or production dump is ever committed, treat it as an
+incident: invalidate all sessions, rotate the affected credentials, and purge
+the secret from every reachable Git object with a coordinated repository
+rewrite before considering the incident closed.
 
 ## Routine commands
 

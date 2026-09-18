@@ -78,3 +78,20 @@ test('legacy present attendance remains eligible without a fake verifier', funct
         ->and($presensi->pemeriksa_id)->toBeNull()
         ->and($presensi->diperiksa_pada)->toBeNull();
 });
+
+test('legacy attendance remains eligible when the member has no enrollment year', function () {
+    $kegiatan = Kegiatan::factory()->withDefaultSession()->create([
+        'jenis_pelaksanaan' => Kegiatan::SATU_SESI,
+        'minimum_sesi_terverifikasi' => 1,
+    ]);
+    $anggota = Anggota::factory()->create(['tahun_daftar' => null]);
+
+    Presensi::factory()->hadir()->create([
+        'kegiatan_id' => $kegiatan->id,
+        'sesi_kegiatan_id' => $kegiatan->sesiKegiatans()->first()->id,
+        'anggota_id' => $anggota->id,
+        'status_verifikasi' => 'legacy',
+    ]);
+
+    expect(app(VerifiedAttendance::class)->meetsRequirement($kegiatan, $anggota))->toBeTrue();
+});

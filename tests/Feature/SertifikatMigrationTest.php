@@ -7,18 +7,14 @@ use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Storage;
 
-test('certificate migration keeps the newest row with an existing PDF', function () {
-    Storage::fake('public');
+test('certificate migration refuses duplicate rows without deleting data', function () {
     Schema::table('sertifikat', function (Blueprint $table) {
         $table->dropUnique('sertifikat_kegiatan_anggota_unique');
     });
 
     $anggota = Anggota::factory()->create();
     $kegiatan = Kegiatan::factory()->create();
-    Storage::disk('public')->put('sertifikat/old.pdf', 'old certificate');
-    Storage::disk('public')->put('sertifikat/new.pdf', 'new certificate');
     $old = Sertifikat::factory()->create([
         'anggota_id' => $anggota->id,
         'kegiatan_id' => $kegiatan->id,
@@ -40,14 +36,10 @@ test('certificate migration keeps the newest row with an existing PDF', function
     ]);
 
     $migration = include database_path('migrations/2026_08_12_144520_add_kegiatan_anggota_unique_index_to_sertifikat_table.php');
-    $migration->up();
+    expect(fn () => $migration->up())
+        ->toThrow(\RuntimeException::class, 'duplicate activity/member pairs require manual reconciliation');
 
-    expect(Sertifikat::where('kegiatan_id', $kegiatan->id)
-        ->where('anggota_id', $anggota->id)
-        ->pluck('id')->all())->toBe([$existingNew->id]);
-    Storage::disk('public')->assertExists('sertifikat/old.pdf');
-    Storage::disk('public')->assertExists('sertifikat/new.pdf');
-    expect(DB::table('sertifikat')->whereIn('id', [$old->id, $missingNewest->id])->exists())->toBeFalse();
+    expect(DB::table('sertifikat')->whereIn('id', [$old->id, $existingNew->id, $missingNewest->id])->count())->toBe(3);
 });
 
 test('certificate migration enforces one certificate per activity and member', function () {

@@ -280,6 +280,30 @@ test('admin rejection deletes the registration identity document', function () {
     Storage::disk('local')->assertMissing($path);
 });
 
+test('admin cannot reject a pendaftaran that was already approved', function () {
+    Storage::fake('local');
+
+    $admin = User::factory()->admin()->create();
+    $path = 'pendaftaran/approved-identity.pdf';
+    Storage::disk('local')->put($path, '%PDF-1.4 approved document');
+    $user = User::factory()->kader()->create();
+    $pendaftaran = Pendaftaran::factory()->approved()->create([
+        'user_id' => $user->id,
+        'file_persyaratan' => $path,
+    ]);
+
+    $this->actingAs($admin)
+        ->from(route('admin.pendaftaran.show', $pendaftaran))
+        ->post(route('admin.pendaftaran.validate', $pendaftaran), [
+            'status' => 'ditolak',
+            'catatan_admin' => 'Tidak boleh diproses ulang.',
+        ])
+        ->assertSessionHasErrors('status');
+
+    expect($pendaftaran->refresh()->status_validasi)->toBe('disetujui');
+    Storage::disk('local')->assertExists($path);
+});
+
 test('admin approval flash renders as auto-dismiss toast', function () {
     $admin = User::factory()->admin()->create();
 

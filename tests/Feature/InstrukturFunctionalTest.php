@@ -477,6 +477,26 @@ test('inactive anggota cannot receive presensi', function () {
     ]);
 });
 
+test('presensi rejects an active non-kader anggota from a manipulated payload', function () {
+    $instruktur = User::factory()->instruktur()->create();
+    $kegiatan = Kegiatan::factory()->withDefaultSession()->create();
+    $nonKader = Anggota::factory()->create([
+        'tahun_daftar' => now()->year,
+        'user_id' => User::factory()->instruktur(),
+    ]);
+
+    $this->actingAs($instruktur)
+        ->post(route('admin.presensi.store', [$kegiatan, $kegiatan->sesiKegiatans()->first()]), [
+            'presensi' => [[
+                'anggota_id' => $nonKader->id,
+                'status_kehadiran' => 'hadir',
+            ]],
+        ])
+        ->assertSessionHasErrors('presensi.0.anggota_id');
+
+    expect(Presensi::where('kegiatan_id', $kegiatan->id)->exists())->toBeFalse();
+});
+
 test('kader cannot access kegiatan and presensi management', function () {
     $kader = User::factory()->kader()->create();
     $kegiatan = Kegiatan::factory()->create();

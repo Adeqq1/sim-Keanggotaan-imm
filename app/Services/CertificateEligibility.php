@@ -15,7 +15,11 @@ class CertificateEligibility
             return null;
         }
 
+        $hasLegacyAttendance = $anggota->tahun_daftar === null
+            && $anggota->presensi()->where('kegiatan_id', $kegiatan->id)->where('status_verifikasi', 'legacy')->exists();
+
         if (! $attendanceAlreadyVerified
+            && ! $hasLegacyAttendance
             && ! $kegiatan->tahunAngkatans()->where('tahun_daftar', $anggota->tahun_daftar)->exists()) {
             return null;
         }

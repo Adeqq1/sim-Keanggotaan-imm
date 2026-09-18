@@ -21,15 +21,14 @@ RUN apt-get update \
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
+COPY docker/apache-public.conf /etc/apache2/sites-available/000-default.conf
+
 WORKDIR /var/www/html
 
 # The source folder is bind-mounted from Fedora and owned by UID/GID 1000.
 # Run Apache workers as that user so Laravel can write cache, logs, sessions, and uploads.
 RUN groupadd --gid 1000 appuser \
     && useradd --uid 1000 --gid 1000 --no-create-home appuser \
-    && sed -ri 's!/var/www/html!/var/www/html/public!g' \
-        /etc/apache2/sites-available/000-default.conf \
-        /etc/apache2/apache2.conf \
     && sed -ri 's/^: \$\{APACHE_RUN_USER:=.*/: ${APACHE_RUN_USER:=appuser}/; s/^: \$\{APACHE_RUN_GROUP:=.*/: ${APACHE_RUN_GROUP:=appuser}/' \
         /etc/apache2/envvars
 

@@ -15,9 +15,12 @@ class VerifiedAttendance
             ->terverifikasi()
             ->where('presensi.kegiatan_id', $kegiatan->id)
             ->where('presensi.anggota_id', $anggota->id)
-            ->whereExists(fn ($query) => $query->from('kegiatan_tahun_angkatan')
-                ->whereColumn('kegiatan_tahun_angkatan.kegiatan_id', 'presensi.kegiatan_id')
-                ->where('kegiatan_tahun_angkatan.tahun_daftar', $anggota->tahun_daftar))
+            ->where(function ($query) use ($anggota): void {
+                $query->whereExists(fn ($subquery) => $subquery->from('kegiatan_tahun_angkatan')
+                    ->whereColumn('kegiatan_tahun_angkatan.kegiatan_id', 'presensi.kegiatan_id')
+                    ->where('kegiatan_tahun_angkatan.tahun_daftar', $anggota->tahun_daftar))
+                    ->when($anggota->tahun_daftar === null, fn ($legacy) => $legacy->orWhere('presensi.status_verifikasi', 'legacy'));
+            })
             ->whereRelation('sesiKegiatan', 'kegiatan_id', $kegiatan->id)
             ->distinct('sesi_kegiatan_id')
             ->count('sesi_kegiatan_id');
@@ -47,9 +50,15 @@ class VerifiedAttendance
             ->terverifikasi()
             ->join('anggota', 'anggota.id', '=', 'presensi.anggota_id')
             ->where('kegiatan_id', $kegiatan->id)
-            ->whereExists(fn ($query) => $query->from('kegiatan_tahun_angkatan')
-                ->whereColumn('kegiatan_tahun_angkatan.kegiatan_id', 'presensi.kegiatan_id')
-                ->whereColumn('kegiatan_tahun_angkatan.tahun_daftar', 'anggota.tahun_daftar'))
+            ->where(function ($query): void {
+                $query->whereExists(fn ($subquery) => $subquery->from('kegiatan_tahun_angkatan')
+                    ->whereColumn('kegiatan_tahun_angkatan.kegiatan_id', 'presensi.kegiatan_id')
+                    ->whereColumn('kegiatan_tahun_angkatan.tahun_daftar', 'anggota.tahun_daftar'))
+                    ->orWhere(function ($legacy): void {
+                        $legacy->whereNull('anggota.tahun_daftar')
+                            ->where('presensi.status_verifikasi', 'legacy');
+                    });
+            })
             ->whereRelation('sesiKegiatan', 'kegiatan_id', $kegiatan->id)
             ->select('anggota_id')
             ->selectRaw('COUNT(DISTINCT sesi_kegiatan_id) as verified_sessions')
@@ -65,9 +74,15 @@ class VerifiedAttendance
             ->join('kegiatan', 'kegiatan.id', '=', 'presensi.kegiatan_id')
             ->join('sesi_kegiatan', 'sesi_kegiatan.id', '=', 'presensi.sesi_kegiatan_id')
             ->join('anggota', 'anggota.id', '=', 'presensi.anggota_id')
-            ->whereExists(fn ($query) => $query->from('kegiatan_tahun_angkatan')
-                ->whereColumn('kegiatan_tahun_angkatan.kegiatan_id', 'presensi.kegiatan_id')
-                ->whereColumn('kegiatan_tahun_angkatan.tahun_daftar', 'anggota.tahun_daftar'))
+            ->where(function ($query): void {
+                $query->whereExists(fn ($subquery) => $subquery->from('kegiatan_tahun_angkatan')
+                    ->whereColumn('kegiatan_tahun_angkatan.kegiatan_id', 'presensi.kegiatan_id')
+                    ->whereColumn('kegiatan_tahun_angkatan.tahun_daftar', 'anggota.tahun_daftar'))
+                    ->orWhere(function ($legacy): void {
+                        $legacy->whereNull('anggota.tahun_daftar')
+                            ->where('presensi.status_verifikasi', 'legacy');
+                    });
+            })
             ->where('presensi.anggota_id', $anggota->id)
             ->whereIn('kegiatan.jenis_pelaksanaan', [Kegiatan::SATU_SESI, Kegiatan::MULTI_SESI])
             ->whereColumn('sesi_kegiatan.kegiatan_id', 'kegiatan.id')

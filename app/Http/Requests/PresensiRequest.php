@@ -40,7 +40,12 @@ class PresensiRequest extends FormRequest
                 'required',
                 'integer',
                 'distinct',
-                Rule::exists('anggota', 'id')->where('status_aktif', true),
+                Rule::exists('anggota', 'id')->where(function ($query): void {
+                    $query->where('status_aktif', true)
+                        ->whereExists(fn ($users) => $users->from('users')
+                            ->whereColumn('users.id', 'anggota.user_id')
+                            ->where('users.role', 'kader'));
+                }),
             ],
             'presensi.*.status_kehadiran' => ['required', 'in:hadir,izin,alfa'],
         ];

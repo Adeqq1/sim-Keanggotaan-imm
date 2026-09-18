@@ -1,0 +1,15 @@
+.git
+.github
+.env
+.env.*
+!.env.example
+!.env.docker.example
+!.env.production.example
+node_modules
+vendor
+public/build
+storage/app/private
+storage/framework
+storage/logs
+*.sql
+*.log

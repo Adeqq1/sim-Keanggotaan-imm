@@ -5,6 +5,8 @@ services:
     build:
       context: .
     restart: unless-stopped
+    env_file:
+      - .env
     ports:
       - "127.0.0.1:8000:80"
     volumes:
@@ -23,6 +25,8 @@ services:
     build:
       context: .
     command: ["sh", "-c", "until php artisan migrate:status >/dev/null 2>&1; do sleep 3; done; exec php artisan queue:work database --sleep=3 --tries=3 --max-time=3600"]
+    env_file:
+      - .env
     user: "1000:1000"
     restart: unless-stopped
     volumes:
@@ -35,10 +39,10 @@ services:
     image: mariadb:11.4
     restart: unless-stopped
     environment:
-      MARIADB_DATABASE: ${DB_DATABASE}
-      MARIADB_USER: ${DB_USERNAME}
-      MARIADB_PASSWORD: ${DB_PASSWORD}
-      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${DB_DATABASE:?DB_DATABASE is required}
+      MARIADB_USER: ${DB_USERNAME:?DB_USERNAME is required}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?MARIADB_ROOT_PASSWORD is required}
     volumes:
       - mariadb-data:/var/lib/mysql
     healthcheck:
