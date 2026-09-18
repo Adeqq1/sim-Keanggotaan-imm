@@ -113,6 +113,7 @@ test('landing page activities are cached', function () {
 
 test('activities cache is cleared when activities are added, updated, or deleted', function () {
     $instruktur = User::factory()->instruktur()->create();
+    $scheduledAt = now()->addDays(2)->setTime(10, 0)->format('Y-m-d H:i');
 
     // Cache is active
     Cache::remember('kegiatan.terbaru', 3600, function () {
@@ -124,7 +125,7 @@ test('activities cache is cleared when activities are added, updated, or deleted
     $this->actingAs($instruktur)->post(route('admin.kegiatan.store'), [
         'nama_kegiatan' => 'Latihan Kader Baru',
         'deskripsi' => 'Deskripsi baru',
-        'tanggal_waktu' => '2026-06-15 10:00:00',
+        'tanggal_waktu' => $scheduledAt,
         'lokasi' => 'Aula IMM',
         'tahun_angkatan' => [now()->year],
         'jenis_pelaksanaan' => 'satu_sesi',
@@ -143,7 +144,7 @@ test('activities cache is cleared when activities are added, updated, or deleted
     // 2. Update activity clears cache
     $this->actingAs($instruktur)->put(route('admin.kegiatan.update', $kegiatan), [
         'nama_kegiatan' => 'Latihan Kader Updated',
-        'tanggal_waktu' => '2026-06-15 10:00:00',
+        'tanggal_waktu' => $scheduledAt,
         'lokasi' => 'Aula IMM Baru',
         'tahun_angkatan' => [$kegiatan->tahunAngkatans()->value('tahun_daftar')],
         'jenis_pelaksanaan' => 'satu_sesi',
