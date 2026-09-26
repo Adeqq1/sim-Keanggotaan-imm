@@ -34,7 +34,7 @@
             {{-- Sisi Kiri: Branding (hanya tampil di desktop ≥992px via CSS) --}}
             <div class="auth-split-left">
                 <div class="auth-brand-logo">
-                    <i class="bi bi-shield-check"></i>
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo IMM">
                 </div>
                 <h2 class="auth-brand-heading">{{ config('app.name', 'IMM Bungo') }}</h2>
                 <p class="auth-brand-tagline">
@@ -65,7 +65,7 @@
                 <div class="auth-card @yield('auth-card-class')">
                     <div class="text-center mb-4">
                         <div class="auth-brand-icon">
-                            <i class="bi bi-shield-check fs-3"></i>
+                            <img src="{{ asset('images/logo.png') }}" alt="Logo IMM">
                         </div>
                         <h2 class="fw-bold text-primary">{{ config('app.name') }}</h2>
                         <p class="text-muted small">Sistem Informasi Manajemen Keanggotaan &amp; Kearsipan</p>
