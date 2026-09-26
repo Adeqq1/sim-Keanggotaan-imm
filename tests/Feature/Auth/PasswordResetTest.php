@@ -1,11 +1,9 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
+use App\Notifications\QueuedResetPassword;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
-
-const RESET_LINK_STATUS = 'Jika alamat email tersebut terdaftar, kami telah mengirimkan tautan pengaturan ulang kata sandi.';
 
 test('reset password link screen can be rendered', function () {
     $this->get('/forgot-password')->assertOk();
@@ -16,9 +14,9 @@ test('reset password link can be requested', function () {
     $user = User::factory()->create();
 
     $this->post('/forgot-password', ['email' => $user->email])
-        ->assertSessionHas('status', RESET_LINK_STATUS);
+        ->assertSessionHas('status', __('passwords.sent'));
 
-    Notification::assertSentTo($user, ResetPassword::class);
+    Notification::assertSentTo($user, QueuedResetPassword::class);
 });
 
 test('unknown reset email uses the same generic response', function () {
@@ -26,9 +24,22 @@ test('unknown reset email uses the same generic response', function () {
 
     $this->post('/forgot-password', ['email' => 'tidak.terdaftar@example.com'])
         ->assertSessionHasNoErrors()
-        ->assertSessionHas('status', RESET_LINK_STATUS);
+        ->assertSessionHas('status', __('passwords.sent'));
 
     Notification::assertNothingSent();
+});
+
+test('repeated request for a registered email does not reveal throttling', function () {
+    Notification::fake();
+    $user = User::factory()->create();
+
+    $this->post('/forgot-password', ['email' => $user->email]);
+
+    $this->post('/forgot-password', ['email' => $user->email])
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('status', __('passwords.sent'));
+
+    Notification::assertSentToTimes($user, QueuedResetPassword::class, 1);
 });
 
 test('reset link requests are limited to five per minute per IP', function () {
@@ -38,14 +49,14 @@ test('reset link requests are limited to five per minute per IP', function () {
     foreach (range(1, 5) as $attempt) {
         $this->withServerVariables(['REMOTE_ADDR' => $ip])
             ->post('/forgot-password', ['email' => "unknown-{$attempt}@example.com"])
-            ->assertSessionHas('status', RESET_LINK_STATUS);
+            ->assertSessionHas('status', __('passwords.sent'));
     }
 
     $this->withServerVariables(['REMOTE_ADDR' => $ip])
+        ->from('/forgot-password')
         ->post('/forgot-password', ['email' => 'blocked@example.com'])
-        ->assertTooManyRequests()
-        ->assertHeader('X-RateLimit-Limit', '5')
-        ->assertHeader('X-RateLimit-Remaining', '0');
+        ->assertRedirect('/forgot-password')
+        ->assertSessionHasErrors(['email' => __('passwords.throttled')]);
 
     Notification::assertNothingSent();
 });
@@ -56,7 +67,7 @@ test('reset password screen can be rendered', function () {
 
     $this->post('/forgot-password', ['email' => $user->email]);
 
-    Notification::assertSentTo($user, ResetPassword::class, function ($notification) {
+    Notification::assertSentTo($user, QueuedResetPassword::class, function ($notification) {
         $this->get('/reset-password/'.$notification->token)->assertOk();
 
         return true;
@@ -70,7 +81,7 @@ test('password can be reset with valid token', function () {
 
     $this->post('/forgot-password', ['email' => $user->email]);
 
-    Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($oldRememberToken, $user) {
+    Notification::assertSentTo($user, QueuedResetPassword::class, function ($notification) use ($oldRememberToken, $user) {
         $this->post('/reset-password', [
             'token' => $notification->token,
             'email' => $user->email,
@@ -106,13 +117,32 @@ test('password cannot be reset with an invalid token', function () {
     $this->assertCredentials(['email' => $user->email, 'password' => 'password']);
 });
 
+test('reset with an unknown email shows the same error as an invalid token', function () {
+    $this->from('/reset-password/invalid-token')->post('/reset-password', [
+        'token' => 'invalid-token',
+        'email' => 'tidak.terdaftar@example.com',
+        'password' => 'password-baru',
+        'password_confirmation' => 'password-baru',
+    ])->assertRedirect('/reset-password/invalid-token')
+        ->assertSessionHasErrors(['email' => __('passwords.token')]);
+});
+
+test('reset password email is written in Indonesian', function () {
+    $user = User::factory()->create();
+
+    $mail = (new QueuedResetPassword('token-contoh'))->toMail($user);
+
+    expect($mail->subject)->toBe('Atur ulang kata sandi Anda')
+        ->and($mail->actionText)->toBe('Atur Ulang Kata Sandi');
+});
+
 test('expired reset token is rejected', function () {
     Notification::fake();
     $user = User::factory()->create();
 
     $this->post('/forgot-password', ['email' => $user->email]);
 
-    Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
+    Notification::assertSentTo($user, QueuedResetPassword::class, function ($notification) use ($user) {
         $this->travel(61)->minutes();
 
         $this->post('/reset-password', [
@@ -134,7 +164,7 @@ test('reset token can only be used once', function () {
 
     $this->post('/forgot-password', ['email' => $user->email]);
 
-    Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
+    Notification::assertSentTo($user, QueuedResetPassword::class, function ($notification) use ($user) {
         $payload = [
             'token' => $notification->token,
             'email' => $user->email,
