@@ -12,11 +12,12 @@ use Intervention\Image\ImageManager;
 use RuntimeException;
 use Throwable;
 
+// Converts any uploaded image to WebP; used for profile photos, thumbnails and private image uploads.
 class ProfilePhoto
 {
-    public function store(UploadedFile $file): string
+    public function store(UploadedFile $file, string $directory = 'foto_profil', string $diskName = 'public', string $field = 'foto_profil'): string
     {
-        $disk = Storage::disk('public');
+        $disk = Storage::disk($diskName);
         $path = null;
 
         try {
@@ -28,10 +29,10 @@ class ProfilePhoto
 
             $image = (new ImageManager($driver))->decodePath($file->getPathname());
             $encoded = $image->encodeUsingFormat(Format::WEBP);
-            $path = 'foto_profil/'.Str::uuid().'.webp';
+            $path = $directory.'/'.Str::uuid().'.webp';
 
             if (! $disk->put($path, (string) $encoded)) {
-                throw new RuntimeException('Gagal menyimpan foto profil WebP.');
+                throw new RuntimeException('Gagal menyimpan gambar WebP.');
             }
 
             return $path;
@@ -39,7 +40,7 @@ class ProfilePhoto
             if ($path !== null) {
                 try {
                     if ($disk->exists($path) && ! $disk->delete($path)) {
-                        report(new RuntimeException('File foto profil WebP gagal dibersihkan.', 0, $exception));
+                        report(new RuntimeException('File WebP gagal dibersihkan.', 0, $exception));
                     }
                 } catch (Throwable $cleanupException) {
                     report($cleanupException);
@@ -49,7 +50,9 @@ class ProfilePhoto
             report($exception);
 
             throw ValidationException::withMessages([
-                'foto_profil' => 'Foto profil gagal diproses. Silakan coba file lain.',
+                $field => $field === 'foto_profil'
+                    ? 'Foto profil gagal diproses. Silakan coba file lain.'
+                    : 'Gambar gagal diproses. Silakan coba file lain.',
             ]);
         }
     }

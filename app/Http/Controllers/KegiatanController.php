@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\KegiatanRequest;
 use App\Models\Kegiatan;
+use App\Services\ProfilePhoto;
 use App\Support\SortParams;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Http\Request;
@@ -176,18 +177,6 @@ class KegiatanController extends Controller
 
     private function storeThumbnail(UploadedFile $file): string
     {
-        try {
-            $path = $file->store('kegiatan_thumbnails', 'public');
-
-            if (is_string($path) && $path !== '') {
-                return $path;
-            }
-        } catch (Throwable $exception) {
-            report($exception);
-        }
-
-        throw ValidationException::withMessages([
-            'thumbnail' => 'Thumbnail gagal disimpan. Periksa penyimpanan aplikasi lalu coba lagi.',
-        ]);
+        return app(ProfilePhoto::class)->store($file, 'kegiatan_thumbnails', 'public', 'thumbnail');
     }
 }

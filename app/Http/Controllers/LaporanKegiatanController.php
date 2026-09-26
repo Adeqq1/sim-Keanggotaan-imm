@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LaporanKegiatanRequest;
 use App\Models\Kegiatan;
 use App\Models\LaporanKegiatan;
+use App\Services\ProfilePhoto;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
@@ -190,7 +191,11 @@ class LaporanKegiatanController extends Controller
     private function storeFile(?UploadedFile $file): string
     {
         try {
-            $path = $file?->store('laporan_kegiatan', 'local');
+            $path = str_starts_with((string) $file?->getMimeType(), 'image/')
+                ? app(ProfilePhoto::class)->store($file, 'laporan_kegiatan', 'local', 'file_lampiran')
+                : $file?->store('laporan_kegiatan', 'local');
+        } catch (ValidationException $exception) {
+            throw $exception;
         } catch (Throwable) {
             $path = null;
         }

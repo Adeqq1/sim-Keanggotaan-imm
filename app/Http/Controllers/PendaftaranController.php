@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PendaftaranRequest;
 use App\Models\Pendaftaran;
+use App\Services\ProfilePhoto;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -23,7 +24,10 @@ class PendaftaranController extends Controller
 
         $validated['password'] = Hash::make($validated['password']);
 
-        $path = $request->file('file_persyaratan')->store('pendaftaran', 'local');
+        $file = $request->file('file_persyaratan');
+        $path = str_starts_with((string) $file->getMimeType(), 'image/')
+            ? app(ProfilePhoto::class)->store($file, 'pendaftaran', 'local', 'file_persyaratan')
+            : $file->store('pendaftaran', 'local');
 
         if ($path === false) {
             throw ValidationException::withMessages([
