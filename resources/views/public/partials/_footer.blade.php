@@ -75,7 +75,7 @@
         <hr style="border-color:rgba(255,255,255,0.1);">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
             <p class="mb-0 small" style="color:#64748b;">&copy; {{ date('Y') }} Ikatan Mahasiswa Muhammadiyah. Seluruh hak cipta dilindungi.</p>
-            <p class="mb-0 small" style="color:#64748b;">Didukung oleh Adeqq &mdash; Teknologi Informasi 2022</p>
+            <p class="mb-0 small" style="color:#64748b;">Didukung oleh <a href="https://www.instagram.com/rifqi8923/" target="_blank" rel="noopener noreferrer" class="footer-link text-decoration-underline">Adeqq &mdash; Teknologi Informasi</a> 2022</p>
         </div>
     </div>
 </footer>

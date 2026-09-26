@@ -41,7 +41,7 @@
             {{-- Brand --}}
             <div class="sidebar-brand">
                 <div class="sidebar-brand-icon">
-                    <i class="bi bi-shield-check"></i>
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo IMM">
                 </div>
                 <p class="sidebar-brand-title">{{ config('app.name', 'IMM Bungo') }}</p>
                 <p class="sidebar-brand-subtitle">Sistem Informasi Keanggotaan</p>

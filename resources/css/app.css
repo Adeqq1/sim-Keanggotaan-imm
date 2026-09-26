@@ -115,7 +115,7 @@ canvas {
 .sidebar-brand-icon {
     width: 44px;
     height: 44px;
-    background: rgba(255, 255, 255, 0.15);
+    background: #fff;
     border-radius: 12px;
     display: inline-flex;
     align-items: center;
@@ -124,6 +124,13 @@ canvas {
     color: white;
     margin-bottom: 0.6rem;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.sidebar-brand-icon img,
+.auth-brand-logo img,
+.auth-brand-icon img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
 }
 .sidebar-brand-title {
     font-size: 1rem;
@@ -585,7 +592,7 @@ canvas {
 .auth-brand-logo {
     width: 80px;
     height: 80px;
-    background: rgba(255, 255, 255, 0.15);
+    background: #fff;
     border-radius: 24px;
     display: flex;
     align-items: center;
@@ -666,7 +673,7 @@ canvas {
 }
 .auth-brand-icon {
     align-items: center;
-    background: linear-gradient(135deg, #800000 0%, #a00000 100%);
+    background: #fff;
     border-radius: 16px;
     box-shadow: 0 10px 24px rgba(128, 0, 0, 0.28);
     color: white;
