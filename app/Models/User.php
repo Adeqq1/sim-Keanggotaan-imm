@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\RoleEnum;
+use App\Notifications\QueuedResetPassword;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -82,6 +83,14 @@ class User extends Authenticatable
         $words = preg_split('/\s+/', trim($this->name ?: 'User')) ?: ['User'];
 
         return Str::upper(collect($words)->take(2)->map(fn (string $word) => mb_substr($word, 0, 1))->implode(''));
+    }
+
+    /**
+     * Send the password reset notification via the queue.
+     */
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token)
+    {
+        $this->notify(new QueuedResetPassword($token));
     }
 
     /**

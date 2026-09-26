@@ -25,5 +25,12 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('pendaftaran', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());
         });
+
+        RateLimiter::for('password-reset', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip())
+                ->response(fn () => back()
+                    ->withInput($request->only('email'))
+                    ->withErrors(['email' => __('passwords.throttled')]));
+        });
     }
 }

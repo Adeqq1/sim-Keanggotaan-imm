@@ -36,7 +36,7 @@
                 <div class="auth-brand-logo">
                     <i class="bi bi-shield-check"></i>
                 </div>
-                <h2 class="auth-brand-heading">{{ config('app.name', 'SIM-IMM') }}</h2>
+                <h2 class="auth-brand-heading">{{ config('app.name', 'IMM Bungo') }}</h2>
                 <p class="auth-brand-tagline">
                     Sistem Informasi Manajemen Keanggotaan &amp; Kearsipan Ikatan Mahasiswa Muhammadiyah
                 </p>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Kegiatan;
+use App\Models\Pendaftaran;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 
@@ -16,7 +17,7 @@ function payloadPendaftaranDenganFile(array $overrides = []): array
         'password' => 'password',
         'password_confirmation' => 'password',
         'role' => 'kader',
-        'komisariat_id' => array_key_first(\App\Models\Pendaftaran::KOMISARIAT),
+        'komisariat_id' => array_key_first(Pendaftaran::KOMISARIAT),
         'tahun_daftar' => 2024,
         'jenis_dokumen_identitas' => 'ktp',
         'tempat_lahir' => 'Yogyakarta',
@@ -29,7 +30,7 @@ function payloadPendaftaranDenganFile(array $overrides = []): array
 test('Indonesian catalogs resolve framework messages and readable attributes', function () {
     expect(app()->getLocale())->toBe('id')
         ->and(__('auth.failed'))->toBe('Email atau kata sandi yang Anda masukkan tidak sesuai.')
-        ->and(__('passwords.sent'))->toBe('Kami telah mengirimkan tautan pengaturan ulang kata sandi ke email Anda.')
+        ->and(__('passwords.sent'))->toBe('Jika alamat email tersebut terdaftar, kami telah mengirimkan tautan pengaturan ulang kata sandi.')
         ->and(__('pagination.previous'))->toBe('&laquo; Sebelumnya')
         ->and(__('validation.required', ['attribute' => __('validation.attributes.nama_lengkap')]))
         ->toBe('nama lengkap wajib diisi.')
@@ -47,7 +48,7 @@ test('public registration renders Indonesian file validation feedback', function
         ])
     );
 
-        $response
+    $response
         ->assertRedirect(route('pendaftaran'))
         ->assertSessionHas('errors', function ($errors) {
             return $errors->get('file_persyaratan') === [
