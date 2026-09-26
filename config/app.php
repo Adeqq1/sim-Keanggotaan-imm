@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'SIM-IMM'),
+    'name' => env('APP_NAME', 'IMM Bungo'),
 
     'org_name' => env('APP_ORG_NAME', 'IMM Kabupaten Bungo'),
 
