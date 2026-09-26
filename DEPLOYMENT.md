@@ -36,6 +36,10 @@ sudo /usr/local/sbin/backup-sim-keanggotaan-imm
 7. Run migration, `php artisan optimize`, and restart the queue.
 8. Run `php artisan up`, then verify `/up`, login, uploads, and queue logs.
 
+New jpg/png uploads are stored as WebP. To convert existing files once, run
+`php artisan images:webp --dry-run`, review the list, take a backup, then run
+`php artisan images:webp`. It deletes the originals after updating the database.
+
 ## Restore
 
 Stop application writes with `php artisan down`, take another backup, and extract

@@ -36,7 +36,7 @@ test('activity thumbnails stay isolated and are cleaned up on replacement and de
     $kegiatan = Kegiatan::where('nama_kegiatan', 'Latihan Kader')->firstOrFail();
     $oldPath = $kegiatan->thumbnail;
 
-    expect($oldPath)->toStartWith('kegiatan_thumbnails/');
+    expect($oldPath)->toStartWith('kegiatan_thumbnails/')->toEndWith('.webp');
     Storage::disk('public')->assertExists($oldPath);
 
     $this->actingAs($instruktur)->put(route('admin.kegiatan.update', $kegiatan), [

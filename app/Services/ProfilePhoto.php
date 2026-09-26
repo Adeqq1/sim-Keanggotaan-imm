@@ -27,6 +27,13 @@ class ProfilePhoto
                 throw new RuntimeException('WebP tidak didukung oleh GD.');
             }
 
+            // ponytail: GD needs ~5 bytes/pixel and a memory-limit fatal cannot be caught; 25 MP fits in 256M.
+            [$width, $height] = @getimagesize($file->getPathname()) ?: [0, 0];
+
+            if ($width * $height > 25_000_000) {
+                throw new RuntimeException('Resolusi gambar melebihi 25 MP.');
+            }
+
             $image = (new ImageManager($driver))->decodePath($file->getPathname());
             $encoded = $image->encodeUsingFormat(Format::WEBP);
             $path = $directory.'/'.Str::uuid().'.webp';
@@ -52,7 +59,7 @@ class ProfilePhoto
             throw ValidationException::withMessages([
                 $field => $field === 'foto_profil'
                     ? 'Foto profil gagal diproses. Silakan coba file lain.'
-                    : 'Gambar gagal diproses. Silakan coba file lain.',
+                    : 'Gambar gagal diproses atau resolusinya terlalu besar (maks. 25 MP). Silakan coba file lain.',
             ]);
         }
     }

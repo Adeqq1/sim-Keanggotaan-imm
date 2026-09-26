@@ -30,7 +30,7 @@
                             @php
                                 $ext = strtolower(pathinfo($item->file_persyaratan, PATHINFO_EXTENSION));
                             @endphp
-                            @if(in_array($ext, ['jpg', 'jpeg', 'png']))
+                            @if(in_array($ext, ['jpg', 'jpeg', 'png', 'webp']))
                                 <button type="button" class="btn btn-outline-secondary btn-ui btn-ui-sm btn-icon preview-image-btn"
                                     data-bs-toggle="modal" data-bs-target="#previewDocumentModal"
                                     data-preview-url="{{ route('admin.pendaftaran.document.preview', $item) }}"
