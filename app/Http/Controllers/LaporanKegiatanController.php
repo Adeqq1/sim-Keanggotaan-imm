@@ -6,8 +6,11 @@ use App\Http\Requests\LaporanKegiatanRequest;
 use App\Models\Kegiatan;
 use App\Models\LaporanKegiatan;
 use App\Services\ProfilePhoto;
+use App\Support\SortParams;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -17,9 +20,6 @@ use Illuminate\View\View;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
-use Illuminate\Http\Request;
-use App\Support\SortParams;
-use Illuminate\Database\Query\Expression;
 
 class LaporanKegiatanController extends Controller
 {
@@ -190,23 +190,13 @@ class LaporanKegiatanController extends Controller
 
     private function storeFile(?UploadedFile $file): string
     {
-        try {
-            $path = str_starts_with((string) $file?->getMimeType(), 'image/')
-                ? app(ProfilePhoto::class)->store($file, 'laporan_kegiatan', 'local', 'file_lampiran')
-                : $file?->store('laporan_kegiatan', 'local');
-        } catch (ValidationException $exception) {
-            throw $exception;
-        } catch (Throwable) {
-            $path = null;
-        }
-
-        if (! is_string($path) || $path === '') {
+        if (! $file) {
             throw ValidationException::withMessages([
                 'file_lampiran' => 'File lampiran gagal disimpan. Silakan coba lagi.',
             ]);
         }
 
-        return $path;
+        return app(ProfilePhoto::class)->storeUpload($file, 'laporan_kegiatan', 'local', 'file_lampiran', 90);
     }
 
     private function deleteFile(?string $path, string $context): void

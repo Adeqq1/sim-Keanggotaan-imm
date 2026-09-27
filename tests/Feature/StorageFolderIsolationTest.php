@@ -13,6 +13,7 @@ test('profile photos stay in the isolated public folder', function () {
     $path = app(ProfilePhoto::class)->store(UploadedFile::fake()->image('avatar.jpg'));
 
     expect($path)->toStartWith('foto_profil/')->toEndWith('.webp');
+    expect(getimagesizefromstring(Storage::disk('public')->get($path))['mime'])->toBe('image/webp');
     Storage::disk('public')->assertExists($path);
     expect(Storage::disk('public')->allFiles())->toEqual([$path]);
 });

@@ -2,12 +2,12 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Kegiatan;
-use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class KegiatanRequest extends FormRequest
 {
@@ -35,25 +35,25 @@ class KegiatanRequest extends FormRequest
             'waktu_mulai' => ['required', 'date_format:H:i'],
             'tanggal_waktu' => [
                 'required',
-                 'date',
-                 function (string $attribute, mixed $value, \Closure $fail) use ($existing): void {
-                     try {
-                         $date = Carbon::parse($value);
-                     } catch (InvalidFormatException) {
-                         return;
-                     }
+                'date',
+                function (string $attribute, mixed $value, \Closure $fail) use ($existing): void {
+                    try {
+                        $date = Carbon::parse($value);
+                    } catch (InvalidFormatException) {
+                        return;
+                    }
 
-                     if ($existing && $existing->tanggal_waktu?->format('Y-m-d H:i') === $date->format('Y-m-d H:i')) {
-                         return;
-                     }
+                    if ($existing && $existing->tanggal_waktu?->format('Y-m-d H:i') === $date->format('Y-m-d H:i')) {
+                        return;
+                    }
 
-                     if ($date->lessThanOrEqualTo(now())) {
+                    if ($date->lessThanOrEqualTo(now())) {
                         $fail('Jadwal kegiatan harus berada di masa depan.');
                     }
                 },
             ],
             'lokasi' => ['required', 'string', 'max:255'],
-            'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048', 'dimensions:max_width=4096,max_height=4096'],
             'jenis_pelaksanaan' => ['required', Rule::in([Kegiatan::SATU_SESI, Kegiatan::MULTI_SESI])],
             'minimum_sesi_terverifikasi' => ['required', 'integer', 'min:1', 'max:255'],
             'tahun_angkatan' => ['required', 'array', 'min:1'],

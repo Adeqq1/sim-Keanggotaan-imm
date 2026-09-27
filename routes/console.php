@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Anggota;
-use App\Models\Arsip;
 use App\Models\Kegiatan;
 use App\Models\LaporanKegiatan;
 use App\Models\Pendaftaran;
@@ -18,23 +17,34 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Artisan::command('images:webp {--dry-run : Tampilkan file yang akan dikonversi tanpa mengubah apa pun}', function (ProfilePhoto $converter) {
-    // ponytail: Presensi.bukti_kehadiran is historical data and deliberately left out.
+Artisan::command('images:webp {--dry-run : Tampilkan file yang akan dikonversi tanpa mengubah apa pun} {--force : Lewati konfirmasi di production}', function (ProfilePhoto $converter) {
+    if (! $this->option('dry-run') && app()->isProduction() && ! $this->option('force')
+        && ! $this->confirm('File asli akan DIHAPUS setelah dikonversi. Backup sudah dibuat?')) {
+        return 1;
+    }
+
+    // ponytail: Arsip and Presensi.bukti_kehadiran are official/historical documents and deliberately left out.
     $targets = [
-        [Anggota::class, 'foto_profil', 'public'],
-        [Kegiatan::class, 'thumbnail', 'public'],
-        [Pendaftaran::class, 'file_persyaratan', 'local'],
-        [LaporanKegiatan::class, 'file_lampiran', 'local'],
-        [Arsip::class, 'file_arsip', 'local'],
+        [Anggota::class, 'foto_profil', 'public', 85],
+        [Kegiatan::class, 'thumbnail', 'public', 85],
+        [Pendaftaran::class, 'file_persyaratan', 'local', 90],
+        [LaporanKegiatan::class, 'file_lampiran', 'local', 90],
     ];
     $converted = [];
+    $failed = 0;
 
-    foreach ($targets as [$model, $column, $disk]) {
+    foreach ($targets as [$model, $column, $disk, $quality]) {
         $table = (new $model)->getTable();
         $storage = Storage::disk($disk);
         $paths = DB::table($table)->whereNotNull($column)->where($column, 'not like', '%.webp')->distinct()->pluck($column);
 
         foreach ($paths as $path) {
+            if (! str_contains($path, '/')) {
+                $this->warn("Dilewati (tanpa folder): {$disk}:{$path}");
+
+                continue;
+            }
+
             $mime = $storage->exists($path) ? (string) $storage->mimeType($path) : '';
 
             if (! str_starts_with($mime, 'image/') || $mime === 'image/webp') {
@@ -48,15 +58,23 @@ Artisan::command('images:webp {--dry-run : Tampilkan file yang akan dikonversi t
             }
 
             try {
-                $newPath = $converter->store(new UploadedFile($storage->path($path), basename($path)), dirname($path), $disk, $column);
+                $newPath = $converter->store(new UploadedFile($storage->path($path), basename($path)), dirname($path), $disk, $column, $quality);
             } catch (ValidationException) {
                 $this->warn("Gagal: {$disk}:{$path}");
+                $failed++;
 
                 continue;
             }
 
-            // Old file is removed only after every reference points at the new one.
-            DB::table($table)->where($column, $path)->update([$column => $newPath]);
+            try {
+                // Old file is removed only after every reference points at the new one.
+                DB::table($table)->where($column, $path)->update([$column => $newPath]);
+            } catch (Throwable $exception) {
+                $storage->delete($newPath);
+
+                throw $exception;
+            }
+
             $converted[] = [$storage, $path];
             $this->line("{$disk}:{$path} -> {$newPath}");
         }
@@ -69,5 +87,7 @@ Artisan::command('images:webp {--dry-run : Tampilkan file yang akan dikonversi t
         $storage->delete($path);
     }
 
-    $this->info(count($converted).' gambar dikonversi ke WebP.');
+    $this->info(count($converted).' gambar dikonversi ke WebP, '.$failed.' gagal.');
+
+    return $failed > 0 ? 1 : 0;
 })->purpose('Convert stored jpg/png uploads to WebP and update their database paths');

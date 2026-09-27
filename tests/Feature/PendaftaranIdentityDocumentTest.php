@@ -2,6 +2,7 @@
 
 use App\Models\Pendaftaran;
 use App\Models\User;
+use App\Services\ProfilePhoto;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -42,7 +43,7 @@ function validIdentityPdf(string $name = 'identitas.pdf'): UploadedFile
 
 function identityDocumentXPath(string $content): DOMXPath
 {
-    $dom = new DOMDocument();
+    $dom = new DOMDocument;
     $previous = libxml_use_internal_errors(true);
     $dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR | LIBXML_NOWARNING);
     libxml_use_internal_errors($previous);
@@ -455,6 +456,41 @@ test('admin pendaftaran index shows preview controls for image and PDF documents
     expect($pdfLink->getAttribute('target'))->toBe('_blank')
         ->and($pdfLink->getAttribute('rel'))->toBe('noopener')
         ->and($pdfLink->getAttribute('data-bs-toggle'))->toBe('');
+});
+
+test('public registration converts an image identity document to webp but stores a pdf as-is', function () {
+    $imageEmail = fake()->unique()->safeEmail();
+    $this->post(route('pendaftaran.store'), identityDocumentPayload([
+        'email' => $imageEmail,
+        'file_persyaratan' => UploadedFile::fake()->image('ktp.jpg', 40, 25),
+    ]))->assertRedirect(route('pendaftaran.success'));
+
+    $imagePendaftaran = Pendaftaran::where('email', $imageEmail)->firstOrFail();
+    expect($imagePendaftaran->file_persyaratan)->toStartWith('pendaftaran/')->toEndWith('.webp');
+    Storage::disk('local')->assertExists($imagePendaftaran->file_persyaratan);
+
+    $pdfEmail = fake()->unique()->safeEmail();
+    $this->post(route('pendaftaran.store'), identityDocumentPayload([
+        'email' => $pdfEmail,
+        'file_persyaratan' => validIdentityPdf(),
+    ]))->assertRedirect(route('pendaftaran.success'));
+
+    $pdfPendaftaran = Pendaftaran::where('email', $pdfEmail)->firstOrFail();
+    expect($pdfPendaftaran->file_persyaratan)->toStartWith('pendaftaran/')->toEndWith('.pdf');
+});
+
+test('admin previews a webp identity document with the correct content type', function () {
+    $admin = User::factory()->admin()->create();
+    $path = app(ProfilePhoto::class)->store(UploadedFile::fake()->image('a.jpg'), 'pendaftaran', 'local', 'file_persyaratan');
+    $pendaftaran = Pendaftaran::factory()->create([
+        'file_persyaratan' => $path,
+        'jenis_dokumen_identitas' => 'ktp',
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.pendaftaran.document.preview', $pendaftaran))
+        ->assertOk()
+        ->assertHeader('Content-Type', 'image/webp');
 });
 
 test('admin pendaftaran detail shows preview controls for image and PDF documents', function () {

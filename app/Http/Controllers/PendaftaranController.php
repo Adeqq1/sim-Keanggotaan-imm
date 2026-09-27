@@ -7,7 +7,6 @@ use App\Models\Pendaftaran;
 use App\Services\ProfilePhoto;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Throwable;
 
@@ -24,16 +23,7 @@ class PendaftaranController extends Controller
 
         $validated['password'] = Hash::make($validated['password']);
 
-        $file = $request->file('file_persyaratan');
-        $path = str_starts_with((string) $file->getMimeType(), 'image/')
-            ? app(ProfilePhoto::class)->store($file, 'pendaftaran', 'local', 'file_persyaratan')
-            : $file->store('pendaftaran', 'local');
-
-        if ($path === false) {
-            throw ValidationException::withMessages([
-                'file_persyaratan' => 'Dokumen identitas gagal diunggah. Silakan coba lagi.',
-            ]);
-        }
+        $path = app(ProfilePhoto::class)->storeUpload($request->file('file_persyaratan'), 'pendaftaran', 'local', 'file_persyaratan', 90);
 
         $validated['file_persyaratan'] = $path;
         $validated['tanggal_daftar'] = now();
