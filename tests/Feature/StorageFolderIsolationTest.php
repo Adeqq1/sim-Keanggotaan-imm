@@ -13,6 +13,7 @@ test('profile photos stay in the isolated public folder', function () {
     $path = app(ProfilePhoto::class)->store(UploadedFile::fake()->image('avatar.jpg'));
 
     expect($path)->toStartWith('foto_profil/')->toEndWith('.webp');
+    expect(getimagesizefromstring(Storage::disk('public')->get($path))['mime'])->toBe('image/webp');
     Storage::disk('public')->assertExists($path);
     expect(Storage::disk('public')->allFiles())->toEqual([$path]);
 });
@@ -36,7 +37,7 @@ test('activity thumbnails stay isolated and are cleaned up on replacement and de
     $kegiatan = Kegiatan::where('nama_kegiatan', 'Latihan Kader')->firstOrFail();
     $oldPath = $kegiatan->thumbnail;
 
-    expect($oldPath)->toStartWith('kegiatan_thumbnails/');
+    expect($oldPath)->toStartWith('kegiatan_thumbnails/')->toEndWith('.webp');
     Storage::disk('public')->assertExists($oldPath);
 
     $this->actingAs($instruktur)->put(route('admin.kegiatan.update', $kegiatan), [

@@ -70,7 +70,7 @@ class ValidasiPendaftaranController extends Controller
         $disk = Storage::disk('local');
         $mime = $disk->mimeType($path);
 
-        $allowed = ['image/jpeg', 'image/png', 'application/pdf'];
+        $allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
         if (! in_array($mime, $allowed, true)) {
             abort(404);
         }

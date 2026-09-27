@@ -36,6 +36,16 @@ sudo /usr/local/sbin/backup-sim-keanggotaan-imm
 7. Run migration, `php artisan optimize`, and restart the queue.
 8. Run `php artisan up`, then verify `/up`, login, uploads, and queue logs.
 
+New jpg/png uploads are stored as WebP. To convert existing files once:
+
+```bash
+sudo /usr/local/sbin/backup-sim-keanggotaan-imm
+sudo docker compose -f compose.prod.yaml exec --user appuser app php artisan images:webp --dry-run
+sudo docker compose -f compose.prod.yaml exec --user appuser app php artisan images:webp
+```
+
+The command deletes the original files after the database points at the new ones.
+
 ## Restore
 
 Stop application writes with `php artisan down`, take another backup, and extract

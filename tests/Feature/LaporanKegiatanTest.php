@@ -176,6 +176,26 @@ test('lampiran privat dapat dibuat dipertahankan diganti diunduh dan dihapus', f
     Storage::disk('local')->assertMissing($newPath);
 });
 
+test('lampiran gambar dikonversi ke webp, lampiran pdf disimpan apa adanya', function () {
+    Storage::fake('local');
+    $admin = User::factory()->admin()->create();
+
+    $kegiatanGambar = Kegiatan::factory()->create();
+    $this->actingAs($admin)->post(route('admin.kegiatan.laporan-kegiatan.store', $kegiatanGambar), laporanPayload([
+        'file_lampiran' => UploadedFile::fake()->image('bukti.jpg', 40, 25),
+    ]));
+    $laporanGambar = LaporanKegiatan::where('kegiatan_id', $kegiatanGambar->id)->firstOrFail();
+    expect($laporanGambar->file_lampiran)->toStartWith('laporan_kegiatan/')->toEndWith('.webp');
+    Storage::disk('local')->assertExists($laporanGambar->file_lampiran);
+
+    $kegiatanPdf = Kegiatan::factory()->create();
+    $this->actingAs($admin)->post(route('admin.kegiatan.laporan-kegiatan.store', $kegiatanPdf), laporanPayload([
+        'file_lampiran' => UploadedFile::fake()->create('bukti.pdf', 100, 'application/pdf'),
+    ]));
+    $laporanPdf = LaporanKegiatan::where('kegiatan_id', $kegiatanPdf->id)->firstOrFail();
+    expect($laporanPdf->file_lampiran)->toStartWith('laporan_kegiatan/')->toEndWith('.pdf');
+});
+
 test('detail laporan membaca metadata dan presensi live', function () {
     $admin = User::factory()->admin()->create();
     $kegiatan = Kegiatan::factory()->create(['nama_kegiatan' => 'Seminar Live', 'lokasi' => 'Aula Merah']);

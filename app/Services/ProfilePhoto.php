@@ -12,11 +12,12 @@ use Intervention\Image\ImageManager;
 use RuntimeException;
 use Throwable;
 
+// Converts any uploaded image to WebP; used for profile photos, thumbnails and private image uploads.
 class ProfilePhoto
 {
-    public function store(UploadedFile $file): string
+    public function store(UploadedFile $file, string $directory = 'foto_profil', string $diskName = 'public', string $field = 'foto_profil', int $quality = 85): string
     {
-        $disk = Storage::disk('public');
+        $disk = Storage::disk($diskName);
         $path = null;
 
         try {
@@ -26,12 +27,19 @@ class ProfilePhoto
                 throw new RuntimeException('WebP tidak didukung oleh GD.');
             }
 
+            // ponytail: GD needs ~5 bytes/pixel and a memory-limit fatal cannot be caught; 25 MP fits in 256M.
+            [$width, $height] = @getimagesize($file->getPathname()) ?: [0, 0];
+
+            if ($width * $height > 25_000_000) {
+                throw new RuntimeException('Resolusi gambar melebihi 25 MP.');
+            }
+
             $image = (new ImageManager($driver))->decodePath($file->getPathname());
-            $encoded = $image->encodeUsingFormat(Format::WEBP);
-            $path = 'foto_profil/'.Str::uuid().'.webp';
+            $encoded = $image->encodeUsingFormat(Format::WEBP, quality: $quality);
+            $path = $directory.'/'.Str::uuid().'.webp';
 
             if (! $disk->put($path, (string) $encoded)) {
-                throw new RuntimeException('Gagal menyimpan foto profil WebP.');
+                throw new RuntimeException('Gagal menyimpan gambar WebP.');
             }
 
             return $path;
@@ -39,7 +47,7 @@ class ProfilePhoto
             if ($path !== null) {
                 try {
                     if ($disk->exists($path) && ! $disk->delete($path)) {
-                        report(new RuntimeException('File foto profil WebP gagal dibersihkan.', 0, $exception));
+                        report(new RuntimeException('File WebP gagal dibersihkan.', 0, $exception));
                     }
                 } catch (Throwable $cleanupException) {
                     report($cleanupException);
@@ -49,8 +57,33 @@ class ProfilePhoto
             report($exception);
 
             throw ValidationException::withMessages([
-                'foto_profil' => 'Foto profil gagal diproses. Silakan coba file lain.',
+                $field => $field === 'foto_profil'
+                    ? 'Foto profil gagal diproses. Silakan coba file lain.'
+                    : 'Gambar gagal diproses atau resolusinya terlalu besar (maks. 25 MP). Silakan coba file lain.',
             ]);
         }
+    }
+
+    // Images are converted to WebP; other files (PDF, DOCX, ...) are stored as-is.
+    public function storeUpload(UploadedFile $file, string $directory, string $diskName, string $field, int $quality = 85): string
+    {
+        if (str_starts_with((string) $file->getMimeType(), 'image/')) {
+            return $this->store($file, $directory, $diskName, $field, $quality);
+        }
+
+        try {
+            $path = $file->store($directory, $diskName);
+        } catch (Throwable $exception) {
+            report($exception);
+            $path = false;
+        }
+
+        if (! is_string($path) || $path === '') {
+            throw ValidationException::withMessages([
+                $field => 'File gagal disimpan. Silakan coba lagi.',
+            ]);
+        }
+
+        return $path;
     }
 }
